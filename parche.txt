@@ -1,0 +1,120 @@
+================================================================================
+CRACKEDLATRO (CRACKLATRO) - PATCH NOTES
+Version: 1.1.0-Patch
+Date: August 31, 2026
+Author / Mod: Crackedlatro Team
+Compatibility: Steamodded (SMODS) 1.0.0+, Balatro 1.0.1+, CardSleeves, malverk
+================================================================================
+
+[OVERVIEW]
+This patch resolves critical UI stability issues and game crashes related to
+hover tooltips, streamlines Job card interactions inside booster packs using
+the standard "USE" button flow, fixes mismatched consumable enhancements,
+implements odd rank card splitting for The Butcher, removes duplicate seal
+entries in external debug menus, and ensures reliable functionality for both
+Taster and Critic vouchers across all shop and pack pools.
+
+--------------------------------------------------------------------------------
+1. CRASH FIXES & ENGINE STABILITY
+--------------------------------------------------------------------------------
+* [CRITICAL FIX] Tooltip Hover Crash (functions/UI_definitions.lua:1246):
+  - Fixed 'attempt to call method len (a nil value)' triggered when hovering
+    over cards with active mods such as CardSleeves or malverk.
+  - 'create_badge' now verifies whether the supplied text is already a UIBox
+    node table and safely returns it without attempting string length queries.
+  - Job information tooltips are now cleanly appended directly to the main body
+    ('res.main') rather than corrupting the string-only badges array.
+
+* [CRITICAL FIX] Engine UI Tree Hierarchy Crash (engine/ui.lua:258 / set_parent_child):
+  - Removed manual mutations on compiled UIBox instances, eliminating the
+    'attempt to index local node (a number value)' error.
+
+* [CRITICAL FIX] Nil-Safety in Gameplay Hooks:
+  - Added comprehensive nil checks during discard evaluation (The Gardener),
+    graveyard/destroyed card queries (The Archaeologist), and opening hand seal
+    allocations (The Detective).
+
+--------------------------------------------------------------------------------
+2. JOB APPLICATIONS BOOSTER PACK SYSTEM
+--------------------------------------------------------------------------------
+* [FLOW IMPROVEMENT] Native Booster Usage:
+  - Removed the forced "PULL" button override.
+  - Opening a Job Application pack ('Job Application', 'Jumbo', 'Mega') now
+    draws the player hand ('draw_hand = true').
+  - The player selects target cards in hand and uses the native "USE" button
+    directly on the Job card.
+  - Using a Job card consumes one booster choice and automatically closes the
+    pack once available choices are exhausted.
+
+--------------------------------------------------------------------------------
+3. JOB CARDS & CONSUMABLE ENHANCEMENTS
+--------------------------------------------------------------------------------
+* The Miner:
+  - Fixed enhancement assignment: now correctly applies the Diamond Card
+    ('m_Crackedlatro_diamond') featuring retrigger X-Mult and hand dollars
+    instead of Steel Card.
+
+* The Jeweler:
+  - Fixed enhancement assignment: now correctly applies the Jeweled Card
+    ('m_Crackedlatro_jeweled') instead of Lucky Card.
+
+* The Banker:
+  - Fixed enhancement assignment: now correctly applies the Investment Card
+    ('m_Crackedlatro_investment') instead of Gold Card.
+
+* The Alchemist:
+  - Fixed enhancement assignment: now applies the Lead Card ('m_Crackedlatro_lead').
+  - Updated the 'eval_card' hook to detect 'm_Crackedlatro_lead' and permanently
+    transmute it into a Gold Card upon winning the round.
+
+* The Butcher:
+  - Added full support for odd rank cards (rank 3 and higher).
+  - Destroying an odd rank card (e.g., 7) now generates EXACTLY 2 cards:
+    one with the lower half rank (3) and one with +1 rank (4), fulfilling the
+    7 -> 4 & 3 rule.
+  - Destroying an even rank card (e.g., 8) generates 2 half-rank cards (4 & 4).
+  - Refactored the destruction cycle to mark the target card destroyed
+    ('target.destroyed = true') and spawn exactly 2 enhanced cards (Steel, Glass,
+    Wild, or Lucky) without leaving the original card behind.
+
+--------------------------------------------------------------------------------
+4. SHOP VOUCHERS
+--------------------------------------------------------------------------------
+* Taster Voucher (Catador):
+  - Fixed an issue where the voucher failed to reduce Common Joker spawns.
+  - Registers 'v_Crackedlatro_catador', 'v_Cracklatro_catador', and 'v_catador'
+    upon redemption.
+  - Implemented triple-layer interception ('get_current_joker_rarity',
+    'SMODS.poll_rarity', and 'create_card') replacing 75% of Common Joker
+    occurrences with Uncommon or Rare Jokers.
+
+* Critic Voucher (Crítico):
+  - Fixed prerequisite validation ('requires') and guaranteed spawn overrides.
+  - Once redeemed, Common Jokers are 100% ELIMINATED from the shop and packs,
+    automatically converted into Uncommon or Rare Jokers.
+
+--------------------------------------------------------------------------------
+5. SEALS & DEBUG MENU COMPATIBILITY
+--------------------------------------------------------------------------------
+* Dark Green Seal:
+  - Canonical key standardized to 'Crackedlatro_dark_green'.
+  - Removed redundant alias entries in 'G.P_SEALS' and 'SMODS.Seals'.
+  - The seal now appears EXACTLY ONCE in external debug menus (DebugPlus,
+    Native Debug, etc.).
+  - Atlas alias optimized for 's_dark_green'.
+
+--------------------------------------------------------------------------------
+6. GLOBAL COMPATIBILITY & JOKERDISPLAY
+--------------------------------------------------------------------------------
+* Unified Mod Prefix:
+  - Full bidirectional compatibility between the manifest prefix ('Crackedlatro_')
+    and legacy references ('Cracklatro_').
+* JokerDisplay Integration:
+  - Automatic cross-aliasing applied for all custom and Secret Jokers.
+* Secret Jokers & La Muchachada:
+  - Spectral pack spawn pools and Discord Tag triggers updated to match the
+    active mod prefix.
+
+================================================================================
+END OF PATCH NOTES
+================================================================================

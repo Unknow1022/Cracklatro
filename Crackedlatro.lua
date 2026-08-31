@@ -8,11 +8,9 @@
 
     --- JOKERS ---
     Comunes:
-        1. Homebody Joker (+120 Chips for Full House)
-        2. Retired Joker (+20 Mult for Full House)
-        3. Masterful Joker (+25 Mult for Four/Five of a Kind)
-        4. Outstanding Joker (+250 Chips, +50 Mult, and $5 for Four/Five of a Kind)
-        5. Blueberry (+1 Hand at start of round; self-destructs after 3 rounds)
+        1. Masterful Joker (+25 Mult for Four/Five of a Kind)
+        2. Outstanding Joker (+250 Chips, +50 Mult, and $5 for Four/Five of a Kind)
+        3. Blueberry (+1 Hand at start of round; self-destructs after 3 rounds)
 
     Poco Comunes:
         6. Shareholder Joker ($5/$6/$8 when defeating blind in 1 hand)
@@ -41,31 +39,38 @@
 
     Secretos:
         25. Esteban (X2 Mult for scored Spades and Clubs)
-        26. Black Hole (Elevates final Chips and Mult to ^1.2)
-        27. Thiago (Adds half of scored Chips to Mult)
-        28. Paula (Destroys adjacent Jokers at round start, +X1 Mult per destroyed Joker)
+        26. Thiago (Adds half of scored Chips to Mult)
+        27. Paula (Destroys adjacent Jokers at round start, +X1 Mult per destroyed Joker)
+        28. Black Hole (Elevates final Chips and Mult to ^1.2)
+        29. Squele (+10 Mult & X1.5 Mult on Hearts, 1 in 10 chance to Project Lusty Joker)
+        30. Bluxdir (Levels up discarded poker hand on discard)
+        31. Charles (X2 Mult on Spades & Hearts, 1 in 3 chance for $5; Synergy with Mochi)
+        32. Mochi (Scored cards turn into Wild Cards, +X0.25 Mult per Wild Card in full deck. "Un dibujo para ti! :3". Synergy with Charles: Retriggers cards 1x and shows "Mejores amigos!")
 
     --- CONSUMIBLES, SELLOS Y MEJORAS ---
         - Hierarchy (Spectral: Destroy hand, create 3 Steel Kings with Red Seal, -1 Hand)
-        - Dark Green Seal (Seal: Placed first in hand after 1st discard, 1 in 15 chance to destroy on score)
+        - Dark Green Seal (Seal: 1 in 10 chance to retrigger 3x, 1 in 5 for 2x, 1 in 2 for 1x; non-cumulative)
         - Order (Spectral: Adds Dark Green Seal to 1 card)
         - Rot (Spectral: Destroy all Jokers including Eternal, create 2 random Eternal Jokers, -1 Discard)
         - Catastrophic (Spectral: +4 levels to most played hand, 3 Negative Planets of 2nd most played hand, -1 level to all other hands)
         - Intensity (Spectral: Destroy 5 selected cards, create 1 Polychrome Wild Card with Red Seal)
-        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio)
-        - Cartas de Trabajo (Job Cards): The Miner, The Gardener, The Banker, The Surgeon, The Alchemist, The Butcher, The Detective, The Chef, The Archaeologist, The Jeweler, The Electrician
+        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio entre los 8 existentes)
+        - Cartas de Trabajo (Job Cards): The Miner, The Gardener, The Banker, The Surgeon, The Alchemist, The Butcher, The Detective, The Chef, The Archaeologist, The Jeweler
         - Paquetes de Trabajo (Booster Packs): Job Application, Jumbo Job Application, Mega Job Application
         - Mejoras: Diamond Card, Investment Card, Lead Card, Jeweled Card
+
+    --- ETIQUETAS (TAGS) ---
+        - Discord Tag (1 in 2 chance to create La Muchachada if room)
 
     --- VALES (VOUCHERS) ---
         - Catador (Taster): Reduce la aparición de Jokers Comunes en la tienda
         - Crítico (Critic): Elimina por completo los Jokers Comunes de la tienda
 
-    --- CIEGAS JEFE (BOSS BLINDS - ANTE 3+) ---
-        - The Pole, The Rod, The Magician, The Mountain, The Door, The Triangle
+    --- CIEGAS JEFE (BOSS BLINDS) ---
+        - The Pole, The Rod, The Magician, The Mountain, The Door, The Triangle, The Cube, The Void
 
     --- BARAJAS ---
-        - Strategist Deck, Overseer Deck
+        - Caveman Deck (Baraja Cavernícola), Strategist Deck, Overseer Deck
 
     Based on the Steamodded (SMODS) framework.
 --]]
@@ -81,7 +86,11 @@ local function is_secret_card(card)
            (key == 'j_Cracklatro_esteban' or key == 'esteban' or key == 'j_esteban' or
             key == 'j_Cracklatro_thiago' or key == 'thiago' or key == 'j_thiago' or
             key == 'j_Cracklatro_paula' or key == 'paula' or key == 'j_paula' or
-            key == 'j_Cracklatro_black_hole' or key == 'black_hole_joker' or key == 'black_hole' or key == 'j_black_hole')
+            key == 'j_Cracklatro_black_hole' or key == 'black_hole_joker' or key == 'black_hole' or key == 'j_black_hole' or key == 'j_Cracklatro_black_hole_joker' or
+            key == 'j_Cracklatro_squele' or key == 'squele' or key == 'j_squele' or key == 'j_Cracklatro_squele_joker' or
+            key == 'j_Cracklatro_bluxdir' or key == 'bluxdir' or key == 'j_bluxdir' or key == 'j_Cracklatro_bluxdir_joker' or
+            key == 'j_Cracklatro_charles' or key == 'charles' or key == 'j_charles' or key == 'j_Cracklatro_charles_joker' or
+            key == 'j_Cracklatro_mochi' or key == 'mochi' or key == 'j_mochi' or key == 'j_Cracklatro_mochi_joker')
 end
 
 -------------------------------------------------------------------
@@ -140,53 +149,11 @@ local function get_card_job_info(card)
                 "una edición (Foil, Holo, Poly)"
             }
         }
-    elseif card.ability.electrician_job then
-        return {
-            name = 'Electricista',
-            idx = 4,
-            badge_colour = HEX('f1c40f'),
-            text = {
-                "Al puntuar, duplica y transfiere",
-                "sus Fichas base a las cartas",
-                "adyacentes en la mano jugada"
-            }
-        }
     end
     return nil
 end
 
--- Hook global en generate_card_ui para interceptar el badge en TODOS los contextos (juego, colección, tienda, etc.)
-if generate_card_ui then
-    local orig_generate_card_ui = generate_card_ui
-    function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end, card, ...)
-        badges = badges or {}
-        local is_secret = false
-        if _c then
-            local key = _c.key or _c.center_key or _c.name
-            if _c.is_secret or key == 'j_Cracklatro_esteban' or key == 'esteban' or key == 'j_esteban' or
-               key == 'j_Cracklatro_thiago' or key == 'thiago' or key == 'j_thiago' or
-               key == 'j_Cracklatro_paula' or key == 'paula' or key == 'j_paula' or
-               key == 'j_Cracklatro_black_hole' or key == 'black_hole_joker' or key == 'black_hole' or key == 'j_black_hole' then
-                is_secret = true
-            end
-        end
-
-        local res = orig_generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end, card, ...)
-
-        if is_secret and badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
-        end
-
-        local job = get_card_job_info(card)
-        if job and badges then
-            table.insert(badges, create_badge(job.name, job.badge_colour, G.C.WHITE, 1.0))
-        end
-
-        return res
-    end
-end
-
--- Hook para interceptar la generación del UIBox de los Jokers Secretos y Cartas de Oficio
+-- Hook para interceptar la generación del UIBox de los Jokers Secretos y Cartas de Oficio de forma segura
 local card_generate_UIBox_ref = Card.generate_UIBox_ability_table
 function Card:generate_UIBox_ability_table(...)
     local is_secret = is_secret_card(self)
@@ -200,42 +167,47 @@ function Card:generate_UIBox_ability_table(...)
     end
 
     local job = get_card_job_info(self)
-    if job and res and res.main then
-        local desc_nodes = {}
-        for _, line_text in ipairs(job.text) do
-            table.insert(desc_nodes, {
-                n = G.UIT.R,
-                config = { align = "cm" },
-                nodes = {
-                    { n = G.UIT.T, config = { text = line_text, colour = G.C.UI.TEXT_LIGHT, scale = 0.3 } }
-                }
-            })
+    if job and res then
+        if res.badges then
+            table.insert(res.badges, create_badge(job.name, job.badge_colour, G.C.WHITE, 1.0))
         end
-        local job_ui_box = {
-            n = G.UIT.R,
-            config = { align = "cm", colour = G.C.CLEAR, padding = 0.05 },
-            nodes = {
-                {
+        if res.main then
+            local desc_nodes = {}
+            for _, line_text in ipairs(job.text) do
+                table.insert(desc_nodes, {
                     n = G.UIT.R,
-                    config = { align = "cm", colour = HEX('1c2321'), r = 0.08, padding = 0.06, minw = 2.8, emboss = 0.04 },
+                    config = { align = "cm" },
                     nodes = {
-                        {
-                            n = G.UIT.R,
-                            config = { align = "cm" },
-                            nodes = {
-                                { n = G.UIT.T, config = { text = "Oficio: " .. job.name, colour = job.badge_colour, scale = 0.33 } }
+                        { n = G.UIT.T, config = { text = line_text, colour = G.C.UI.TEXT_LIGHT, scale = 0.3 } }
+                    }
+                })
+            end
+            local job_ui_box = {
+                n = G.UIT.R,
+                config = { align = "cm", colour = G.C.CLEAR, padding = 0.05 },
+                nodes = {
+                    {
+                        n = G.UIT.R,
+                        config = { align = "cm", colour = HEX('1c2321'), r = 0.08, padding = 0.06, minw = 2.8, emboss = 0.04 },
+                        nodes = {
+                            {
+                                n = G.UIT.R,
+                                config = { align = "cm" },
+                                nodes = {
+                                    { n = G.UIT.T, config = { text = "Oficio: " .. job.name, colour = job.badge_colour, scale = 0.33 } }
+                                }
+                            },
+                            {
+                                n = G.UIT.R,
+                                config = { align = "cm" },
+                                nodes = desc_nodes
                             }
-                        },
-                        {
-                            n = G.UIT.R,
-                            config = { align = "cm" },
-                            nodes = desc_nodes
                         }
                     }
                 }
             }
-        }
-        table.insert(res.main, job_ui_box)
+            table.insert(res.main, job_ui_box)
+        end
     end
 
     return res
@@ -291,12 +263,12 @@ function create_badge(text, badge_colour, text_colour, scale)
     return create_badge_ref(text, badge_colour, text_colour, scale)
 end
 
--- Hook en G.UIDEF.use_and_sell_buttons para cambiar "USE" por "PULL" en Cartas de Oficio (Job Cards) y Paquetes de Trabajo
+-- Hook en G.UIDEF.use_and_sell_buttons para cambiar "USE" por "PULL" ÚNICAMENTE cuando las cartas están dentro de sobres (G.pack_cards)
 if G.UIDEF and G.UIDEF.use_and_sell_buttons then
     local orig_use_and_sell_buttons = G.UIDEF.use_and_sell_buttons
     function G.UIDEF.use_and_sell_buttons(card)
         local uibox = orig_use_and_sell_buttons(card)
-        if card and (
+        if card and card.area == G.pack_cards and (
             (card.ability and (card.ability.set == 'Job' or card.ability.job or (card.ability.consumeable and card.ability.consumeable.set == 'Job'))) or
             (card.config and card.config.center and (card.config.center.set == 'Job' or card.config.center.job or card.config.center.kind == 'Job' or (card.config.center.key and string.find(card.config.center.key, 'job'))))
         ) then
@@ -465,36 +437,6 @@ function Card:eval_card(context)
         end
     end
 
-    -- Electrician Job: Duplica y suma sus fichas base a las cartas adyacentes en la mano jugada
-    if context and (context.main_scoring or context.individual) and context.cardarea == G.play and self.ability and self.ability.electrician_job then
-        if context.scoring_hand then
-            local my_idx = nil
-            for idx, c in ipairs(context.scoring_hand) do
-                if c == self then my_idx = idx; break end
-            end
-            local base_chips = (self.base and self.base.nominal or 0) + (self.ability and self.ability.perma_bonus or 0)
-            if my_idx and base_chips > 0 then
-                if my_idx > 1 then
-                    local left_c = context.scoring_hand[my_idx - 1]
-                    if left_c then
-                        left_c.ability.perma_bonus = (left_c.ability.perma_bonus or 0) + base_chips
-                        left_c:juice_up()
-                    end
-                end
-                if my_idx < #context.scoring_hand then
-                    local right_c = context.scoring_hand[my_idx + 1]
-                    if right_c then
-                        right_c.ability.perma_bonus = (right_c.ability.perma_bonus or 0) + base_chips
-                        right_c:juice_up()
-                    end
-                end
-                ret = ret or {}
-                ret.message = 'Shock!'
-                ret.colour = G.C.BLUE
-            end
-        end
-    end
-
     -- Lead Card: Transmuta a Gold Card al puntuar si la mano derrota la ciega
     local center_key = (self.config and self.config.center and self.config.center.key) or self.config.center_key or (self.ability and self.ability.name)
     if (center_key == 'm_Cracklatro_lead' or center_key == 'm_lead' or center_key == 'Lead Card' or (self.ability and self.ability.name == 'Lead Card')) and context and (context.main_scoring or context.individual) and context.cardarea == G.play then
@@ -574,79 +516,7 @@ end
 -------------------------------------------------------------------
 
 -------------------------------------------------------------------
---- 1. Homebody Joker
--------------------------------------------------------------------
-SMODS.Atlas {
-    key = "homebody_joker",
-    path = "homebody_joker.png",
-    px = 71,
-    py = 95
-}
-
-SMODS.Joker {
-    key = 'homebody_joker',
-    atlas = 'homebody_joker',
-    loc_txt = {
-        name = 'Homebody Joker',
-        text = {
-            "Gives {C:chips}+#1#{} Chips if played",
-            "hand contains a {C:attention}Full House{}"
-        }
-    },
-    config = { extra = { chips = 120 } },
-    rarity = 1, -- Common
-    pos = { x = 0, y = 0 },
-    cost = 4,
-    loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.chips } }
-    end,
-    calculate = function(self, card, context)
-        if context.joker_main and context.poker_hands and context.poker_hands['Full House'] and next(context.poker_hands['Full House']) then
-            return {
-                chips = card.ability.extra.chips
-            }
-        end
-    end
-}
-
--------------------------------------------------------------------
---- 2. Retired Joker
--------------------------------------------------------------------
-SMODS.Atlas {
-    key = "retired_joker",
-    path = "retired_joker.png",
-    px = 71,
-    py = 95
-}
-
-SMODS.Joker {
-    key = 'retired_joker',
-    atlas = 'retired_joker',
-    loc_txt = {
-        name = 'Retired Joker',
-        text = {
-            "Gives {C:mult}+#1#{} Mult if played",
-            "hand contains a {C:attention}Full House{}"
-        }
-    },
-    config = { extra = { mult = 20 } },
-    rarity = 1, -- Common
-    pos = { x = 0, y = 0 },
-    cost = 4,
-    loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.mult } }
-    end,
-    calculate = function(self, card, context)
-        if context.joker_main and context.poker_hands and context.poker_hands['Full House'] and next(context.poker_hands['Full House']) then
-            return {
-                mult = card.ability.extra.mult
-            }
-        end
-    end
-}
-
--------------------------------------------------------------------
---- 3. Masterful Joker
+--- 1. Masterful Joker
 -------------------------------------------------------------------
 SMODS.Atlas {
     key = "masterful_joker",
@@ -2399,6 +2269,336 @@ SMODS.Joker {
 }
 
 -------------------------------------------------------------------
+--- 28. Squele (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "squele_joker",
+    path = "squele_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'squele',
+    atlas = 'squele_joker',
+    loc_txt = {
+        name = 'Squele',
+        text = {
+            "Scored {C:hearts}Hearts{} cards give {C:mult}+#1#{} Mult",
+            "and {X:mult,C:white}X#2#{} Mult.",
+            "{C:green}#3# in #4#{} chance to {C:attention}Project{} and create",
+            "a {C:attention}Lusty Joker{} {C:inactive}(Must have room){}",
+            "{C:inactive}(\"AHHH ME ESTOY PROYECTANDO\")"
+        }
+    },
+    config = { extra = { mult = 10, xmult = 1.5, odds = 10 } },
+    rarity = 4, -- Legendary tier internamente para animación 2-layer
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or (self.config and self.config.extra and self.config.extra.mult) or 10
+        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 1.5
+        local odds = (card and card.ability and card.ability.extra and card.ability.extra.odds) or (self.config and self.config.extra and self.config.extra.odds) or 10
+        return { vars = { mult, xmult, (G.GAME and G.GAME.probabilities.normal or 1), odds } }
+    end,
+    calculate = function(self, card, context)
+        if context.individual and context.cardarea == G.play and context.other_card:is_suit('Hearts') then
+            local norm = (G.GAME and G.GAME.probabilities.normal or 1)
+            local odds = (card.ability and card.ability.extra and card.ability.extra.odds) or 10
+            local does_project = pseudorandom('squele_project') < (norm / odds)
+
+            if does_project and G.jokers and #G.jokers.cards < G.jokers.config.card_limit then
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        local new_j = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_lusty_joker', 'squele')
+                        new_j:add_to_deck()
+                        G.jokers:emplace(new_j)
+                        return true
+                    end
+                }))
+                return {
+                    mult = card.ability.extra.mult,
+                    x_mult = card.ability.extra.xmult,
+                    message = "AHHH ME ESTOY PROYECTANDO",
+                    colour = G.C.MULT,
+                    card = card
+                }
+            else
+                return {
+                    mult = card.ability.extra.mult,
+                    x_mult = card.ability.extra.xmult,
+                    card = card
+                }
+            end
+        end
+    end
+}
+
+-------------------------------------------------------------------
+--- 29. Bluxdir (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "bluxdir_joker",
+    path = "bluxdir_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'bluxdir',
+    atlas = 'bluxdir_joker',
+    loc_txt = {
+        name = 'Bluxdir',
+        text = {
+            "When a hand is {C:attention}discarded{},",
+            "levels up the discarded {C:attention}poker hand{}",
+            "{C:inactive}(\"No voy a caer en tu ragebait\")"
+        }
+    },
+    config = {},
+    rarity = 4, -- Legendary tier internamente para animación 2-layer
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    calculate = function(self, card, context)
+        if context.pre_discard and not context.hook and context.full_hand and #context.full_hand > 0 then
+            local text, loc_disp_text, poker_hands, scoring_hand, disp_text = G.FUNCS.get_poker_hand_info(context.full_hand)
+            if text and text ~= 'NULL' and G.GAME and G.GAME.hands and G.GAME.hands[text] then
+                level_up_hand(card, text, false, 1)
+                return {
+                    message = "No voy a caer en tu ragebait",
+                    colour = G.C.ATTENTION
+                }
+            end
+        end
+    end
+}
+
+-------------------------------------------------------------------
+--- 30. Charles (Secreto)
+-------------------------------------------------------------------
+local function has_charles_and_mochi()
+    if not (G.jokers and G.jokers.cards) then return false end
+    local has_charles = false
+    local has_mochi = false
+    for _, j in ipairs(G.jokers.cards) do
+        local key = (j.config and j.config.center and j.config.center.key) or j.ability.name
+        if key == 'j_Cracklatro_charles' or key == 'j_charles' or key == 'charles' then
+            has_charles = true
+        end
+        if key == 'j_Cracklatro_mochi' or key == 'j_mochi' or key == 'mochi' then
+            has_mochi = true
+        end
+    end
+    return has_charles and has_mochi
+end
+
+SMODS.Atlas {
+    key = "charles_joker",
+    path = "charles_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'charles',
+    atlas = 'charles_joker',
+    loc_txt = {
+        name = 'Charles',
+        text = {
+            "Scored {C:spades}Spades{} and {C:hearts}Hearts{} cards",
+            "give {X:mult,C:white}X#1#{} Mult.",
+            "{C:green}#2# in #3#{} chance to earn {C:money}$#4#{}.",
+            "{C:inactive}(\"Aqui tiene un regalo!\")"
+        }
+    },
+    config = { extra = { xmult = 2, odds = 3, dollars = 5 } },
+    rarity = 4, -- Legendary tier internamente para animación 2-layer
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 2
+        local odds = (card and card.ability and card.ability.extra and card.ability.extra.odds) or (self.config and self.config.extra and self.config.extra.odds) or 3
+        local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or (self.config and self.config.extra and self.config.extra.dollars) or 5
+        return { vars = { xmult, (G.GAME and G.GAME.probabilities.normal or 1), odds, dollars } }
+    end,
+    calculate = function(self, card, context)
+        -- Charles + Mochi Synergy: Retrigger cards 1 time
+        if context.repetition and context.cardarea == G.play then
+            if has_charles_and_mochi() then
+                return {
+                    message = 'Mejores amigos!',
+                    repetitions = 1,
+                    card = card
+                }
+            end
+        end
+
+        -- Charles + Mochi Synergy: End of round message
+        if context.end_of_round and not context.individual and not context.repetition and not context.blueprint then
+            if has_charles_and_mochi() then
+                return {
+                    message = 'Mejores amigos!',
+                    colour = HEX('ff69b4')
+                }
+            end
+        end
+
+        if context.individual and context.cardarea == G.play and (context.other_card:is_suit('Spades') or context.other_card:is_suit('Hearts')) then
+            local norm = (G.GAME and G.GAME.probabilities.normal or 1)
+            local odds = (card.ability and card.ability.extra and card.ability.extra.odds) or 3
+            local dollars = (card.ability and card.ability.extra and card.ability.extra.dollars) or 5
+            local gives_money = pseudorandom('charles_gift') < (norm / odds)
+
+            if gives_money then
+                ease_dollars(dollars)
+                return {
+                    x_mult = card.ability.extra.xmult,
+                    dollars = dollars,
+                    message = "Aqui tiene un regalo!",
+                    colour = G.C.MONEY,
+                    card = card
+                }
+            else
+                return {
+                    x_mult = card.ability.extra.xmult,
+                    card = card
+                }
+            end
+        end
+    end
+}
+
+-------------------------------------------------------------------
+--- 31. Mochi (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "mochi_joker",
+    path = "mochi_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'mochi',
+    atlas = 'mochi_joker',
+    loc_txt = {
+        name = 'Mochi',
+        text = {
+            "Scored cards become {C:attention}Wild Cards{}.",
+            "Gives {X:mult,C:white}+X#1#{} Mult for each",
+            "{C:attention}Wild Card{} in your full deck",
+            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult)",
+            "{C:inactive}(\"Un dibujo para ti! :3\")"
+        }
+    },
+    config = { extra = { xmult_gain = 0.25 } },
+    rarity = 4, -- Legendary tier internamente para animación 2-layer
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        local xmult_gain = (card and card.ability and card.ability.extra and card.ability.extra.xmult_gain) or (self.config and self.config.extra and self.config.extra.xmult_gain) or 0.25
+        local wild_count = 0
+        if G.playing_cards then
+            for _, pcard in ipairs(G.playing_cards) do
+                if is_wild_card(pcard) then
+                    wild_count = wild_count + 1
+                end
+            end
+        end
+        local current_xmult = 1.0 + (wild_count * xmult_gain)
+        return { vars = { xmult_gain, current_xmult } }
+    end,
+    calculate = function(self, card, context)
+        -- Charles + Mochi Synergy: End of round message
+        if context.end_of_round and not context.individual and not context.repetition and not context.blueprint then
+            if has_charles_and_mochi() then
+                return {
+                    message = 'Mejores amigos!',
+                    colour = HEX('ff69b4')
+                }
+            end
+        end
+
+        if context.individual and context.cardarea == G.play then
+            if context.other_card.config and context.other_card.config.center ~= G.P_CENTERS.m_wild then
+                context.other_card:set_ability(G.P_CENTERS.m_wild)
+                context.other_card:juice_up()
+            end
+        end
+
+        if context.joker_main then
+            local wild_count = 0
+            if G.playing_cards then
+                for _, pcard in ipairs(G.playing_cards) do
+                    if is_wild_card(pcard) then
+                        wild_count = wild_count + 1
+                    end
+                end
+            end
+            local xmult_gain = (card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 0.25
+            local total_xmult = 1.0 + (wild_count * xmult_gain)
+            if total_xmult > 1 then
+                return {
+                    Xmult = total_xmult
+                }
+            end
+        end
+    end
+}
+
+-------------------------------------------------------------------
 --- 24. Perfectionism
 -------------------------------------------------------------------
 SMODS.Atlas {
@@ -2602,16 +2802,36 @@ SMODS.Seal {
         name = 'Dark Green Seal',
         label = 'Dark Green Seal',
         text = {
-            "Placed first in hand after 1st discard,",
-            "regardless of hand size.",
-            "{C:green}1 in 15{} chance to be {C:red}destroyed{}",
-            "when played and scored"
+            "{C:green}#1# in 10{} chance to retrigger {C:attention}3 times{},",
+            "{C:green}#1# in 5{} chance to retrigger {C:attention}2 times{},",
+            "or {C:green}#1# in 2{} chance to retrigger {C:attention}1 time{}",
+            "{C:inactive}(Non-cumulative){}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { (G.GAME and G.GAME.probabilities.normal or 1) } }
+    end,
     calculate = function(self, card, context)
-        if context.destroying_card and context.destroying_card == card then
-            if pseudorandom('dark_green_destroy') < G.GAME.probabilities.normal / 15 then
-                return true
+        if context.repetition and context.cardarea == G.play then
+            local norm = (G.GAME and G.GAME.probabilities.normal or 1)
+            if pseudorandom('dark_green_3') < (norm / 10) then
+                return {
+                    message = 'x3 Retrigger!',
+                    repetitions = 3,
+                    card = card
+                }
+            elseif pseudorandom('dark_green_2') < (norm / 5) then
+                return {
+                    message = 'x2 Retrigger!',
+                    repetitions = 2,
+                    card = card
+                }
+            elseif pseudorandom('dark_green_1') < (norm / 2) then
+                return {
+                    message = 'x1 Retrigger!',
+                    repetitions = 1,
+                    card = card
+                }
             end
         end
     end
@@ -2925,7 +3145,10 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         G.E_MANAGER:add_event(Event({
             func = function()
-                local secret_keys = { 'j_Cracklatro_esteban', 'j_Cracklatro_thiago', 'j_Cracklatro_paula', 'j_Cracklatro_black_hole_joker' }
+                local secret_keys = {
+                    'j_Cracklatro_esteban', 'j_Cracklatro_thiago', 'j_Cracklatro_paula', 'j_Cracklatro_black_hole_joker',
+                    'j_Cracklatro_squele', 'j_Cracklatro_bluxdir', 'j_Cracklatro_charles', 'j_Cracklatro_mochi'
+                }
                 local chosen_key = pseudorandom_element(secret_keys, 'la_muchachada_secret')
                 local new_joker = create_card('Joker', G.jokers, nil, nil, nil, nil, chosen_key, 'la_muchachada')
                 new_joker:add_to_deck()
@@ -3164,8 +3387,7 @@ local JOB_CARD_KEYS = {
     'c_Cracklatro_detective_job',
     'c_Cracklatro_chef_job',
     'c_Cracklatro_archaeologist_job',
-    'c_Cracklatro_jeweler_job',
-    'c_Cracklatro_electrician_job'
+    'c_Cracklatro_jeweler_job'
 }
 
 local function create_job_card_for_pack(key_append)
@@ -3652,48 +3874,6 @@ SMODS.Consumable {
     end
 }
 
--------------------------------------------------------------------
---- Job Consumable 11: The Electrician (El Electricista)
--------------------------------------------------------------------
-SMODS.Atlas {
-    key = "c_electrician",
-    path = "c_electrician.png",
-    px = 71,
-    py = 95
-}
-
-SMODS.Consumable {
-    key = 'electrician_job',
-    set = 'Job',
-    atlas = 'c_electrician',
-    pos = { x = 0, y = 0 },
-    loc_txt = {
-        name = 'The Electrician',
-        text = {
-            "Assigns Electrician job to {C:attention}1 selected card{}.",
-            "When scored, duplicates and grants its base Chips to",
-            "adjacent cards to its left and right in the played hand"
-        }
-    },
-    in_pool = function(self, args)
-        return true
-    end,
-    can_use = function(self, card)
-        return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
-    end,
-    use = function(self, card, area, copier)
-        local target = G.hand.highlighted[1]
-        G.E_MANAGER:add_event(Event({
-            func = function()
-                target.ability = target.ability or {}
-                target.ability.electrician_job = true
-                target:juice_up()
-                if G.hand then G.hand:unhighlight_all() end
-                return true
-            end
-        }))
-    end
-}
 
 -------------------------------------------------------------------
 --- Voucher 1: Taster
@@ -4097,9 +4277,96 @@ SMODS.Blind {
     end
 }
 
+-------------------------------------------------------------------
+--- Boss Blind 7: The Cube (El Cubo)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "b_cube",
+    path = "b_cube.png",
+    px = 34,
+    py = 34
+}
+
+SMODS.Blind {
+    key = 'cube',
+    atlas = 'b_cube',
+    pos = { x = 0, y = 0 },
+    dollars = 5,
+    mult = 2,
+    boss = { min = 1, max = 10 },
+    boss_colour = HEX('3498db'),
+    loc_txt = {
+        name = 'The Cube',
+        text = {
+            "Halves final Chips and Mult",
+            "if the number is even in final scoring"
+        }
+    },
+    calculate = function(self, card, context)
+        if context.before then
+            G.GAME.cube_triggered = nil
+        end
+        if context.final_scoring_step and not G.GAME.cube_triggered then
+            G.GAME.cube_triggered = true
+            local cur_chips = (hand_chips and hand_chips > 0 and hand_chips) or (context.chips and context.chips > 0 and context.chips) or 0
+            local cur_mult = (mult and mult > 0 and mult) or (context.mult and context.mult > 0 and context.mult) or 0
+            local mod_chips = (cur_chips > 0 and cur_chips % 2 == 0) and 0.5 or 1
+            local mod_mult = (cur_mult > 0 and cur_mult % 2 == 0) and 0.5 or 1
+            if mod_chips < 1 or mod_mult < 1 then
+                return {
+                    x_chips = mod_chips,
+                    Xmult = mod_mult,
+                    message = 'Cube Halved!',
+                    colour = HEX('3498db')
+                }
+            end
+        end
+    end
+}
+
+-------------------------------------------------------------------
+--- Boss Blind 8: The Void (El Vacío)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "b_void",
+    path = "b_void.png",
+    px = 34,
+    py = 34
+}
+
+SMODS.Blind {
+    key = 'void',
+    atlas = 'b_void',
+    pos = { x = 0, y = 0 },
+    dollars = 5,
+    mult = 2,
+    boss = { min = 1, max = 10 },
+    boss_colour = HEX('1a052e'),
+    loc_txt = {
+        name = 'The Void',
+        text = {
+            "Increases chip requirement by",
+            "{C:attention}X1.25{} after each played hand",
+            "that does not defeat the blind"
+        }
+    },
+    calculate = function(self, card, context)
+        if context.after and not context.blueprint and not context.individual and not context.repetition then
+            if G.GAME and G.GAME.blind and G.GAME.chips < G.GAME.blind.chips then
+                G.GAME.blind.chips = math.floor(G.GAME.blind.chips * 1.25)
+                G.GAME.blind.chip_text = number_format(G.GAME.blind.chips)
+                return {
+                    message = 'X1.25 Target!',
+                    colour = HEX('8e44ad')
+                }
+            end
+        end
+    end
+}
+
 -- Ensure G.ANIMATION_ATLAS and G.ASSET_ATLAS entries exist for all custom blinds for external mod compatibility (e.g. Cartomancer)
 local function sync_blind_atlases()
-    local blind_atlases = {'b_pole', 'b_stick', 'b_wizard', 'b_mountain', 'b_door', 'b_triangle'}
+    local blind_atlases = {'b_pole', 'b_stick', 'b_wizard', 'b_mountain', 'b_door', 'b_triangle', 'b_cube', 'b_void'}
     for _, key in ipairs(blind_atlases) do
         local atlas_obj = (SMODS and SMODS.Atlases and SMODS.Atlases[key]) or (G.ASSET_ATLAS and G.ASSET_ATLAS[key]) or (G.ANIMATION_ATLAS and G.ANIMATION_ATLAS[key])
         if atlas_obj then
@@ -4121,6 +4388,51 @@ G.E_MANAGER:add_event(Event({
 -- ===================================================================
 -- 4. BARAJAS (DECKS)
 -- ===================================================================
+
+-------------------------------------------------------------------
+--- Back: Caveman Deck (Baraja Cavernícola)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "b_cavernicola",
+    path = "b_cavernicola.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Back {
+    key = 'cavernicola',
+    atlas = 'b_cavernicola',
+    pos = { x = 0, y = 0 },
+    loc_txt = {
+        name = 'Caveman Deck',
+        text = {
+            "Start with only {C:attention}A, 2, 3, 4, 6, 8{} of each suit in your full deck,",
+            "all other starting cards are {C:attention}Stone Cards{},",
+            "{C:red}-1{} Hand"
+        }
+    },
+    apply = function(self)
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                if G.playing_cards then
+                    local keep_ranks = { ['Ace'] = true, ['2'] = true, ['3'] = true, ['4'] = true, ['6'] = true, ['8'] = true }
+                    for _, card in ipairs(G.playing_cards) do
+                        local val = card.base and card.base.value
+                        if not keep_ranks[val] then
+                            card:set_ability(G.P_CENTERS.m_stone)
+                        end
+                    end
+                end
+
+                -- -1 Hand
+                G.GAME.round_resets.hands = math.max(1, G.GAME.round_resets.hands - 1)
+                ease_hands_played(-1)
+
+                return true
+            end
+        }))
+    end
+}
 
 -------------------------------------------------------------------
 --- Back: Strategist Deck (Baraja Estratega)
@@ -4257,6 +4569,55 @@ SMODS.Back {
 
 
 -- ===================================================================
+-- 4.1 ETIQUETAS (TAGS)
+-- ===================================================================
+
+-------------------------------------------------------------------
+--- Tag: Discord Tag
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "tag_discord",
+    path = "tag_discord.png",
+    px = 34,
+    py = 34
+}
+
+SMODS.Tag {
+    key = 'discord',
+    atlas = 'tag_discord',
+    pos = { x = 0, y = 0 },
+    min_ante = 1,
+    loc_txt = {
+        name = 'Discord Tag',
+        text = {
+            "{C:green}#1# in 2{} chance to create",
+            "{C:spectral}La Muchachada{}",
+            "{C:inactive}(Must have room){}"
+        }
+    },
+    loc_vars = function(self, info_queue)
+        return { vars = { (G.GAME and G.GAME.probabilities.normal or 1) } }
+    end,
+    apply = function(self, tag, context)
+        if context.type == 'immediate' or context.type == 'round_start_bonus' or context.type == 'new_blind_choice' or context.type == 'tag_add' then
+            tag:yep('+', G.C.SECONDARY_SET.Spectral, function()
+                if pseudorandom('discord_tag') < ((G.GAME and G.GAME.probabilities.normal or 1) / 2) then
+                    if G.consumeables and #G.consumeables.cards < G.consumeables.config.card_limit then
+                        local card = create_card('Spectral', G.consumeables, nil, nil, nil, nil, 'c_Cracklatro_la_muchachada', 'discord_tag')
+                        card:add_to_deck()
+                        G.consumeables:emplace(card)
+                    end
+                end
+                return true
+            end)
+            tag.triggered = true
+            return true
+        end
+    end
+}
+
+
+-- ===================================================================
 -- 5. GAMEPLAY HOOKS
 -- ===================================================================
 
@@ -4278,69 +4639,6 @@ function Card:use_consumeable(area, copier)
         G.GAME.mountain_disabled_hand = true
     end
     return use_card_ref(self, area, copier)
-end
-
--- Hook for Dark Green Seal (Draw and place Dark Green Seal cards first after 1st discard)
-local function is_dark_green_seal(c)
-    return c and c.seal and (c.seal == 'Cracklatro_dark_green' or c.seal == 'dark_green' or c.seal == 'seel_dark_green' or c.seal == 'seel_Cracklatro_dark_green' or string.find(c.seal, 'dark_green'))
-end
-
-local function is_in_active_round()
-    return G.GAME and G.GAME.current_round 
-       and (G.STATE == G.STATES.SELECTING_HAND or G.STATE == G.STATES.DRAW_TO_HAND)
-       and not G.pack_cards
-       and G.hand and G.deck
-end
-
-local draw_card_ref = draw_card
-function draw_card(from, to, percent, dir, sort, card, delay, mute, stay_visible, flip, arrival_time)
-    if from == G.deck and to == G.hand and is_in_active_round() then
-        if G.GAME.current_round.discards_used >= 1 and G.deck and G.deck.cards then
-            for i = 1, #G.deck.cards - 1 do
-                local c = G.deck.cards[i]
-                if is_dark_green_seal(c) then
-                    table.remove(G.deck.cards, i)
-                    table.insert(G.deck.cards, c)
-                    break
-                end
-            end
-        end
-    end
-    return draw_card_ref(from, to, percent, dir, sort, card, delay, mute, stay_visible, flip, arrival_time)
-end
-
--- Hook for discard action: Ensure Dark Green Seal cards are placed first after 1st discard
-local discard_cards_from_highlighted_ref = G.FUNCS and G.FUNCS.discard_cards_from_highlighted
-if discard_cards_from_highlighted_ref then
-    G.FUNCS.discard_cards_from_highlighted = function(e)
-        discard_cards_from_highlighted_ref(e)
-        if is_in_active_round() and G.GAME.current_round.discards_used >= 1 then
-            G.E_MANAGER:add_event(Event({
-                trigger = 'after',
-                delay = 0.5,
-                func = function()
-                    if is_in_active_round() and G.hand and G.hand.cards then
-                        local green_cards = {}
-                        for i = #G.hand.cards, 1, -1 do
-                            local c = G.hand.cards[i]
-                            if is_dark_green_seal(c) then
-                                table.insert(green_cards, c)
-                                table.remove(G.hand.cards, i)
-                            end
-                        end
-                        for _, c in ipairs(green_cards) do
-                            table.insert(G.hand.cards, 1, c)
-                        end
-                        if #green_cards > 0 then
-                            G.hand:parse_highlighted()
-                            G.hand:align_cards()
-                        end
-                    end
-                    return true
-                end
-            }))
-        end
-    end
 end
 
 -- Hook for Overseer Deck: Always Double Tags
@@ -4447,26 +4745,6 @@ end
 -- ===================================================================
 if JokerDisplay then
     local jd_def = JokerDisplay.Definitions
-
-    jd_def["j_Cracklatro_homebody_joker"] = {
-        text = {
-            { text = "+", colour = G.C.CHIPS },
-            { ref_table = "card.ability.extra", ref_value = "chips", colour = G.C.CHIPS }
-        },
-        reminder_text = {
-            { text = "(Full House)" }
-        }
-    }
-
-    jd_def["j_Cracklatro_retired_joker"] = {
-        text = {
-            { text = "+", colour = G.C.MULT },
-            { ref_table = "card.ability.extra", ref_value = "mult", colour = G.C.MULT }
-        },
-        reminder_text = {
-            { text = "(Full House)" }
-        }
-    }
 
     jd_def["j_Cracklatro_masterful_joker"] = {
         text = {
@@ -4704,5 +4982,56 @@ if JokerDisplay then
             { ref_table = "card.ability.extra", ref_value = "required_rank", colour = G.C.ATTENTION }
         }
     }
+
+    jd_def["j_Cracklatro_squele"] = {
+        text = {
+            { text = "+10", colour = G.C.MULT },
+            { text = " X1.5", colour = G.C.XMULT }
+        },
+        reminder_text = {
+            { text = "(Hearts)" }
+        }
+    }
+    jd_def["j_squele"] = jd_def["j_Cracklatro_squele"]
+
+    jd_def["j_Cracklatro_bluxdir"] = {
+        text = {
+            { text = "+1 Level", colour = G.C.ATTENTION }
+        },
+        reminder_text = {
+            { text = "(On Discard)" }
+        }
+    }
+    jd_def["j_bluxdir"] = jd_def["j_Cracklatro_bluxdir"]
+
+    jd_def["j_Cracklatro_charles"] = {
+        text = {
+            { text = "X2", colour = G.C.XMULT }
+        },
+        reminder_text = {
+            { text = "(Spades/Hearts, 1 in 3 $5)" }
+        }
+    }
+    jd_def["j_charles"] = jd_def["j_Cracklatro_charles"]
+
+    jd_def["j_Cracklatro_mochi"] = {
+        calc_function = function(card)
+            local wild_count = 0
+            if G.playing_cards then
+                for _, pcard in ipairs(G.playing_cards) do
+                    if is_wild_card(pcard) then
+                        wild_count = wild_count + 1
+                    end
+                end
+            end
+            local xmult_gain = (card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 0.25
+            card.joker_display_values.mochi_xmult = 1.0 + (wild_count * xmult_gain)
+        end,
+        text = {
+            { text = "X", colour = G.C.XMULT },
+            { ref_table = "card.joker_display_values", ref_value = "mochi_xmult", colour = G.C.XMULT }
+        }
+    }
+    jd_def["j_mochi"] = jd_def["j_Cracklatro_mochi"]
 end
 

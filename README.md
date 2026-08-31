@@ -1,22 +1,27 @@
 # The Cracked Balatro (Cracklatro)
 
-Una expansión masiva y completa para **Balatro** creada con el framework **Steamodded (SMODS)**. Introduce nuevas mecánicas, una nueva rareza exclusiva, tipos de consumibles inéditos, paquetes de refuerzo temáticos, ciegas jefe desafiantes, barajas estratégicas y vales de tienda.
+Una expansión masiva y completa para **Balatro** creada con el framework **Steamodded (SMODS)**. Introduce nuevas mecánicas, una nueva rareza exclusiva, tipos de consumibles inéditos, paquetes de refuerzo temáticos, ciegas jefe desafiantes, barajas estratégicas, etiquetas y vales de tienda.
 
 ---
 
 ## 🃏 Contenido del Mod
 
-### 🌟 Nueva Rareza: **Secretos**
-*Badge negro sólido y efectos exclusivos. Solo pueden ser invocados mediante el consumible espectral *La Muchachada*.*
+### 🌟 Nueva Rareza: **Secretos** (8 Jokers Secretos)
+*Badge negro sólido y efectos legendarios exclusivos. Solo pueden ser invocados mediante el consumible espectral *La Muchachada*.*
 - **Esteban**: X2 Multiplicador por cartas puntuadas de Picas y Tréboles.
-- **Black Hole**: Eleva las Fichas y el Multiplicador final a la potencia `^1.2`.
 - **Thiago**: Suma la mitad de las Fichas puntuadas directamente al Multiplicador.
 - **Paula**: Destruye los Jokers adyacentes al inicio de la ronda y gana permanentemente +X1 Multiplicador por cada Joker destruido.
+- **Black Hole**: Eleva las Fichas y el Multiplicador final a la potencia `^1.2`.
+- **Squele**: Las cartas de Corazones otorgan +10 de Multi y X1.5 de Multi; 1 en 10 probabilidades de *proyectarse* creando un Joker Lujurioso (*"AHHH ME ESTOY PROYECTANDO"*).
+- **Bluxdir**: Cuando se descarta una mano, sube de nivel la mano de póker descartada (*"No voy a caer en tu ragebait"*).
+- **Charles**: Las cartas de Picas y Corazones al puntuar otorgan X2 de Multi, con 1 en 3 probabilidades de generar $5 (*"¡Aquí tiene un regalo!"*). Cuenta con una sinergia única con Mochi.
+- **Mochi**: Las cartas puntuadas se convierten en Cartas Versátiles (Wild Cards); otorga +X0.25 de Multi por cada Carta Versátil en tu baraja completa (*"Un dibujo para ti! :3"*).
+  - **Sinergia Charles & Mochi**: Si ambos están en tus ranuras de Jokers, las cartas puntuadas se **reactivan 1 vez** y, al finalizar la ronda, ambos muestran al unísono el mensaje *"¡Mejores amigos!"*.
 
 ---
 
-### 🎭 Nuevos Jokers (24+ Jokers)
-- **Comunes**: Homebody Joker, Retired Joker, Masterful Joker, Outstanding Joker, Blueberry.
+### 🎭 Nuevos Jokers (22+ Jokers)
+- **Comunes**: Masterful Joker, Outstanding Joker, Blueberry.
 - **Poco Comunes**: Shareholder Joker, Builder Joker, Banquet, Appraiser, Runway, Slot Machine, Duel of Value, Falta de Lectura, Chameleon Joker.
 - **Raros**: Doctor Jo., Symmetrical Joker, Balance, Merchant, Lover, Blacksmith, Lucky One, Miner, Joke Joker?.
 - **Legendarios**: Perfectionism.
@@ -37,14 +42,13 @@ Un nuevo tipo de consumibles temáticos que asignan oficios permanentes o aplica
   - **The Chef**: Al puntuar una figura (J, Q, K), transforma todas las demás cartas de la mano en Cartas Multi.
   - **The Archaeologist**: Al puntuar en la última mano de la ronda, recupera 1 carta descartada con edición aleatoria.
   - **The Jeweler**: Mejora 1 carta a *Jeweled Card* (+1$ y X1.1 Mult si es Diamante o Corazón).
-  - **The Electrician**: Al puntuar, duplica y comparte sus Fichas base con las cartas adyacentes en la jugada.
 
 ---
 
 ### 🌌 Consumibles Espectrales, Sellos y Mejoras
-- **La Muchachada**: Crea un Joker Secreto aleatorio.
+- **La Muchachada**: Crea un Joker Secreto aleatorio (entre los 8 disponibles).
 - **Hierarchy**: Destruye la mano entera, crea 3 Reyes de Acero con Sello Rojo, -1 Mano.
-- **Dark Green Seal**: Sello verde oscuro (se coloca al frente de la mano tras el primer descarte; 1 en 15 de destruirse).
+- **Dark Green Seal**: Sello verde oscuro (1 en 10 probabilidades de reactivarse 3 veces, 1 en 5 de reactivarse 2 veces, 1 en 2 de reactivarse 1 vez; no acumulativo).
 - **Order**: Aplica el Sello Verde Oscuro a 1 carta seleccionada.
 - **Rot**: Destruye todos los Jokers (incluso Eternos) y genera 2 Jokers Eternos aleatorios, -1 Descarte.
 - **Catastrophic**: +4 niveles a la mano más jugada, 3 Planetas Negativos de la 2ª más jugada, -1 nivel a todas las demás.
@@ -52,13 +56,20 @@ Un nuevo tipo de consumibles temáticos que asignan oficios permanentes o aplica
 
 ---
 
-### 👁️ Ciegas Jefe (Boss Blinds - A partir de Ante 3)
+### 🏷️ Etiquetas (Tags)
+- **Discord Tag**: 1 en 2 probabilidades de crear el consumible *La Muchachada* (si hay espacio).
+
+---
+
+### 👁️ Ciegas Jefe (Boss Blinds)
 - **The Pole**: Las cartas con edición (Foil, Holo, Poly) pierden $10 al puntuar.
 - **The Rod**: Si tu puntuación triplica el objetivo de la ciega, el objetivo de la siguiente ronda aumenta un X1.5.
 - **The Magician**: En la puntuación final, reduce las fichas a la mitad (/2) y el multiplicador a un tercio (/3).
 - **The Mountain**: Usar consumibles desactiva la puntuación de la siguiente mano jugada.
 - **The Door**: Las manos con un número impar de cartas no puntúan.
 - **The Triangle**: Las manos con un número par de cartas no puntúan.
+- **The Cube**: Reduce a la mitad las Fichas y el Multiplicador si el número de la puntuación final es par.
+- **The Void**: Aumenta el objetivo de fichas de la ciega en un X1.25 por cada mano jugada que no derrote la ciega.
 
 ---
 
@@ -69,8 +80,9 @@ Un nuevo tipo de consumibles temáticos que asignan oficios permanentes o aplica
 ---
 
 ### 🎴 Barajas (Decks)
-- **Strategist Deck**: Comienza con consumibles clave y adaptabilidad estratégica.
-- **Overseer Deck**: Duplica las etiquetas (Tags) obtenidas, pero los Jokers cuestan X1.5 en la tienda.
+- **Baraja Cavernícola (Caveman Deck)**: Empiezas con solo A, 2, 3, 4, 6 y 8 de cada palo en tu baraja completa; el resto de cartas comienzan como Cartas de Piedra (Stone Cards). -1 Mano.
+- **Strategist Deck**: Comienza con una baraja reducida de 24 cartas altas (A, K, Q, J, 10, 9), vale Truco de Magia, $0, -1 mano, -2 descartes, escalado de ciegas X1.2.
+- **Overseer Deck**: Genera una carta Espectral al final de cada ronda, duplica las etiquetas obtenidas, pero los Jokers cuestan X1.5 en la tienda.
 
 ---
 
@@ -89,3 +101,4 @@ Un nuevo tipo de consumibles temáticos que asignan oficios permanentes o aplica
 ## 👤 Autor y Créditos
 - **Creador**: Unknow102
 - **Framework**: Steamodded (SMODS)
+

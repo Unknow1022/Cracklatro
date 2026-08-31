@@ -6,17 +6,20 @@ Una expansión masiva y completa para **Balatro** creada con el framework **Stea
 
 ## 🃏 Contenido del Mod
 
-### 🌟 Nueva Rareza: **Secretos** (8 Jokers Secretos)
+### 🌟 Nueva Rareza: **Secretos** (11 Jokers Secretos)
 *Badge negro sólido y efectos legendarios exclusivos. Solo pueden ser invocados mediante el consumible espectral *La Muchachada*.*
-- **Esteban**: X2 Multiplicador por cartas puntuadas de Picas y Tréboles.
-- **Thiago**: Suma la mitad de las Fichas puntuadas directamente al Multiplicador.
-- **Paula**: Destruye los Jokers adyacentes al inicio de la ronda y gana permanentemente +X1 Multiplicador por cada Joker destruido.
-- **Black Hole**: Eleva las Fichas y el Multiplicador final a la potencia `^1.2`.
-- **Squele**: Las cartas de Corazones otorgan +10 de Multi y X1.5 de Multi; 1 en 10 probabilidades de *proyectarse* creando un Joker Lujurioso (*"AHHH ME ESTOY PROYECTANDO"*).
-- **Bluxdir**: Cuando se descarta una mano, sube de nivel la mano de póker descartada (*"No voy a caer en tu ragebait"*).
-- **Charles**: Las cartas de Picas y Corazones al puntuar otorgan X2 de Multi, con 1 en 3 probabilidades de generar $5 (*"¡Aquí tiene un regalo!"*). Cuenta con una sinergia única con Mochi.
+- **Esteban**: X2.5 Multiplicador por cartas puntuadas de Picas y Tréboles (*"*Ignores the kid*"*).
+- **Thiago**: Otorga X1 de Multiplicador por cada 20 Fichas en la puntuación final de la mano (*"Son, Hijillo, Brochacho 😭"*).
+- **Paula**: Destruye los Jokers adyacentes al inicio de la ronda y gana permanentemente +X1 Multiplicador por cada Joker destruido (*"*Ñam Ñam ñam* NOO MAMA ESPERA NO ESTOY COMIENDO"*).
+- **Black Hole**: Eleva las Fichas y el Multiplicador final a la potencia `^1.5`.
+- **Squele**: Las cartas de Corazones otorgan +10 de Multi y X1.5 de Multi; 1 en 10 probabilidades de *proyectarse* creando una Roca de Sangre (Bloodstone) Negativa (*"Ahhh me proyecto"*).
+- **Bluxdir**: Cuando se descarta una mano, sube de nivel la mano de póker descartada (*"*Se pone a farmear aura*"*).
+- **Charles**: Las cartas de Picas y Corazones al puntuar otorgan X2 de Multi, y otorga $5 por cada carta puntuada (*"Pe Causa"*). Cuenta con una sinergia única con Mochi.
 - **Mochi**: Las cartas puntuadas se convierten en Cartas Versátiles (Wild Cards); otorga +X0.25 de Multi por cada Carta Versátil en tu baraja completa (*"Un dibujo para ti! :3"*).
-  - **Sinergia Charles & Mochi**: Si ambos están en tus ranuras de Jokers, las cartas puntuadas se **reactivan 1 vez** y, al finalizar la ronda, ambos muestran al unísono el mensaje *"¡Mejores amigos!"*.
+  - **Sinergia Charles & Mochi**: Si ambos están en tus ranuras de Jokers, las cartas puntuadas se **reactivan 1 vez** y, al ganar la ronda, muestran una sola vez el mensaje *"¡Mejores amigos!"*.
+- **Helin**: Al jugarse la primera mano de la ronda, eleva al cuadrado (`^2`) el Multiplicador final (*"Pero que envian al chat"*).
+- **RayTracing**: Genera 2 cartas espectrales aleatorias Negativas al final de la ronda, excepto La Muchachada (*"Depradosini Negrini"*).
+- **Paco**: Obtiene X2 de Multiplicador por cada descarte restante que poseas actualmente (*"No es necesario descartar, todas las cartas son utiles"*).
 
 ---
 
@@ -46,22 +49,22 @@ Un nuevo tipo de consumibles temáticos que asignan oficios permanentes o aplica
 ---
 
 ### 🌌 Consumibles Espectrales, Sellos y Mejoras
-- **La Muchachada**: Crea un Joker Secreto aleatorio (entre los 8 disponibles).
+- **La Muchachada**: Crea un Joker Secreto aleatorio (entre los 11 existentes). Exclusivo de paquetes espectrales (el doble de rareza que El Alma, 0.15% de probabilidad) y Discord Tag.
 - **Hierarchy**: Destruye la mano entera, crea 3 Reyes de Acero con Sello Rojo, -1 Mano.
 - **Dark Green Seal**: Sello verde oscuro (1 en 10 probabilidades de reactivarse 3 veces, 1 en 5 de reactivarse 2 veces, 1 en 2 de reactivarse 1 vez; no acumulativo).
 - **Order**: Aplica el Sello Verde Oscuro a 1 carta seleccionada.
 - **Rot**: Destruye todos los Jokers (incluso Eternos) y genera 2 Jokers Eternos aleatorios, -1 Descarte.
-- **Catastrophic**: +4 niveles a la mano más jugada, 3 Planetas Negativos de la 2ª más jugada, -1 nivel a todas las demás.
+- **Catastrophic**: +4 niveles a la mano más jugada, 3 Planetas Negativos de la mano más jugada, -1 nivel a todas las demás (sin animación innecesaria).
 - **Intensity**: Destruye 5 cartas seleccionadas y crea 1 Carta Salvaje Policromada con Sello Rojo.
 
 ---
 
 ### 🏷️ Etiquetas (Tags)
-- **Discord Tag**: 1 en 2 probabilidades de crear el consumible *La Muchachada* (si hay espacio).
+- **Discord Tag**: 1 en 5 probabilidades de crear el consumible *La Muchachada* (si hay espacio).
 
 ---
 
-### 👁️ Ciegas Jefe (Boss Blinds)
+### 👁️ Ciegas Jefe (Boss Blinds & Showdown)
 - **The Pole**: Las cartas con edición (Foil, Holo, Poly) pierden $10 al puntuar.
 - **The Rod**: Si tu puntuación triplica el objetivo de la ciega, el objetivo de la siguiente ronda aumenta un X1.5.
 - **The Magician**: En la puntuación final, reduce las fichas a la mitad (/2) y el multiplicador a un tercio (/3).
@@ -69,7 +72,7 @@ Un nuevo tipo de consumibles temáticos que asignan oficios permanentes o aplica
 - **The Door**: Las manos con un número impar de cartas no puntúan.
 - **The Triangle**: Las manos con un número par de cartas no puntúan.
 - **The Cube**: Reduce a la mitad las Fichas y el Multiplicador si el número de la puntuación final es par.
-- **The Void**: Aumenta el objetivo de fichas de la ciega en un X1.25 por cada mano jugada que no derrote la ciega.
+- **The Void (Ciega Jefe Final / Showdown)**: Aparece en el Ante 8 (junto a Cerulean Bell, Verdant Leaf, etc.). Aumenta el objetivo de fichas de la ciega en un X1.25 por cada mano jugada que no derrote la ciega ($8 de recompensa).
 
 ---
 

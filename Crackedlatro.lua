@@ -38,36 +38,40 @@
         24. Perfectionism (At end of round, applies Foil, Holo, or Poly edition to a Joker)
 
     Secretos:
-        25. Esteban (X2 Mult for scored Spades and Clubs)
-        26. Thiago (Adds half of scored Chips to Mult)
-        27. Paula (Destroys adjacent Jokers at round start, +X1 Mult per destroyed Joker)
-        28. Black Hole (Elevates final Chips and Mult to ^1.2)
-        29. Squele (+10 Mult & X1.5 Mult on Hearts, 1 in 10 chance to Project Lusty Joker)
-        30. Bluxdir (Levels up discarded poker hand on discard)
-        31. Charles (X2 Mult on Spades & Hearts, 1 in 3 chance for $5; Synergy with Mochi)
-        32. Mochi (Scored cards turn into Wild Cards, +X0.25 Mult per Wild Card in full deck. "Un dibujo para ti! :3". Synergy with Charles: Retriggers cards 1x and shows "Mejores amigos!")
+        25. Esteban (X2.5 Mult for scored Spades and Clubs. "*Ignores the kid*")
+        26. Thiago (Gives X1 Mult per 20 Chips in final hand chips. "Son, Hijillo, Brochacho 😭")
+        27. Paula (Destroys adjacent Jokers at round start, +X1 Mult per destroyed Joker. "*Ñam Ñam ñam* NOO MAMA ESPERA NO ESTOY COMIENDO")
+        28. Black Hole (Elevates final Chips and Mult to ^1.5)
+        29. Squele (+10 Mult & X1.5 Mult on Hearts, 1 in 10 chance to Project Negative Bloodstone. "Ahhh me proyecto")
+        30. Bluxdir (Levels up discarded poker hand on discard. "*Se pone a farmear aura*")
+        31. Charles (X2 Mult on Spades & Hearts, $5 for each scored card. "Pe Causa". Synergy with Mochi)
+        32. Mochi (Scored cards turn into Wild Cards, +X0.25 Mult per Wild Card in full deck. "Un dibujo para ti! :3". Synergy with Charles)
+        33. Helin (On 1st hand of round, squares final Mult ^2. "Pero que envian al chat")
+        34. RayTracing (Creates 2 random Negative Spectrals at end of round. "Depradosini Negrini")
+        35. Paco (Gives X2 Mult per remaining discard. "No es necesario descartar, todas las cartas son utiles")
 
     --- CONSUMIBLES, SELLOS Y MEJORAS ---
         - Hierarchy (Spectral: Destroy hand, create 3 Steel Kings with Red Seal, -1 Hand)
         - Dark Green Seal (Seal: 1 in 10 chance to retrigger 3x, 1 in 5 for 2x, 1 in 2 for 1x; non-cumulative)
         - Order (Spectral: Adds Dark Green Seal to 1 card)
         - Rot (Spectral: Destroy all Jokers including Eternal, create 2 random Eternal Jokers, -1 Discard)
-        - Catastrophic (Spectral: +4 levels to most played hand, 3 Negative Planets of 2nd most played hand, -1 level to all other hands)
+        - Catastrophic (Spectral: +4 levels to most played hand, 3 Negative Planets of most played hand, -1 level to all other hands silently)
         - Intensity (Spectral: Destroy 5 selected cards, create 1 Polychrome Wild Card with Red Seal)
-        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio entre los 8 existentes)
+        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio entre los 11 existentes; exclusivo de paquetes espectrales, doble rareza que El Alma)
         - Cartas de Trabajo (Job Cards): The Miner, The Gardener, The Banker, The Surgeon, The Alchemist, The Butcher, The Detective, The Chef, The Archaeologist, The Jeweler
         - Paquetes de Trabajo (Booster Packs): Job Application, Jumbo Job Application, Mega Job Application
         - Mejoras: Diamond Card, Investment Card, Lead Card, Jeweled Card
 
     --- ETIQUETAS (TAGS) ---
-        - Discord Tag (1 in 2 chance to create La Muchachada if room)
+        - Discord Tag (1 in 5 chance to create La Muchachada if room)
 
     --- VALES (VOUCHERS) ---
         - Catador (Taster): Reduce la aparición de Jokers Comunes en la tienda
         - Crítico (Critic): Elimina por completo los Jokers Comunes de la tienda
 
     --- CIEGAS JEFE (BOSS BLINDS) ---
-        - The Pole, The Rod, The Magician, The Mountain, The Door, The Triangle, The Cube, The Void
+        - Boss Blinds: The Pole, The Rod, The Magician, The Mountain, The Door, The Triangle, The Cube
+        - Final Boss Blind (Showdown): The Void
 
     --- BARAJAS ---
         - Caveman Deck (Baraja Cavernícola), Strategist Deck, Overseer Deck
@@ -81,16 +85,16 @@
 
 local function is_secret_card(card)
     if not card then return false end
-    local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name)
-    return card.is_secret or (card.config and card.config.center and card.config.center.is_secret) or
-           (key == 'j_Cracklatro_esteban' or key == 'esteban' or key == 'j_esteban' or
-            key == 'j_Cracklatro_thiago' or key == 'thiago' or key == 'j_thiago' or
-            key == 'j_Cracklatro_paula' or key == 'paula' or key == 'j_paula' or
-            key == 'j_Cracklatro_black_hole' or key == 'black_hole_joker' or key == 'black_hole' or key == 'j_black_hole' or key == 'j_Cracklatro_black_hole_joker' or
-            key == 'j_Cracklatro_squele' or key == 'squele' or key == 'j_squele' or key == 'j_Cracklatro_squele_joker' or
-            key == 'j_Cracklatro_bluxdir' or key == 'bluxdir' or key == 'j_bluxdir' or key == 'j_Cracklatro_bluxdir_joker' or
-            key == 'j_Cracklatro_charles' or key == 'charles' or key == 'j_charles' or key == 'j_Cracklatro_charles_joker' or
-            key == 'j_Cracklatro_mochi' or key == 'mochi' or key == 'j_mochi' or key == 'j_Cracklatro_mochi_joker')
+    if card.is_secret or (card.config and card.config.center and card.config.center.is_secret) then return true end
+    local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+    key = string.lower(tostring(key))
+    local secret_names = {
+        'esteban', 'thiago', 'paula', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco'
+    }
+    for _, name in ipairs(secret_names) do
+        if string.find(key, name) then return true end
+    end
+    return false
 end
 
 -------------------------------------------------------------------
@@ -531,8 +535,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Masterful Joker',
         text = {
-            "Gives {C:mult}+#1#{} Mult if played hand",
-            "contains a {C:attention}Four of a Kind{} or {C:attention}Five of a Kind{}"
+            "{C:mult}+#1#{} Mult if played hand contains",
+            "a {C:attention}Four of a Kind{} or {C:attention}Five of a Kind{}"
         }
     },
     config = { extra = { mult = 25 } },
@@ -572,9 +576,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Outstanding Joker',
         text = {
-            "Gives {C:chips}+#1#{} Chips, {C:mult}+#2#{} Mult",
-            "and {C:money}$#3#{} if played hand contains",
-            "a {C:attention}Four of a Kind{} or {C:attention}Five of a Kind{}"
+            "{C:chips}+#1#{} Chips, {C:mult}+#2#{} Mult, and {C:money}$#3#{}",
+            "if played hand contains a {C:attention}Four of a Kind{}",
+            "or {C:attention}Five of a Kind{}"
         },
         unlock = {
             "Play a",
@@ -628,9 +632,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Blueberry',
         text = {
-            "{C:blue}+1{} Hand at start of round.",
-            "Self-destructs after {C:attention}#1#{} rounds",
-            "{C:inactive}(Art By kars_on_mars){}"
+            "{C:blue}+1{} Hand when {C:attention}Blind{} is selected.",
+            "Self-destructs after {C:attention}#1#{} round#2#{}",
+            "{C:inactive}(Art by kars_on_mars){}"
         }
     },
     config = { extra = { hands = 1, rounds_left = 3 } },
@@ -638,7 +642,8 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     cost = 4,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.rounds_left } }
+        local r = (card and card.ability and card.ability.extra and card.ability.extra.rounds_left) or 3
+        return { vars = { r, (r == 1 and '' or 's') } }
     end,
     calculate = function(self, card, context)
         if context.setting_blind and not context.blueprint then
@@ -694,8 +699,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Shareholder Joker',
         text = {
-            "Earn {C:money}$#1#{} when defeating the blind in {C:attention}1 hand{}",
-            "{C:inactive}({C:money}$#2#{} for Big Blind, {C:money}$#3#{} for Boss Blind){}"
+            "Earn {C:money}$#1#{} ({C:money}$#2#{} on {C:attention}Big Blind{}, {C:money}$#3#{} on {C:attention}Boss Blind{})",
+            "when defeating the Blind in only {C:attention}1 hand{}"
         },
         unlock = {
             "Have at least",
@@ -753,8 +758,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Builder Joker',
         text = {
-            "Gains {X:mult,C:white}X#2#{} Mult if played hand is",
-            "a {C:attention}Three of a Kind{}, {C:attention}Four of a Kind{}, or {C:attention}Five of a Kind{}",
+            "Gains {X:mult,C:white}X#2#{} Mult if played hand contains",
+            "a {C:attention}Three of a Kind{}, {C:attention}Four of a Kind{},",
+            "or {C:attention}Five of a Kind{}",
             "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
         },
         unlock = {
@@ -824,7 +830,7 @@ SMODS.Joker {
         name = 'Banquet',
         text = {
             "When {C:attention}sold{}, creates an {C:attention}Ice Cream{},",
-            "a {C:attention}Popcorn{}, and a {C:attention}Ramen{}",
+            "{C:attention}Popcorn{}, and {C:attention}Ramen{}",
             "{C:inactive}(Must have room){}"
         }
     },
@@ -868,15 +874,18 @@ SMODS.Joker {
     loc_txt = {
         name = 'Appraiser',
         text = {
-            "Each card with an Edition",
-            "{C:dark_edition}(Foil, Holographic, or Polychrome){}",
-            "in your full deck gives {C:money}$1{} at end of round"
+            "Earn {C:money}$#1#{} at end of round for each card",
+            "with an {C:dark_edition}Edition{} in your {C:attention}full deck{}",
+            "{C:inactive}(Foil, Holographic, or Polychrome){}"
         }
     },
     config = { extra = { dollars_per_edition = 1 } },
     rarity = 2, -- Uncommon
     pos = { x = 0, y = 0 },
     cost = 6,
+    loc_vars = function(self, info_queue, card)
+        return { vars = { (card and card.ability and card.ability.extra and card.ability.extra.dollars_per_edition) or 1 } }
+    end,
     calculate = function(self, card, context)
         if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
             local count = 0
@@ -915,15 +924,18 @@ SMODS.Joker {
     loc_txt = {
         name = 'Runway',
         text = {
-            "Played cards with an {C:attention}enhancement{}",
-            "have a {C:green}1 in 10{} chance to become",
-            "{C:dark_edition}Foil{}, {C:dark_edition}Holographic{}, or {C:dark_edition}Polychrome{}"
+            "{C:green}#1# in #2#{} chance for played {C:attention}Enhanced cards{}",
+            "to permanently gain a random {C:dark_edition}Edition{}",
+            "{C:inactive}(Foil, Holographic, or Polychrome){}"
         }
     },
     config = { extra = { odds = 10 } },
     rarity = 2, -- Uncommon
     pos = { x = 0, y = 0 },
     cost = 7,
+    loc_vars = function(self, info_queue, card)
+        return { vars = { (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
+    end,
     calculate = function(self, card, context)
         if context.before and not context.blueprint and context.scoring_hand then
             for _, pcard in ipairs(context.scoring_hand) do
@@ -962,12 +974,12 @@ SMODS.Joker {
     loc_txt = {
         name = 'Slot Machine',
         text = {
-            "When a card scores, has a chance to win:",
-            "{C:green}#1# in 8{}: {C:money}$3{}, {C:green}#1# in 15{}: {C:money}$5{}, {C:green}#1# in 25{}: {C:money}$15{}, {C:green}#1# in 35{}: {C:money}$30{}",
-            "{C:green}#1# in 40{}: {C:green}Uncommon Joker{}, {C:green}#1# in 65{}: {C:red}Rare Joker{}",
+            "Each scored card has a chance to win:",
+            "{C:green}#1# in 8{}: {C:money}$3{} | {C:green}#1# in 15{}: {C:money}$5{} | {C:green}#1# in 25{}: {C:money}$15{} | {C:green}#1# in 35{}: {C:money}$30{}",
+            "{C:green}#1# in 40{}: {C:attention}Uncommon Joker{} | {C:green}#1# in 65{}: {C:red}Rare Joker{}",
             "{C:green}#1# in 125{}: {C:dark_edition}Negative{} {C:red}Rare Joker{}",
             "{C:green}#1# in 200{}: {C:dark_edition}Negative{} {C:eternal}Eternal{} {C:attention}Blueprint{}",
-            "{C:green}#1# in 777{}: {C:dark_edition}Negative{} {C:spectral}Soul{}"
+            "{C:green}#1# in 777{}: {C:dark_edition}Negative{} {C:spectral}The Soul{}"
         },
         unlock = {
             "Trigger both {C:mult}+20 Mult{} and",
@@ -1128,10 +1140,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Duel of Value',
         text = {
-            "Gives {X:mult,C:white}X#1#{} Mult if played hand",
-            "is a {C:attention}Two Pair{} with 2 {C:attention}even{} cards",
-            "and 2 {C:attention}odd{} cards",
-            "{C:inactive}(Art By kars_on_mars){}"
+            "{X:mult,C:white}X#1#{} Mult if played hand is a {C:attention}Two Pair{}",
+            "scored with exactly {C:attention}2 even{} and {C:attention}2 odd{} cards",
+            "{C:inactive}(Art by kars_on_mars){}"
         },
         unlock = {
             "Reach {C:attention}Ante 8{} holding both",
@@ -1203,12 +1214,12 @@ SMODS.Joker {
     loc_txt = {
         name = 'Falta de Lectura',
         text = {
-            "Gives {X:mult,C:white}X#1#{} Mult if played hand",
-            "triggers {C:attention}no other Jokers{}"
+            "{X:mult,C:white}X#1#{} Mult if played hand",
+            "activates {C:attention}no other Jokers{}"
         },
         unlock = {
             "Play a scoring hand that",
-            "triggers {C:attention}no Jokers{}"
+            "activates {C:attention}no Jokers{}"
         }
     },
     config = { extra = { xmult = 5.0 } },
@@ -1285,9 +1296,10 @@ SMODS.Joker {
     loc_txt = {
         name = 'Doctor Jo.',
         text = {
-            "If another compatible Joker is {C:red}destroyed{}",
-            "{C:inactive}(e.g. Ankh or Perishable){}, creates a clean copy",
-            "of that Joker and {C:attention}Doctor Jo. self-destructs{}"
+            "When another compatible {C:attention}Joker{} is {C:red}destroyed{},",
+            "{C:attention}Doctor Jo. self-destructs{} to create an exact",
+            "copy of it without debuffs or negative stickers",
+            "{C:inactive}(e.g. Perishable, Rental, Debuffed){}"
         }
     },
     config = { extra = {} },
@@ -1385,8 +1397,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Symmetrical Joker',
         text = {
-            "Gives {X:mult,C:white}X#1#{} Mult if played hand is a {C:attention}Four of a Kind{}",
-            "and all cards are of the {C:attention}same suit{}"
+            "{X:mult,C:white}X#1#{} Mult if played hand is a",
+            "{C:attention}Four of a Kind{} or {C:attention}Five of a Kind{}",
+            "where all scoring cards share the {C:attention}same suit{}"
         }
     },
     config = { extra = { xmult = 4.0 } },
@@ -1436,10 +1449,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Balance',
         text = {
-            "If played hand is a {C:attention}Four of a Kind{}",
-            "with {C:attention}4 scoring cards{} of the {C:attention}same suit{},",
-            "creates {C:spectral}2 Spectral cards{}",
-            "{C:inactive}(Must have room){}"
+            "Creates {C:spectral}#2# Spectral cards{} if played hand",
+            "is a {C:attention}Four of a Kind{} with exactly {C:attention}#1# scoring cards{}",
+            "of the {C:attention}same suit{} {C:inactive}(Must have room){}"
         }
     },
     config = { extra = { cards_needed = 4, spectral_count = 2 } },
@@ -1508,9 +1520,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Merchant',
         text = {
-            "{C:attention}+1{} card slot, {C:attention}+1{} Voucher and {C:attention}+1{} Booster Pack in shop,",
-            "{C:attention}25% discount{} on all shop items,",
-            "Increases appearance rate of {C:red}Rare Jokers{},",
+            "In shop: {C:attention}+1{} Card slot, {C:attention}+1{} Voucher, {C:attention}+1{} Booster Pack,",
+            "{C:money}25% discount{} on all items, and {C:red}higher Rare Joker rate{}",
             "Lose {C:money}$#1#{} when leaving the shop"
         },
         unlock = {
@@ -1574,9 +1585,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lover',
         text = {
-            "Scored {C:hearts}Hearts{} cards give {C:chips}+#1#{} Chips",
-            "and {C:mult}+#2#{} Mult, and have a {C:green}1 in #3#{} chance",
-            "to create a {C:dark_edition}Negative{} {C:tarot}The Lovers{} Tarot card"
+            "Scored {C:hearts}Hearts{} give {C:chips}+#1#{} Chips and {C:mult}+#2#{} Mult.",
+            "{C:green}#3# in #4#{} chance to create a {C:dark_edition}Negative{}",
+            "{C:tarot}The Lovers{} Tarot card {C:inactive}(Must have room){}"
         },
         unlock = {
             "Play a {C:attention}Flush{} of all 4 suits",
@@ -1589,7 +1600,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.chips, card.ability.extra.mult, (G.GAME and G.GAME.probabilities.normal or 1) * card.ability.extra.odds } }
+        return { vars = { card.ability.extra.chips, card.ability.extra.mult, (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
@@ -1633,8 +1644,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Blacksmith',
         text = {
-            "Gains {X:mult,C:white}X#2#{} Mult whenever a",
-            "played {C:spades}Spade{} card is scored",
+            "This Joker gains {X:mult,C:white}X#2#{} Mult for each",
+            "scored {C:spades}Spade{} card played",
             "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
         },
         unlock = {
@@ -1688,9 +1699,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lucky One',
         text = {
-            "Scored {C:clubs}Clubs{} cards give {C:money}$#1#{} and {C:mult}+#2#{} Mult,",
-            "and have a {C:green}1 in #3#{} chance to create a",
-            "{C:attention}Common/Uncommon Joker{} {C:inactive}(Must have room){}"
+            "Scored {C:clubs}Clubs{} give {C:money}$#1#{} and {C:mult}+#2#{} Mult.",
+            "{C:green}#3# in #4#{} chance to create a random",
+            "{C:attention}Common{} or {C:attention}Uncommon Joker{} {C:inactive}(Must have room){}"
         },
         unlock = {
             "Play a {C:attention}Flush{} of all 4 suits",
@@ -1703,7 +1714,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.dollars, card.ability.extra.mult, (G.GAME and G.GAME.probabilities.normal or 1) * card.ability.extra.odds } }
+        return { vars = { card.ability.extra.dollars, card.ability.extra.mult, (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
@@ -1750,10 +1761,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Miner',
         text = {
-            "Scored {C:diamonds}Diamonds{} cards give {X:mult,C:white}X#1#{} Mult",
-            "and {C:chips}+#2#{} Chips.",
-            "{C:green}1 in #3#{} chance to self-destruct at end of round,",
-            "leaving behind a {C:attention}Rough Gem{}"
+            "Scored {C:diamonds}Diamonds{} give {X:mult,C:white}X#1#{} Mult and {C:chips}+#2#{} Chips.",
+            "{C:green}#3# in #4#{} chance at end of round to collapse and",
+            "transform into a {C:attention}Rough Gem{}"
         },
         unlock = {
             "Play a {C:attention}Flush{} of all 4 suits",
@@ -1766,7 +1776,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.xmult, card.ability.extra.chips, (G.GAME and G.GAME.probabilities.normal or 1) * card.ability.extra.odds } }
+        return { vars = { card.ability.extra.xmult, card.ability.extra.chips, (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
@@ -1823,7 +1833,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'Joke Joker?',
         text = {
-            "Does nothing"
+            "Does nothing... or does it?"
         },
         unlock = {
             "Redeem the {C:attention}Blank Voucher{}",
@@ -1911,10 +1921,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Chameleon',
         text = {
-            "Copies ability of {C:attention}Joker to the left{},",
-            "if played hand contains at least",
-            "1 card of rank {C:attention}#1#{}",
-            "{C:inactive}(Rank chosen from full deck){}"
+            "Copies ability of the {C:attention}Joker to the left{}",
+            "if played hand contains at least one {C:attention}#1#{}",
+            "{C:inactive}(Rank changes every round from full deck){}"
         }
     },
     config = { extra = { required_rank = 'Ace' } },
@@ -2016,10 +2025,11 @@ SMODS.Joker {
         name = 'Esteban',
         text = {
             "Scored {C:spades}Spades{} and {C:clubs}Clubs{}",
-            "cards give {X:mult,C:white}X#1#{} Mult"
+            "cards give {X:mult,C:white}X#1#{} Mult",
+            "{C:inactive}(\"*Ignores the kid*\")"
         }
     },
-    config = { extra = { xmult = 2 } },
+    config = { extra = { xmult = 2.5 } },
     rarity = 4, -- Legendary tier internamente para animación 2-layer
     is_secret = true,
     pos = { x = 0, y = 0 },
@@ -2038,14 +2048,14 @@ SMODS.Joker {
         end
     end,
     loc_vars = function(self, info_queue, card)
-        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 2
+        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 2.5
         return { vars = { xmult } }
     end,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play then
             if context.other_card:is_suit('Spades') or context.other_card:is_suit('Clubs') then
                 return {
-                    x_mult = (card.ability and card.ability.extra and card.ability.extra.xmult) or 2,
+                    x_mult = (card.ability and card.ability.extra and card.ability.extra.xmult) or 2.5,
                     card = card
                 }
             end
@@ -2069,11 +2079,12 @@ SMODS.Joker {
     loc_txt = {
         name = 'Thiago',
         text = {
-            "Adds {C:attention}half{} of the scored",
-            "{C:chips}Chips{} to {C:mult}Mult{}"
+            "Gives {X:mult,C:white}X1{} Mult for every",
+            "{C:chips}#1# Chips{} in final hand chips",
+            "{C:inactive}(\"Son, Hijillo, Brochacho 😭\")"
         }
     },
-    config = {},
+    config = { extra = { chips_per_xmult = 20 } },
     rarity = 4, -- Legendary tier internamente para animación 2-layer
     is_secret = true,
     pos = { x = 0, y = 0 },
@@ -2091,15 +2102,19 @@ SMODS.Joker {
             badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
+    loc_vars = function(self, info_queue, card)
+        local chips_req = (card and card.ability and card.ability.extra and card.ability.extra.chips_per_xmult) or (self.config and self.config.extra and self.config.extra.chips_per_xmult) or 20
+        return { vars = { chips_req } }
+    end,
     calculate = function(self, card, context)
         if context.joker_main then
             local current_chips = (hand_chips and hand_chips > 0 and hand_chips) or (context.chips and context.chips > 0 and context.chips) or 0
-            local mult_gain = math.floor(current_chips / 2)
-            if mult_gain > 0 then
+            local chips_req = (card.ability and card.ability.extra and card.ability.extra.chips_per_xmult) or 20
+            local xmult = math.floor(current_chips / chips_req)
+            if xmult > 1 then
                 return {
-                    mult = mult_gain,
-                    message = '+' .. mult_gain .. ' Mult',
-                    colour = G.C.MULT
+                    Xmult = xmult,
+                    card = card
                 }
             end
         end
@@ -2125,7 +2140,8 @@ SMODS.Joker {
             "At start of round, {C:red}destroys{} adjacent",
             "Jokers and gains {X:mult,C:white}+X1{} Mult",
             "for each Joker destroyed",
-            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult){}"
+            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult){}",
+            "{C:inactive}(\"*Ñam Ñam ñam* NOO MAMA ESPERA NO ESTOY COMIENDO\")"
         }
     },
     config = { extra = { xmult = 1.0 } },
@@ -2191,7 +2207,7 @@ SMODS.Joker {
                         end
                     }))
                     return {
-                        message = 'X' .. tostring(card.ability.extra.xmult) .. ' Mult!',
+                        message = '*Ñam Ñam ñam*',
                         colour = G.C.XMULT
                     }
                 end
@@ -2226,7 +2242,7 @@ SMODS.Joker {
             "and final {C:mult}Mult{} to the power of {C:mult}^#1#{}"
         }
     },
-    config = { extra = { pow = 1.2 } },
+    config = { extra = { pow = 1.5 } },
     rarity = 4, -- Legendary tier internamente para animación 2-layer
     is_secret = true,
     pos = { x = 0, y = 0 },
@@ -2245,24 +2261,26 @@ SMODS.Joker {
         end
     end,
     loc_vars = function(self, info_queue, card)
-        local pow = (card and card.ability and card.ability.extra and card.ability.extra.pow) or (self.config and self.config.extra and self.config.extra.pow) or 1.2
+        local pow = (card and card.ability and card.ability.extra and card.ability.extra.pow) or (self.config and self.config.extra and self.config.extra.pow) or 1.5
         return { vars = { pow } }
     end,
     calculate = function(self, card, context)
         if context.joker_main then
-            local current_chips = (hand_chips and hand_chips > 1) and hand_chips or (context.chips and context.chips > 1 and context.chips) or 1
-            local current_mult = (mult and mult > 1) and mult or (context.mult and context.mult > 1 and context.mult) or 1
+            local pow = (card.ability and card.ability.extra and card.ability.extra.pow) or 1.5
 
-            local pow = (card.ability and card.ability.extra and card.ability.extra.pow) or 1.2
+            if hand_chips and hand_chips > 1 then
+                hand_chips = math.floor(hand_chips ^ pow)
+            end
+            if mult and mult > 1 then
+                mult = math.floor(mult ^ pow)
+            end
 
-            local xchips = (current_chips > 1) and (current_chips ^ (pow - 1)) or 1
-            local xmult = (current_mult > 1) and (current_mult ^ (pow - 1)) or 1
+            update_hand_text({ sound = 'chips2', modded = true }, { chips = hand_chips, mult = mult })
 
             return {
-                x_chips = xchips,
-                Xmult = xmult,
                 message = '^' .. tostring(pow) .. '!',
-                colour = G.C.DARK_EDITION
+                colour = G.C.DARK_EDITION,
+                card = card
             }
         end
     end
@@ -2287,8 +2305,8 @@ SMODS.Joker {
             "Scored {C:hearts}Hearts{} cards give {C:mult}+#1#{} Mult",
             "and {X:mult,C:white}X#2#{} Mult.",
             "{C:green}#3# in #4#{} chance to {C:attention}Project{} and create",
-            "a {C:attention}Lusty Joker{} {C:inactive}(Must have room){}",
-            "{C:inactive}(\"AHHH ME ESTOY PROYECTANDO\")"
+            "a {C:dark_edition}Negative{} {C:attention}Bloodstone{}",
+            "{C:inactive}(\"Ahhh me proyecto\")"
         }
     },
     config = { extra = { mult = 10, xmult = 1.5, odds = 10 } },
@@ -2320,20 +2338,20 @@ SMODS.Joker {
             local odds = (card.ability and card.ability.extra and card.ability.extra.odds) or 10
             local does_project = pseudorandom('squele_project') < (norm / odds)
 
-            if does_project and G.jokers and #G.jokers.cards < G.jokers.config.card_limit then
+            if does_project and G.jokers then
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        local new_j = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_lusty_joker', 'squele')
+                        local new_j = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_bloodstone', 'squele')
+                        new_j:set_edition({ negative = true }, true)
                         new_j:add_to_deck()
                         G.jokers:emplace(new_j)
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Negative Bloodstone!', colour = G.C.DARK_EDITION })
                         return true
                     end
                 }))
                 return {
                     mult = card.ability.extra.mult,
                     x_mult = card.ability.extra.xmult,
-                    message = "AHHH ME ESTOY PROYECTANDO",
-                    colour = G.C.MULT,
                     card = card
                 }
             else
@@ -2365,7 +2383,7 @@ SMODS.Joker {
         text = {
             "When a hand is {C:attention}discarded{},",
             "levels up the discarded {C:attention}poker hand{}",
-            "{C:inactive}(\"No voy a caer en tu ragebait\")"
+            "{C:inactive}(\"*Se pone a farmear aura*\")"
         }
     },
     config = {},
@@ -2390,10 +2408,6 @@ SMODS.Joker {
             local text, loc_disp_text, poker_hands, scoring_hand, disp_text = G.FUNCS.get_poker_hand_info(context.full_hand)
             if text and text ~= 'NULL' and G.GAME and G.GAME.hands and G.GAME.hands[text] then
                 level_up_hand(card, text, false, 1)
-                return {
-                    message = "No voy a caer en tu ragebait",
-                    colour = G.C.ATTENTION
-                }
             end
         end
     end
@@ -2402,18 +2416,27 @@ SMODS.Joker {
 -------------------------------------------------------------------
 --- 30. Charles (Secreto)
 -------------------------------------------------------------------
+local function is_charles_card(card)
+    if not card then return false end
+    local k = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+    k = string.lower(tostring(k))
+    return string.find(k, 'charles') ~= nil
+end
+
+local function is_mochi_card(card)
+    if not card then return false end
+    local k = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+    k = string.lower(tostring(k))
+    return string.find(k, 'mochi') ~= nil
+end
+
 local function has_charles_and_mochi()
     if not (G.jokers and G.jokers.cards) then return false end
     local has_charles = false
     local has_mochi = false
     for _, j in ipairs(G.jokers.cards) do
-        local key = (j.config and j.config.center and j.config.center.key) or j.ability.name
-        if key == 'j_Cracklatro_charles' or key == 'j_charles' or key == 'charles' then
-            has_charles = true
-        end
-        if key == 'j_Cracklatro_mochi' or key == 'j_mochi' or key == 'mochi' then
-            has_mochi = true
-        end
+        if is_charles_card(j) then has_charles = true end
+        if is_mochi_card(j) then has_mochi = true end
     end
     return has_charles and has_mochi
 end
@@ -2433,11 +2456,11 @@ SMODS.Joker {
         text = {
             "Scored {C:spades}Spades{} and {C:hearts}Hearts{} cards",
             "give {X:mult,C:white}X#1#{} Mult.",
-            "{C:green}#2# in #3#{} chance to earn {C:money}$#4#{}.",
-            "{C:inactive}(\"Aqui tiene un regalo!\")"
+            "Earn {C:money}$#2#{} for {C:attention}each scored card{}.",
+            "{C:inactive}(\"Pe Causa\")"
         }
     },
-    config = { extra = { xmult = 2, odds = 3, dollars = 5 } },
+    config = { extra = { xmult = 2, dollars = 5 } },
     rarity = 4, -- Legendary tier internamente para animación 2-layer
     is_secret = true,
     pos = { x = 0, y = 0 },
@@ -2456,50 +2479,50 @@ SMODS.Joker {
     end,
     loc_vars = function(self, info_queue, card)
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 2
-        local odds = (card and card.ability and card.ability.extra and card.ability.extra.odds) or (self.config and self.config.extra and self.config.extra.odds) or 3
         local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or (self.config and self.config.extra and self.config.extra.dollars) or 5
-        return { vars = { xmult, (G.GAME and G.GAME.probabilities.normal or 1), odds, dollars } }
+        return { vars = { xmult, dollars } }
     end,
     calculate = function(self, card, context)
         -- Charles + Mochi Synergy: Retrigger cards 1 time
         if context.repetition and context.cardarea == G.play then
             if has_charles_and_mochi() then
                 return {
-                    message = 'Mejores amigos!',
                     repetitions = 1,
                     card = card
                 }
             end
         end
 
-        -- Charles + Mochi Synergy: End of round message
+        -- Charles + Mochi Synergy: End of round message (1 sola vez al ganar la ronda)
         if context.end_of_round and not context.individual and not context.repetition and not context.blueprint then
             if has_charles_and_mochi() then
-                return {
-                    message = 'Mejores amigos!',
-                    colour = HEX('ff69b4')
-                }
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.3,
+                    func = function()
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '¡Mejores amigos!', colour = HEX('ff69b4') })
+                        card:juice_up(0.8, 0.8)
+                        return true
+                    end
+                }))
             end
         end
 
-        if context.individual and context.cardarea == G.play and (context.other_card:is_suit('Spades') or context.other_card:is_suit('Hearts')) then
-            local norm = (G.GAME and G.GAME.probabilities.normal or 1)
-            local odds = (card.ability and card.ability.extra and card.ability.extra.odds) or 3
+        if context.individual and context.cardarea == G.play then
             local dollars = (card.ability and card.ability.extra and card.ability.extra.dollars) or 5
-            local gives_money = pseudorandom('charles_gift') < (norm / odds)
+            local gives_xmult = context.other_card:is_suit('Spades') or context.other_card:is_suit('Hearts')
+            local xmult = (card.ability and card.ability.extra and card.ability.extra.xmult) or 2
 
-            if gives_money then
-                ease_dollars(dollars)
+            ease_dollars(dollars)
+            if gives_xmult then
                 return {
-                    x_mult = card.ability.extra.xmult,
+                    x_mult = xmult,
                     dollars = dollars,
-                    message = "Aqui tiene un regalo!",
-                    colour = G.C.MONEY,
                     card = card
                 }
             else
                 return {
-                    x_mult = card.ability.extra.xmult,
+                    dollars = dollars,
                     card = card
                 }
             end
@@ -2561,16 +2584,6 @@ SMODS.Joker {
         return { vars = { xmult_gain, current_xmult } }
     end,
     calculate = function(self, card, context)
-        -- Charles + Mochi Synergy: End of round message
-        if context.end_of_round and not context.individual and not context.repetition and not context.blueprint then
-            if has_charles_and_mochi() then
-                return {
-                    message = 'Mejores amigos!',
-                    colour = HEX('ff69b4')
-                }
-            end
-        end
-
         if context.individual and context.cardarea == G.play then
             if context.other_card.config and context.other_card.config.center ~= G.P_CENTERS.m_wild then
                 context.other_card:set_ability(G.P_CENTERS.m_wild)
@@ -2589,6 +2602,195 @@ SMODS.Joker {
             end
             local xmult_gain = (card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 0.25
             local total_xmult = 1.0 + (wild_count * xmult_gain)
+            if total_xmult > 1 then
+                return {
+                    Xmult = total_xmult
+                }
+            end
+        end
+    end
+}
+
+-------------------------------------------------------------------
+--- 32. Helin (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "helin_joker",
+    path = "helin_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'helin',
+    atlas = 'helin_joker',
+    loc_txt = {
+        name = 'Helin',
+        text = {
+            "On {C:attention}first hand{} of round,",
+            "elevates final {C:mult}Mult{} to the power of {X:mult,C:white}^#1#{}",
+            "{C:inactive}(\"Pero que envian al chat\")"
+        }
+    },
+    config = { extra = { power = 2 } },
+    rarity = 4,
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        local power = (card and card.ability and card.ability.extra and card.ability.extra.power) or (self.config and self.config.extra and self.config.extra.power) or 2
+        return { vars = { power } }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main and G.GAME and G.GAME.current_round and G.GAME.current_round.hands_played == 0 then
+            local pow = (card.ability and card.ability.extra and card.ability.extra.power) or 2
+
+            if mult and mult > 1 then
+                mult = math.floor(mult ^ pow)
+            end
+
+            update_hand_text({ sound = 'multhit2', modded = true }, { mult = mult })
+
+            return {
+                message = '^' .. tostring(pow) .. ' Mult!',
+                colour = G.C.DARK_EDITION,
+                card = card
+            }
+        end
+    end
+}
+
+-------------------------------------------------------------------
+--- 33. RayTracing (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "raytracing_joker",
+    path = "raytracing_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'raytracing',
+    atlas = 'raytracing_joker',
+    loc_txt = {
+        name = 'RayTracing',
+        text = {
+            "Creates {C:attention}2{} random {C:dark_edition}Negative{}",
+            "{C:spectral}Spectral{} cards at end of round",
+            "{C:inactive}(Except La Muchachada){}",
+            "{C:inactive}(\"Depradosini Negrini\")"
+        }
+    },
+    config = {},
+    rarity = 4,
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    calculate = function(self, card, context)
+        if context.end_of_round and not context.individual and not context.repetition and not context.blueprint then
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.4,
+                func = function()
+                    local spectral_cards = {}
+                    if G.P_CENTER_POOLS and G.P_CENTER_POOLS['Spectral'] then
+                        for _, center in ipairs(G.P_CENTER_POOLS['Spectral']) do
+                            if center.key ~= 'c_Cracklatro_la_muchachada' and center.key ~= 'c_la_muchachada' and center.key ~= 'la_muchachada' then
+                                table.insert(spectral_cards, center.key)
+                            end
+                        end
+                    end
+                    for i = 1, 2 do
+                        local chosen_spectral = (#spectral_cards > 0) and pseudorandom_element(spectral_cards, 'raytracing_spectral') or 'c_ankh'
+                        local new_card = create_card('Spectral', G.consumeables, nil, nil, nil, nil, chosen_spectral, 'raytracing')
+                        new_card:set_edition({ negative = true }, true)
+                        new_card:add_to_deck()
+                        G.consumeables:emplace(new_card)
+                    end
+                    card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+2 Negative Spectrals!', colour = G.C.DARK_EDITION })
+                    card:juice_up(0.6, 0.6)
+                    return true
+                end
+            }))
+        end
+    end
+}
+
+-------------------------------------------------------------------
+--- 34. Paco (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "paco_joker",
+    path = "paco_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'paco',
+    atlas = 'paco_joker',
+    loc_txt = {
+        name = 'Paco',
+        text = {
+            "Gives {X:mult,C:white}X#1#{} Mult for each",
+            "remaining {C:attention}discard{} you currently have",
+            "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult){}",
+            "{C:inactive}(\"No es necesario descartar, todas las cartas son utiles\")"
+        }
+    },
+    config = { extra = { xmult_per_discard = 2 } },
+    rarity = 4,
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        local discards = (G.GAME and G.GAME.current_round and G.GAME.current_round.discards_left) or 0
+        local xmult_per_discard = (card and card.ability and card.ability.extra and card.ability.extra.xmult_per_discard) or (self.config and self.config.extra and self.config.extra.xmult_per_discard) or 2
+        local total_xmult = math.max(1, discards * xmult_per_discard)
+        return { vars = { xmult_per_discard, total_xmult } }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main then
+            local discards = (G.GAME and G.GAME.current_round and G.GAME.current_round.discards_left) or 0
+            local xmult_per_discard = (card.ability and card.ability.extra and card.ability.extra.xmult_per_discard) or 2
+            local total_xmult = discards * xmult_per_discard
             if total_xmult > 1 then
                 return {
                     Xmult = total_xmult
@@ -3026,7 +3228,7 @@ SMODS.Consumable {
         text = {
             "{C:attention}+4 levels{} to your most played hand,",
             "creates {C:attention}3 Negative Planets{} of your",
-            "2nd most played hand,",
+            "most played hand,",
             "{C:red}-1 level{} to all other hands"
         }
     },
@@ -3034,18 +3236,18 @@ SMODS.Consumable {
         return true
     end,
     use = function(self, card, area, copier)
-        local most_played, second_played = get_most_played_hands()
+        local most_played = get_most_played_hands()
 
         update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname = most_played, level = G.GAME.hands[most_played].level + 4})
         level_up_hand(card, most_played, false, 4)
 
         for hand_name, hand_data in pairs(G.GAME.hands) do
             if hand_name ~= most_played and hand_data.level > 1 then
-                level_up_hand(card, hand_name, false, -1)
+                level_up_hand(card, hand_name, true, -1)
             end
         end
 
-        local planet_key = hand_to_planet[second_played] or 'c_pluto'
+        local planet_key = hand_to_planet[most_played] or 'c_pluto'
         G.E_MANAGER:add_event(Event({
             func = function()
                 for i = 1, 3 do
@@ -3136,9 +3338,14 @@ SMODS.Consumable {
         name = 'La Muchachada',
         text = {
             "Creates a random {C:attention}Secret Joker{}",
-            "{C:inactive}(Must have room){}"
+            "{C:inactive}(Must have room){}",
+            "{C:inactive}(\"LLEGO UN MIEMBRO DE LA MUCHACHADA!!\"){}"
         }
     },
+    -- Exclusivo: solo se puede obtener a través de paquetes espectrales y Discord Tag
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
     can_use = function(self, card)
         return G.jokers and #G.jokers.cards < G.jokers.config.card_limit
     end,
@@ -3147,12 +3354,14 @@ SMODS.Consumable {
             func = function()
                 local secret_keys = {
                     'j_Cracklatro_esteban', 'j_Cracklatro_thiago', 'j_Cracklatro_paula', 'j_Cracklatro_black_hole_joker',
-                    'j_Cracklatro_squele', 'j_Cracklatro_bluxdir', 'j_Cracklatro_charles', 'j_Cracklatro_mochi'
+                    'j_Cracklatro_squele', 'j_Cracklatro_bluxdir', 'j_Cracklatro_charles', 'j_Cracklatro_mochi',
+                    'j_Cracklatro_helin', 'j_Cracklatro_raytracing', 'j_Cracklatro_paco'
                 }
                 local chosen_key = pseudorandom_element(secret_keys, 'la_muchachada_secret')
                 local new_joker = create_card('Joker', G.jokers, nil, nil, nil, nil, chosen_key, 'la_muchachada')
                 new_joker:add_to_deck()
                 G.jokers:emplace(new_joker)
+                card_eval_status_text(card, 'extra', nil, nil, nil, { message = "LLEGO UN MIEMBRO DE LA MUCHACHADA!!", colour = G.C.DARK_EDITION })
                 return true
             end
         }))
@@ -4325,7 +4534,7 @@ SMODS.Blind {
 }
 
 -------------------------------------------------------------------
---- Boss Blind 8: The Void (El Vacío)
+--- Boss Blind 8: The Void (El Vacío - Ciega Jefe Final / Showdown)
 -------------------------------------------------------------------
 SMODS.Atlas {
     key = "b_void",
@@ -4338,9 +4547,10 @@ SMODS.Blind {
     key = 'void',
     atlas = 'b_void',
     pos = { x = 0, y = 0 },
-    dollars = 5,
+    dollars = 8,
     mult = 2,
-    boss = { min = 1, max = 10 },
+    boss = { min = 8, max = 10, showdown = true },
+    showdown = true,
     boss_colour = HEX('1a052e'),
     loc_txt = {
         name = 'The Void',
@@ -4590,7 +4800,7 @@ SMODS.Tag {
     loc_txt = {
         name = 'Discord Tag',
         text = {
-            "{C:green}#1# in 2{} chance to create",
+            "{C:green}#1# in 5{} chance to create",
             "{C:spectral}La Muchachada{}",
             "{C:inactive}(Must have room){}"
         }
@@ -4601,7 +4811,7 @@ SMODS.Tag {
     apply = function(self, tag, context)
         if context.type == 'immediate' or context.type == 'round_start_bonus' or context.type == 'new_blind_choice' or context.type == 'tag_add' then
             tag:yep('+', G.C.SECONDARY_SET.Spectral, function()
-                if pseudorandom('discord_tag') < ((G.GAME and G.GAME.probabilities.normal or 1) / 2) then
+                if pseudorandom('discord_tag') < ((G.GAME and G.GAME.probabilities.normal or 1) / 5) then
                     if G.consumeables and #G.consumeables.cards < G.consumeables.config.card_limit then
                         local card = create_card('Spectral', G.consumeables, nil, nil, nil, nil, 'c_Cracklatro_la_muchachada', 'discord_tag')
                         card:add_to_deck()
@@ -4695,9 +4905,21 @@ function get_current_joker_rarity(area, rarity_share)
     return rarity
 end
 
--- Hook for Herrero Legendary Joker (All created Jokers get Edition)
+-- Hook for La Muchachada spawn in Spectral Packs & Herrero Legendary Joker
 local create_card_ref = create_card
 function create_card(type, area, legendary, _rarity, skip_materialize, soulable, forced_key, key_append)
+    -- La Muchachada: solo aparece en paquetes espectrales con el doble de rareza que El Alma (0.15% vs 0.3% / 1 en 666.67)
+    if not forced_key and type == 'Spectral' and (area == G.pack_cards or key_append == 'spe' or (G.pack_cards and area == G.pack_cards)) then
+        local muchachada_center_key = (G.P_CENTERS and G.P_CENTERS['c_Cracklatro_la_muchachada'] and 'c_Cracklatro_la_muchachada') or (G.P_CENTERS and G.P_CENTERS['c_la_muchachada'] and 'c_la_muchachada') or 'c_Cracklatro_la_muchachada'
+        local allow_spawn = not (G.GAME and G.GAME.used_jokers and G.GAME.used_jokers[muchachada_center_key]) or (find_joker and next(find_joker("Showman")) ~= nil)
+        if allow_spawn then
+            local ante = (G.GAME and G.GAME.round_resets and G.GAME.round_resets.ante) or 1
+            if pseudorandom('la_muchachada_spectral_' .. (key_append or 'spe') .. ante) > 0.9985 then
+                forced_key = muchachada_center_key
+            end
+        end
+    end
+
     local card = create_card_ref(type, area, legendary, _rarity, skip_materialize, soulable, forced_key, key_append)
     if type == 'Joker' and card and not card.edition then
         local has_herrero = false
@@ -4936,15 +5158,40 @@ if JokerDisplay then
         }
     }
 
+    jd_def["j_Cracklatro_esteban"] = {
+        text = {
+            { text = "X2.5", colour = G.C.XMULT }
+        },
+        reminder_text = {
+            { text = "(Spades/Clubs)" }
+        }
+    }
+    jd_def["j_esteban"] = jd_def["j_Cracklatro_esteban"]
+
+    jd_def["j_Cracklatro_thiago"] = {
+        calc_function = function(card)
+            local current_chips = (hand_chips and hand_chips > 0 and hand_chips) or 0
+            card.joker_display_values.thiago_xmult = math.max(1, math.floor(current_chips / 20))
+        end,
+        text = {
+            { text = "X", colour = G.C.XMULT },
+            { ref_table = "card.joker_display_values", ref_value = "thiago_xmult", colour = G.C.XMULT }
+        },
+        reminder_text = {
+            { text = "(/20 Chips)" }
+        }
+    }
+    jd_def["j_thiago"] = jd_def["j_Cracklatro_thiago"]
+
     jd_def["j_Cracklatro_black_hole_joker"] = {
         text = {
-            { text = "^1.2 Chips & Mult", colour = G.C.DARK_EDITION }
+            { text = "^1.5 Chips & Mult", colour = G.C.DARK_EDITION }
         }
     }
 
     jd_def["j_black_hole_joker"] = {
         text = {
-            { text = "^1.2 Chips & Mult", colour = G.C.DARK_EDITION }
+            { text = "^1.5 Chips & Mult", colour = G.C.DARK_EDITION }
         }
     }
 
@@ -5009,7 +5256,7 @@ if JokerDisplay then
             { text = "X2", colour = G.C.XMULT }
         },
         reminder_text = {
-            { text = "(Spades/Hearts, 1 in 3 $5)" }
+            { text = "(Spades/Hearts, +$5 Scored)" }
         }
     }
     jd_def["j_charles"] = jd_def["j_Cracklatro_charles"]
@@ -5033,5 +5280,41 @@ if JokerDisplay then
         }
     }
     jd_def["j_mochi"] = jd_def["j_Cracklatro_mochi"]
+
+    jd_def["j_Cracklatro_helin"] = {
+        text = {
+            { text = "^2 Mult", colour = G.C.DARK_EDITION }
+        },
+        reminder_text = {
+            { text = "(1st Hand)" }
+        }
+    }
+    jd_def["j_helin"] = jd_def["j_Cracklatro_helin"]
+
+    jd_def["j_Cracklatro_raytracing"] = {
+        text = {
+            { text = "+2 Neg. Spectral", colour = G.C.DARK_EDITION }
+        },
+        reminder_text = {
+            { text = "(End of Round)" }
+        }
+    }
+    jd_def["j_raytracing"] = jd_def["j_Cracklatro_raytracing"]
+
+    jd_def["j_Cracklatro_paco"] = {
+        calc_function = function(card)
+            local discards = (G.GAME and G.GAME.current_round and G.GAME.current_round.discards_left) or 0
+            local xmult_per_discard = (card.ability and card.ability.extra and card.ability.extra.xmult_per_discard) or 2
+            card.joker_display_values.paco_xmult = math.max(1, discards * xmult_per_discard)
+        end,
+        text = {
+            { text = "X", colour = G.C.XMULT },
+            { ref_table = "card.joker_display_values", ref_value = "paco_xmult", colour = G.C.XMULT }
+        },
+        reminder_text = {
+            { text = "(Per Discard)" }
+        }
+    }
+    jd_def["j_paco"] = jd_def["j_Cracklatro_paco"]
 end
 

@@ -48,6 +48,7 @@
         34. RayTracing (Creates 2 random Negative Spectrals at end of round. "Depradosini Negrini")
         35. Paco (Gives X2 Mult per remaining discard. "No es necesario descartar, todas las cartas son utiles")
         36. Gabi (X4 Mult per scored card, subtracts 3/4 of final Chips at end of scoring. "Todo tiene un precio...")
+        37. Yairo (Scored 6s & 7s give X3 Mult & X1.5 Chips. Secret synergy with 6 & Ace gives X2 Chips & X4 Mult. "El 6 y el 7...")
 
     --- CONSUMIBLES, SELLOS Y MEJORAS ---
         - Hierarchy (Spectral: Destroy hand, create 3 Steel Kings with Red Seal, -1 Hand)
@@ -56,7 +57,7 @@
         - Rot (Spectral: Destroy all Jokers including Eternal, create 2 random Eternal Jokers, -1 Discard)
         - Catastrophic (Spectral: +4 levels to most played hand, 3 Negative Planets of most played hand, -1 level to all other hands silently)
         - Intensity (Spectral: Destroy 5 selected cards, create 1 Polychrome Wild Card with Red Seal)
-        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio entre los 12 existentes; exclusivo de paquetes espectrales, doble rareza que El Alma)
+        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio entre los 13 existentes; exclusivo de paquetes espectrales, doble rareza que El Alma)
         - Cartas de Trabajo (Job Cards): The Miner, The Gardener, The Banker, The Surgeon, The Alchemist, The Butcher, The Detective, The Chef, The Archaeologist, The Jeweler
         - Paquetes de Trabajo (Booster Packs): Job Application, Jumbo Job Application, Mega Job Application
         - Mejoras: Diamond Card, Investment Card, Lead Card, Jeweled Card
@@ -88,7 +89,7 @@ local function is_secret_card(card)
     local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
     key = string.lower(tostring(key))
     local secret_names = {
-        'esteban', 'thiago', 'paula', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco', 'gabi'
+        'esteban', 'thiago', 'paula', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco', 'gabi', 'yairo'
     }
     for _, name in ipairs(secret_names) do
         if string.find(key, name) then return true end
@@ -2837,6 +2838,91 @@ SMODS.Joker {
 }
 
 -------------------------------------------------------------------
+--- 36. Yairo (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "yairo_joker",
+    path = "yairo_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'yairo',
+    atlas = 'yairo_joker',
+    loc_txt = {
+        name = 'Yairo',
+        text = {
+            "Scored {C:attention}6s{} and {C:attention}7s{} give",
+            "{X:mult,C:white}X#1#{} Mult and {X:chips,C:white}X#2#{} Chips.",
+            "{C:inactive}(Habilidad secreta: Si juegas un 6 y un As...){}",
+            "{C:inactive}(\"El 6 y el 7 tienen el poder...\")"
+        }
+    },
+    config = { extra = { xmult = 3, xchips = 1.5, secret_xmult = 4, secret_xchips = 2 } },
+    rarity = 4, -- Legendary tier internamente para animación 2-layer
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 3
+        local xchips = (card and card.ability and card.ability.extra and card.ability.extra.xchips) or 1.5
+        return { vars = { xmult, xchips } }
+    end,
+    calculate = function(self, card, context)
+        -- Habilidad Base: Las cartas 6 o 7 puntuadas otorgan X3 Mult y X1.5 Fichas
+        if context.individual and context.cardarea == G.play then
+            local id = (context.other_card.get_id and context.other_card:get_id()) or (context.other_card.base and context.other_card.base.id)
+            local val = context.other_card.base and context.other_card.base.value
+            if id == 6 or id == 7 or val == '6' or val == '7' then
+                return {
+                    x_mult = (card.ability and card.ability.extra and card.ability.extra.xmult) or 3,
+                    x_chips = (card.ability and card.ability.extra and card.ability.extra.xchips) or 1.5,
+                    card = card
+                }
+            end
+        end
+
+        -- Habilidad Secreta: Si se juega un "6" y un "1 (As)" en la mano jugada
+        if context.joker_main then
+            local has_six = false
+            local has_ace = false
+            local check_cards = context.scoring_hand or context.full_hand
+            if check_cards then
+                for _, c in ipairs(check_cards) do
+                    local id = (c.get_id and c:get_id()) or (c.base and c.base.id)
+                    local val = c.base and c.base.value
+                    if id == 6 or val == '6' then has_six = true end
+                    if id == 14 or id == 1 or val == 'Ace' or val == '1' then has_ace = true end
+                end
+            end
+
+            if has_six and has_ace then
+                return {
+                    Xmult = (card.ability and card.ability.extra and card.ability.extra.secret_xmult) or 4,
+                    x_chips = (card.ability and card.ability.extra and card.ability.extra.secret_xchips) or 2,
+                    message = '¡6 y As Secreto!',
+                    colour = G.C.DARK_EDITION,
+                    card = card
+                }
+            end
+        end
+    end
+}
+
+-------------------------------------------------------------------
 --- 24. Perfectionism
 -------------------------------------------------------------------
 SMODS.Atlas {
@@ -3418,10 +3504,10 @@ SMODS.Consumable {
                 local secret_keys = {
                     'j_Crackedlatro_esteban', 'j_Crackedlatro_thiago', 'j_Crackedlatro_paula', 'j_Crackedlatro_black_hole_joker',
                     'j_Crackedlatro_squele', 'j_Crackedlatro_bluxdir', 'j_Crackedlatro_charles', 'j_Crackedlatro_mochi',
-                    'j_Crackedlatro_helin', 'j_Crackedlatro_raytracing', 'j_Crackedlatro_paco', 'j_Crackedlatro_gabi',
+                    'j_Crackedlatro_helin', 'j_Crackedlatro_raytracing', 'j_Crackedlatro_paco', 'j_Crackedlatro_gabi', 'j_Crackedlatro_yairo',
                     'j_Cracklatro_esteban', 'j_Cracklatro_thiago', 'j_Cracklatro_paula', 'j_Cracklatro_black_hole_joker',
                     'j_Cracklatro_squele', 'j_Cracklatro_bluxdir', 'j_Cracklatro_charles', 'j_Cracklatro_mochi',
-                    'j_Cracklatro_helin', 'j_Cracklatro_raytracing', 'j_Cracklatro_paco', 'j_Cracklatro_gabi'
+                    'j_Cracklatro_helin', 'j_Cracklatro_raytracing', 'j_Cracklatro_paco', 'j_Cracklatro_gabi', 'j_Cracklatro_yairo'
                 }
                 local valid_secret_keys = {}
                 for _, k in ipairs(secret_keys) do
@@ -5524,6 +5610,17 @@ if JokerDisplay then
         }
     }
     jd_def["j_gabi"] = jd_def["j_Cracklatro_gabi"]
+
+    jd_def["j_Cracklatro_yairo"] = {
+        text = {
+            { text = "X3", colour = G.C.XMULT },
+            { text = " X1.5 Chips", colour = G.C.CHIPS }
+        },
+        reminder_text = {
+            { text = "(6s / 7s | Secret: 6+Ace)" }
+        }
+    }
+    jd_def["j_yairo"] = jd_def["j_Cracklatro_yairo"]
 
     -- Cross-alias j_Cracklatro_ and j_Crackedlatro_ for full compatibility
     local aliases_to_add = {}

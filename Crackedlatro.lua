@@ -33,8 +33,6 @@
         21. Lucky One (Scored Clubs give $1, +5 Mult, 1 in 4 chance for random Joker)
         22. Miner (Scored Diamonds give X1.5 Mult and +10 Chips; 1 in 7 chance to collapse into Rough Gem)
         23. Joke Joker? (Does nothing... in secret converts Blank Voucher to Antimatter)
-
-    Legendarios:
         24. Perfectionism (At end of round, applies Foil, Holo, or Poly edition to a Joker)
 
     Secretos:
@@ -49,6 +47,7 @@
         33. Helin (On 1st hand of round, squares final Mult ^2. "Pero que envian al chat")
         34. RayTracing (Creates 2 random Negative Spectrals at end of round. "Depradosini Negrini")
         35. Paco (Gives X2 Mult per remaining discard. "No es necesario descartar, todas las cartas son utiles")
+        36. Gabi (X4 Mult per scored card, subtracts 3/4 of final Chips at end of scoring. "Todo tiene un precio...")
 
     --- CONSUMIBLES, SELLOS Y MEJORAS ---
         - Hierarchy (Spectral: Destroy hand, create 3 Steel Kings with Red Seal, -1 Hand)
@@ -57,7 +56,7 @@
         - Rot (Spectral: Destroy all Jokers including Eternal, create 2 random Eternal Jokers, -1 Discard)
         - Catastrophic (Spectral: +4 levels to most played hand, 3 Negative Planets of most played hand, -1 level to all other hands silently)
         - Intensity (Spectral: Destroy 5 selected cards, create 1 Polychrome Wild Card with Red Seal)
-        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio entre los 11 existentes; exclusivo de paquetes espectrales, doble rareza que El Alma)
+        - La Muchachada (Spectral: Crea un Joker Secreto aleatorio entre los 12 existentes; exclusivo de paquetes espectrales, doble rareza que El Alma)
         - Cartas de Trabajo (Job Cards): The Miner, The Gardener, The Banker, The Surgeon, The Alchemist, The Butcher, The Detective, The Chef, The Archaeologist, The Jeweler
         - Paquetes de Trabajo (Booster Packs): Job Application, Jumbo Job Application, Mega Job Application
         - Mejoras: Diamond Card, Investment Card, Lead Card, Jeweled Card
@@ -89,7 +88,7 @@ local function is_secret_card(card)
     local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
     key = string.lower(tostring(key))
     local secret_names = {
-        'esteban', 'thiago', 'paula', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco'
+        'esteban', 'thiago', 'paula', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco', 'gabi'
     }
     for _, name in ipairs(secret_names) do
         if string.find(key, name) then return true end
@@ -2773,6 +2772,71 @@ SMODS.Joker {
 }
 
 -------------------------------------------------------------------
+--- 35. Gabi (Secreto)
+-------------------------------------------------------------------
+SMODS.Atlas {
+    key = "gabi_joker",
+    path = "gabi_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'gabi',
+    atlas = 'gabi_joker',
+    loc_txt = {
+        name = 'Gabi',
+        text = {
+            "Scored cards give {X:mult,C:white}X#1#{} Mult,",
+            "but {C:attention}subtracts 3/4{} of final {C:chips}Chips{}",
+            "at the end of scoring",
+            "{C:inactive}(\"Todo tiene un precio...\")"
+        }
+    },
+    config = { extra = { xmult = 4 } },
+    rarity = 4, -- Legendary tier internamente para animación 2-layer
+    is_secret = true,
+    pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
+    cost = 20,
+    in_pool = function(self, args)
+        return false, { allow_duplicates = false }
+    end,
+    set_card_type_badge = function(self, card, badges)
+        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+    end,
+    set_badges = function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end,
+    loc_vars = function(self, info_queue, card)
+        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 4
+        return { vars = { xmult } }
+    end,
+    calculate = function(self, card, context)
+        if context.individual and context.cardarea == G.play then
+            return {
+                x_mult = (card.ability and card.ability.extra and card.ability.extra.xmult) or 4,
+                card = card
+            }
+        end
+
+        if context.joker_main then
+            if hand_chips and hand_chips > 1 then
+                hand_chips = math.max(1, math.floor(hand_chips * 0.25))
+                update_hand_text({ sound = 'chips2', modded = true }, { chips = hand_chips })
+            end
+            return {
+                message = '-3/4 Chips',
+                colour = G.C.CHIPS,
+                card = card
+            }
+        end
+    end
+}
+
+-------------------------------------------------------------------
 --- 24. Perfectionism
 -------------------------------------------------------------------
 SMODS.Atlas {
@@ -2915,30 +2979,54 @@ SMODS.Consumable {
     end,
     use = function(self, card, area, copier)
         local destroyed_cards = {}
-        for _, c in ipairs(G.hand.cards) do
-            table.insert(destroyed_cards, c)
+        for i = 1, #G.hand.cards do
+            destroyed_cards[#destroyed_cards + 1] = G.hand.cards[i]
         end
-        ease_hands_played(-1)
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.4,
             func = function()
-                for _, c in ipairs(destroyed_cards) do
-                    c:start_dissolve()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                for i = #destroyed_cards, 1, -1 do
+                    local d_card = destroyed_cards[i]
+                    if d_card.ability and d_card.ability.name == 'Glass Card' then
+                        d_card:shatter()
+                    else
+                        d_card:start_dissolve(nil, i == #destroyed_cards)
+                    end
                 end
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.7,
+            func = function()
+                local cards = {}
                 for i = 1, 3 do
                     local suits = {'Hearts', 'Diamonds', 'Spades', 'Clubs'}
                     local chosen_suit = pseudorandom_element(suits, 'hierarchy_suit')
                     local suit_prefix = string.sub(chosen_suit, 1, 1)
 
-                    local new_card = create_playing_card({
+                    cards[i] = create_playing_card({
                         front = G.P_CARDS[suit_prefix .. '_K'],
                         center = G.P_CENTERS.m_steel
-                    }, G.hand, nil, nil, {G.C.SECONDARY_SET.Spectral})
-
-                    new_card:set_seal('Red', true)
+                    }, G.hand, nil, i ~= 1, {G.C.SECONDARY_SET.Spectral})
+                    cards[i]:set_seal('Red', nil, true)
                 end
+                playing_card_joker_effects(cards)
                 return true
             end
         }))
+        ease_hands_played(-1)
     end
 }
 
@@ -3246,10 +3334,33 @@ SMODS.Consumable {
             table.insert(destroyed_cards, c)
         end
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.4,
             func = function()
-                for _, c in ipairs(destroyed_cards) do
-                    c:start_dissolve()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                for i = #destroyed_cards, 1, -1 do
+                    local d_card = destroyed_cards[i]
+                    if d_card.ability and d_card.ability.name == 'Glass Card' then
+                        d_card:shatter()
+                    else
+                        d_card:start_dissolve(nil, i == #destroyed_cards)
+                    end
                 end
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.7,
+            func = function()
                 local suits = {'Hearts', 'Diamonds', 'Spades', 'Clubs'}
                 local ranks = {'2','3','4','5','6','7','8','9','10','J','Q','K','A'}
                 local chosen_suit = pseudorandom_element(suits, 'intensity_suit')
@@ -3262,7 +3373,8 @@ SMODS.Consumable {
                 }, G.hand, nil, nil, {G.C.SECONDARY_SET.Spectral})
 
                 new_card:set_edition('e_polychrome', true)
-                new_card:set_seal('Red', true)
+                new_card:set_seal('Red', nil, true)
+                playing_card_joker_effects({new_card})
                 return true
             end
         }))
@@ -3306,10 +3418,10 @@ SMODS.Consumable {
                 local secret_keys = {
                     'j_Crackedlatro_esteban', 'j_Crackedlatro_thiago', 'j_Crackedlatro_paula', 'j_Crackedlatro_black_hole_joker',
                     'j_Crackedlatro_squele', 'j_Crackedlatro_bluxdir', 'j_Crackedlatro_charles', 'j_Crackedlatro_mochi',
-                    'j_Crackedlatro_helin', 'j_Crackedlatro_raytracing', 'j_Crackedlatro_paco',
+                    'j_Crackedlatro_helin', 'j_Crackedlatro_raytracing', 'j_Crackedlatro_paco', 'j_Crackedlatro_gabi',
                     'j_Cracklatro_esteban', 'j_Cracklatro_thiago', 'j_Cracklatro_paula', 'j_Cracklatro_black_hole_joker',
                     'j_Cracklatro_squele', 'j_Cracklatro_bluxdir', 'j_Cracklatro_charles', 'j_Cracklatro_mochi',
-                    'j_Cracklatro_helin', 'j_Cracklatro_raytracing', 'j_Cracklatro_paco'
+                    'j_Cracklatro_helin', 'j_Cracklatro_raytracing', 'j_Cracklatro_paco', 'j_Cracklatro_gabi'
                 }
                 local valid_secret_keys = {}
                 for _, k in ipairs(secret_keys) do
@@ -5401,6 +5513,17 @@ if JokerDisplay then
         }
     }
     jd_def["j_paco"] = jd_def["j_Cracklatro_paco"]
+
+    jd_def["j_Cracklatro_gabi"] = {
+        text = {
+            { text = "X4", colour = G.C.XMULT },
+            { text = " -3/4 Chips", colour = G.C.CHIPS }
+        },
+        reminder_text = {
+            { text = "(Scored Cards)" }
+        }
+    }
+    jd_def["j_gabi"] = jd_def["j_Cracklatro_gabi"]
 
     -- Cross-alias j_Cracklatro_ and j_Crackedlatro_ for full compatibility
     local aliases_to_add = {}

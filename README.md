@@ -6,7 +6,7 @@ Una expansión masiva y completa para **Balatro** creada con el framework **Stea
 
 ## 🃏 Contenido del Mod
 
-### 🌟 Nueva Rareza: **Secretos** (11 Jokers Secretos)
+### 🌟 Nueva Rareza: **Secretos** (13 Jokers Secretos)
 *Badge negro sólido y efectos legendarios exclusivos. Solo pueden ser invocados mediante el consumible espectral *La Muchachada*.*
 - **Esteban**: X2.5 Multiplicador por cartas puntuadas de Picas y Tréboles (*"*Ignores the kid*"*).
 - **Thiago**: Otorga X1 de Multiplicador por cada 20 Fichas en la puntuación final de la mano (*"Son, Hijillo, Brochacho 😭"*).
@@ -20,6 +20,8 @@ Una expansión masiva y completa para **Balatro** creada con el framework **Stea
 - **Helin**: Al jugarse la primera mano de la ronda, eleva al cuadrado (`^2`) el Multiplicador final (*"Pero que envian al chat"*).
 - **RayTracing**: Genera 2 cartas espectrales aleatorias Negativas al final de la ronda, excepto La Muchachada (*"Depradosini Negrini"*).
 - **Paco**: Obtiene X2 de Multiplicador por cada descarte restante que poseas actualmente (*"No es necesario descartar, todas las cartas son utiles"*).
+- **Gabi**: Añade X4 de Multiplicador por cada carta puntuada, pero resta 3/4 de las fichas totales al final de la puntuación (*"Todo tiene un precio..."*).
+- **Yairo**: Las cartas 6 o 7 puntuadas otorgan X3 de Multi y X1.5 de Fichas. Habilidad secreta: si juegas un "6" y un "As", otorga X4 de Multiplicador y X2 de Fichas (*"El 6 y el 7 tienen el poder..."*).
 
 ---
 

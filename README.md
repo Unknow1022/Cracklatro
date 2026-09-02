@@ -38,16 +38,15 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 
 ### 🎭 Jokers Estándar (35 Jokers)
 
-#### Comunes (7)
+#### Comunes (6)
 * **Masterful Joker**: +25 Multi si la mano jugada contiene un Poker (*Four of a Kind*) o Repóker (*Five of a Kind*).
 * **Outstanding Joker**: +250 Fichas, +50 Multi y $5 si la mano jugada contiene un Poker o Repóker.
 * **Blueberry**: +1 Mano al seleccionar Ciega. Se autodestruye tras 3 rondas.
 * **DJ Joker**: Al jugarse una sola carta, la convierte en una carta mejorada aleatoria (*Suerte, Metal, Oro o Vidrio*) (**1 vez por ronda**).
-* **Injured Joker (Joker Lesionado)**: Tras jugar 3 Escaleras, se autodestruye y genera a *Sr. Huesos* (*Mr. Bones*).
 * **Designer Joker (Joker Diseñador)**: Las cartas versátiles (*Wild Cards*) otorgan **+$1** al ser puntuadas.
 * **TTS**: Los Ases generan **+20 Multi** y **+10 Fichas** al puntuar, y otorgan **+$2** si se mantienen en mano al final de la ronda.
 
-#### Poco Comunes (13)
+#### Poco Comunes (14)
 * **Shareholder Joker**: Gana $5 ($6 en Ciega Grande, $8 en Ciega Jefe) al derrotar la Ciega en solo 1 mano.
 * **Builder Joker**: Gana permanentemente +X0.1 Multi si la mano jugada contiene un Trío, Poker o Repóker.
 * **Banquet**: Al venderse, crea un Ice Cream, Popcorn y Ramen (si hay espacio).
@@ -60,6 +59,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Duel of Value**: X3 Multi si la mano jugada es Doble Pareja puntuada con exactamente 2 cartas pares y 2 cartas impares.
 * **Reading Deficiency (Falta de Lectura)**: X5 Multi si la mano jugada no activa ningún otro Joker.
 * **Chameleon Joker**: Copia la habilidad del Joker a su izquierda si la mano jugada contiene al menos una carta del rango requerido (el rango cambia cada ronda).
+* **Injured Joker (Joker Lesionado)**: Otorga **+125 Fichas** y **X1.5 Multi** al puntuar una Escalera (*Straight*). Tiene **1 en 5** probabilidades al final de la ronda de convertirse en *Motorized Joker*, *High Risk Joker / Doble de riesgo* ("A rockear!"), *Invisible Joker*, *Sr. Huesos*, *Vampiro* ("Maldito!") o *Joker Stencil* ("?").
 * **Motorized Joker (Joker Motorizado)**: Inicia con **+20 Multi**. Cada vez que una carta se reactiva (*retrigger*), gana **+20 Multi** adicional.
 * **Hired Joker (Joker Contratado)**: 1 en 3 probabilidades por cada mano jugada de generar una carta de Trabajo (*Job Card*) aleatoria.
 * **Seal of Approval (Sello de Aprobación)**: Al jugarse solo 1 carta en la mano, le otorga un sello aleatorio (*Dorado, Azul, Rojo, Púrpura, Verde Oscuro, Plata, Blanco*).

@@ -510,12 +510,13 @@ jd_def["j_Crackedlatro_dj_joker"] = {
 
 jd_def["j_Crackedlatro_lesionado_joker"] = {
     text = {
-        { text = "Mr. Bones", colour = G.C.RED }
+        { text = "+", colour = G.C.CHIPS },
+        { ref_table = "card.ability.extra", ref_value = "chips", colour = G.C.CHIPS },
+        { text = " X", colour = G.C.XMULT },
+        { ref_table = "card.ability.extra", ref_value = "xmult", colour = G.C.XMULT }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.ability.extra", ref_value = "straights_left" },
-        { text = " Straights)" }
+        { text = "(Straight)" }
     }
 }
 

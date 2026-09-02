@@ -921,3 +921,89 @@ SMODS.Joker {
         end
     end
 }
+
+-- Injured Joker (Joker Lesionado)
+SMODS.Atlas {
+    key = "lesionado_joker",
+    path = "lesionado_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'lesionado_joker',
+    atlas = 'lesionado_joker',
+    loc_txt = {
+        name = 'Injured Joker',
+        text = {
+            "{C:chips}+#1#{} Chips and {X:mult,C:white}X#2#{} Mult",
+            "if played hand contains a {C:attention}Straight{}",
+            "{C:green}#3# in #4#{} chance at the end of round",
+            "to transform into another Joker"
+        }
+    },
+    config = { extra = { chips = 125, xmult = 1.5, odds = 5 } },
+    rarity = 2,
+    pos = { x = 0, y = 0 },
+    cost = 6,
+    loc_vars = function(self, info_queue, card)
+        local chips = (card and card.ability and card.ability.extra and card.ability.extra.chips) or 125
+        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 1.5
+        local odds = (card and card.ability and card.ability.extra and card.ability.extra.odds) or 5
+        local prob = (G.GAME and G.GAME.probabilities.normal) or 1
+        return { vars = { chips, xmult, prob, odds } }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main and context.poker_hands then
+            local is_straight = (context.poker_hands['Straight'] and next(context.poker_hands['Straight'])) or
+                                (context.poker_hands['Straight Flush'] and next(context.poker_hands['Straight Flush']))
+            if is_straight then
+                return {
+                    chips = card.ability.extra.chips,
+                    Xmult = card.ability.extra.xmult,
+                    card = card
+                }
+            end
+        end
+
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
+            local odds = (card.ability and card.ability.extra and card.ability.extra.odds) or 5
+            local prob = (G.GAME and G.GAME.probabilities.normal) or 1
+            if pseudorandom('injured_joker') < (prob / odds) then
+                local motorized_key = (G.P_CENTERS and G.P_CENTERS['j_Crackedlatro_motorizado_joker']) and 'j_Crackedlatro_motorizado_joker' or 'j_motorizado_joker'
+                local transform_options = {
+                    { key = motorized_key, message = 'A rockear!', colour = G.C.ORANGE },
+                    { key = 'j_stuntman', message = 'A rockear!', colour = G.C.ORANGE },
+                    { key = 'j_invisible', message = 'Maldito!', colour = G.C.RED },
+                    { key = 'j_mr_bones', message = 'Maldito!', colour = G.C.RED },
+                    { key = 'j_vampire', message = 'Maldito!', colour = G.C.RED },
+                    { key = 'j_stencil', message = '?', colour = G.C.PURPLE }
+                }
+                local chosen = pseudorandom_element(transform_options, pseudoseed('injured_transform'))
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.4,
+                    func = function()
+                        play_sound('tarot2')
+                        local ed = card.edition
+                        card:start_dissolve()
+                        local new_joker = create_card('Joker', G.jokers, nil, nil, nil, nil, chosen.key, 'injured_morph')
+                        if ed then
+                            new_joker:set_edition(ed, true)
+                        end
+                        new_joker:add_to_deck()
+                        G.jokers:emplace(new_joker)
+                        new_joker:juice_up(0.6, 0.6)
+                        card_eval_status_text(new_joker, 'extra', nil, nil, nil, { message = chosen.message, colour = chosen.colour })
+                        return true
+                    end
+                }))
+                return {
+                    message = chosen.message,
+                    colour = chosen.colour
+                }
+            end
+        end
+    end
+}
+

@@ -684,46 +684,44 @@ SMODS.Joker {
         name = 'Infostealer Joker',
         text = {
             "{C:eternal}Always Eternal{}.",
-            "Click {C:attention}Use{} to feed it {C:money}$1{}.",
-            "Gains {X:mult,C:white}+X#3#{} Mult for every",
-            "{C:money}$#4#{} fed to it {C:inactive}(#2#/#4# fed){}",
+            "Click {C:attention}Use{} to pay {C:money}$#2#{} and gain {X:mult,C:white}+X#3#{} Mult.",
+            "Cost increases by {C:money}+$#4#{} per payment",
             "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
         }
     },
-    config = { extra = { xmult = 1.0, dollars_drained = 0, threshold = 20, xmult_gain = 2.0 } },
+    config = { extra = { xmult = 1.0, cost = 20, cost_increase = 1, xmult_gain = 1.0, times_fed = 0 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 1.0
-        local drained = (card and card.ability and card.ability.extra and card.ability.extra.dollars_drained) or 0
-        local current_fed = drained % 20
-        local gain = (card and card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 2.0
-        local threshold = (card and card.ability and card.ability.extra and card.ability.extra.threshold) or 20
-        return { vars = { xmult, current_fed, gain, threshold } }
+        local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
+        local gain = (card and card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 1.0
+        local increase = (card and card.ability and card.ability.extra and card.ability.extra.cost_increase) or 1
+        return { vars = { xmult, cost, gain, increase } }
     end,
     add_to_deck = function(self, card, from_debuff)
         card:set_eternal(true)
         if card.ability then card.ability.eternal = true end
     end,
     can_use = function(self, card)
-        return G.GAME and G.GAME.dollars and G.GAME.dollars >= 1
+        local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
+        return G.GAME and G.GAME.dollars and G.GAME.dollars >= cost
     end,
     use = function(self, card, area, copier)
-        ease_dollars(-1)
-        card.ability.extra.dollars_drained = (card.ability.extra.dollars_drained or 0) + 1
-        local current_progress = card.ability.extra.dollars_drained % card.ability.extra.threshold
-        play_sound('tarot1')
-        card:juice_up(0.4, 0.4)
+        card.ability.extra = card.ability.extra or {}
+        local cost = card.ability.extra.cost or 20
+        if (G.GAME.dollars or 0) < cost then return end
 
-        if current_progress == 0 then
-            card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + card.ability.extra.xmult_gain
-            play_sound('foil1')
-            card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. card.ability.extra.xmult_gain .. ' XMult!', colour = G.C.XMULT })
-        else
-            card_eval_status_text(card, 'extra', nil, nil, nil, { message = '-$1 (' .. current_progress .. '/' .. card.ability.extra.threshold .. ')', colour = G.C.MONEY })
-        end
+        ease_dollars(-cost)
+        card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + (card.ability.extra.xmult_gain or 1.0)
+        card.ability.extra.times_fed = (card.ability.extra.times_fed or 0) + 1
+        card.ability.extra.cost = cost + (card.ability.extra.cost_increase or 1)
+
+        play_sound('foil1')
+        card:juice_up(0.5, 0.5)
+        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. (card.ability.extra.xmult_gain or 1) .. ' XMult!', colour = G.C.XMULT })
     end,
     calculate = function(self, card, context)
         if context.joker_main and card.ability.extra.xmult > 1 then

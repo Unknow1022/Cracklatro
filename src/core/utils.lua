@@ -409,10 +409,19 @@ if Blind.disable then
     function Blind:disable()
         local ret = blind_disable_ref(self)
         if self.boss and G.C and G.C.DYN_UI then
-            ease_colour(G.C.DYN_UI.MAIN, G.C.SET.Blind)
-            ease_colour(G.C.DYN_UI.DARK, G.C.BLACK)
+            local default_main = (G.C.BLIND and G.C.BLIND.Small) or G.C.RED
+            local default_dark = G.C.BLACK
+            local bg_d = (G.C.BACKGROUND and G.C.BACKGROUND.D) or HEX('374244')
+            local bg_l = (G.C.BACKGROUND and G.C.BACKGROUND.L) or HEX('374244')
+
+            if G.C.DYN_UI.MAIN then
+                ease_colour(G.C.DYN_UI.MAIN, default_main)
+            end
+            if G.C.DYN_UI.DARK then
+                ease_colour(G.C.DYN_UI.DARK, default_dark)
+            end
             if ease_background_colour then
-                ease_background_colour{new_colour = G.C.BACKGROUND.D, special_colour = G.C.BACKGROUND.L, contrast = 1}
+                ease_background_colour{new_colour = bg_d, special_colour = bg_l, contrast = 1}
             end
         end
         return ret
@@ -425,10 +434,19 @@ if Blind.defeat then
     function Blind:defeat(silent)
         local ret = blind_defeat_ref(self, silent)
         if self.boss and G.C and G.C.DYN_UI then
-            ease_colour(G.C.DYN_UI.MAIN, G.C.SET.Blind)
-            ease_colour(G.C.DYN_UI.DARK, G.C.BLACK)
+            local default_main = (G.C.BLIND and G.C.BLIND.Small) or G.C.RED
+            local default_dark = G.C.BLACK
+            local bg_d = (G.C.BACKGROUND and G.C.BACKGROUND.D) or HEX('374244')
+            local bg_l = (G.C.BACKGROUND and G.C.BACKGROUND.L) or HEX('374244')
+
+            if G.C.DYN_UI.MAIN then
+                ease_colour(G.C.DYN_UI.MAIN, default_main)
+            end
+            if G.C.DYN_UI.DARK then
+                ease_colour(G.C.DYN_UI.DARK, default_dark)
+            end
             if ease_background_colour then
-                ease_background_colour{new_colour = G.C.BACKGROUND.D, special_colour = G.C.BACKGROUND.L, contrast = 1}
+                ease_background_colour{new_colour = bg_d, special_colour = bg_l, contrast = 1}
             end
         end
         return ret
@@ -742,7 +760,8 @@ end
 G.FUNCS.can_use_infostealer = function(e)
     local card = e.config.ref_table
     local can_use = false
-    if card and card.area == G.jokers and (G.GAME.dollars or 0) >= 1 then
+    local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
+    if card and card.area == G.jokers and (G.GAME.dollars or 0) >= cost then
         if G.STATE ~= G.STATES.HAND_PLAYED and G.STATE ~= G.STATES.DRAW_TO_HAND then
             can_use = true
         end
@@ -760,24 +779,35 @@ end
 G.FUNCS.use_infostealer = function(e)
     local card = e.config.ref_table
     if not card or card.area ~= G.jokers then return end
-    if (G.GAME.dollars or 0) < 1 then return end
-
-    ease_dollars(-1)
     card.ability.extra = card.ability.extra or {}
-    card.ability.extra.dollars_drained = (card.ability.extra.dollars_drained or 0) + 1
-    local threshold = card.ability.extra.threshold or 20
-    local gain = card.ability.extra.xmult_gain or 2.0
-    local current_progress = card.ability.extra.dollars_drained % threshold
+    local cost = card.ability.extra.cost or 20
+    if (G.GAME.dollars or 0) < cost then return end
 
-    play_sound('tarot1')
-    card:juice_up(0.4, 0.4)
+    ease_dollars(-cost)
+    card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + (card.ability.extra.xmult_gain or 1.0)
+    card.ability.extra.times_fed = (card.ability.extra.times_fed or 0) + 1
+    card.ability.extra.cost = cost + (card.ability.extra.cost_increase or 1)
 
-    if current_progress == 0 then
-        card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + gain
-        play_sound('foil1')
-        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. gain .. ' XMult!', colour = G.C.XMULT })
-    else
-        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '-$1 (' .. current_progress .. '/' .. threshold .. ')', colour = G.C.MONEY })
+    play_sound('foil1')
+    card:juice_up(0.5, 0.5)
+    card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. (card.ability.extra.xmult_gain or 1) .. ' XMult!', colour = G.C.XMULT })
+
+    -- Refresh button UI in real time to show new cost
+    if card.children and card.children.use_button and G.UIDEF and G.UIDEF.use_and_sell_buttons then
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.1,
+            func = function()
+                if card.children and card.children.use_button then
+                    card.children.use_button:remove()
+                    card.children.use_button = UIBox{
+                        definition = G.UIDEF.use_and_sell_buttons(card),
+                        config = { align = "cr", offset = { x = 0, y = 0 }, parent = card }
+                    }
+                end
+                return true
+            end
+        }))
     end
 end
 
@@ -786,6 +816,7 @@ if G.UIDEF and G.UIDEF.use_and_sell_buttons then
     function G.UIDEF.use_and_sell_buttons(card)
         local retval = use_and_sell_buttons_ref(card)
         if is_infostealer_card(card) and card.area == G.jokers then
+            local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
             local feed_btn = {
                 n = G.UIT.R,
                 config = { align = "cl" },
@@ -808,7 +839,7 @@ if G.UIDEF and G.UIDEF.use_and_sell_buttons then
                             {
                                 n = G.UIT.T,
                                 config = {
-                                    text = "USE $1",
+                                    text = "USE $" .. cost,
                                     scale = 0.45,
                                     colour = G.C.UI.TEXT_LIGHT,
                                     shadow = true

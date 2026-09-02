@@ -714,15 +714,35 @@ SMODS.Joker {
         return { vars = { mult, mult_gain } }
     end,
     calculate = function(self, card, context)
-        if context.repetition and not context.blueprint then
-            card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gain
-            card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. card.ability.extra.mult_gain .. ' Mult!', colour = G.C.MULT })
+        if context.before then
+            G.GAME.motorizado_scored_cards = {}
+        end
+
+        if context.individual and (context.cardarea == G.play or context.cardarea == G.hand) and not context.blueprint then
+            local pcard = context.other_card
+            G.GAME.motorizado_scored_cards = G.GAME.motorizado_scored_cards or {}
+            if pcard then
+                if G.GAME.motorizado_scored_cards[pcard] then
+                    card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gain
+                    return {
+                        message = '+' .. card.ability.extra.mult_gain .. ' Mult!',
+                        colour = G.C.MULT,
+                        card = card
+                    }
+                else
+                    G.GAME.motorizado_scored_cards[pcard] = true
+                end
+            end
         end
 
         if context.joker_main and card.ability.extra.mult > 0 then
             return {
                 mult = card.ability.extra.mult
             }
+        end
+
+        if context.after or context.end_of_round then
+            G.GAME.motorizado_scored_cards = nil
         end
     end
 }

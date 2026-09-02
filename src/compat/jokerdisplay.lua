@@ -504,7 +504,7 @@ jd_def["j_Crackedlatro_dj_joker"] = {
         { text = "Remix Card", colour = G.C.SECONDARY_SET.Enhanced }
     },
     reminder_text = {
-        { text = "(1 Card Played)" }
+        { text = "(1/round on 1 card)" }
     }
 }
 
@@ -604,7 +604,9 @@ jd_def["j_Crackedlatro_infostealer_joker"] = {
     },
     text_config = { colour = G.C.WHITE },
     reminder_text = {
-        { text = "($1 Drain)" }
+        { text = "($" },
+        { ref_table = "card.ability.extra", ref_value = "cost" },
+        { text = " for +X1)" }
     }
 }
 

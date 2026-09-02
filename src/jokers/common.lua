@@ -169,33 +169,48 @@ SMODS.Joker {
         text = {
             "If played hand contains only {C:attention}1 card{},",
             "converts it into a random {C:attention}Lucky{},",
-            "{C:attention}Steel{}, {C:attention}Gold{}, or {C:attention}Glass{} card"
+            "{C:attention}Steel{}, {C:attention}Gold{}, or {C:attention}Glass{} card",
+            "{C:inactive}(Once per round, #1#){}"
         }
     },
-    config = {},
+    config = { extra = { used = false } },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
+    loc_vars = function(self, info_queue, card)
+        local used = (card and card.ability and card.ability.extra and card.ability.extra.used) or false
+        local status_text = used and "Used this round" or "Available"
+        return { vars = { status_text } }
+    end,
     calculate = function(self, card, context)
         if context.before and not context.blueprint then
-            local play_count = (context.full_hand and #context.full_hand) or (context.scoring_hand and #context.scoring_hand) or (G.play and G.play.cards and #G.play.cards) or 0
-            if play_count == 1 and context.scoring_hand and #context.scoring_hand == 1 then
-                local target_card = context.scoring_hand[1]
-                local enhancements = { G.P_CENTERS.m_lucky, G.P_CENTERS.m_steel, G.P_CENTERS.m_gold, G.P_CENTERS.m_glass }
-                local chosen_enh = pseudorandom_element(enhancements, pseudoseed('dj_joker'))
-                G.E_MANAGER:add_event(Event({
-                    trigger = 'after',
-                    delay = 0.2,
-                    func = function()
-                        play_sound('tarot1')
-                        target_card:set_ability(chosen_enh)
-                        target_card:juice_up(0.5, 0.5)
-                        card:juice_up(0.3, 0.5)
-                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Remixed!', colour = G.C.SECONDARY_SET.Enhanced })
-                        return true
-                    end
-                }))
+            card.ability.extra = card.ability.extra or {}
+            if not card.ability.extra.used then
+                local play_count = (context.full_hand and #context.full_hand) or (context.scoring_hand and #context.scoring_hand) or (G.play and G.play.cards and #G.play.cards) or 0
+                if play_count == 1 and context.scoring_hand and #context.scoring_hand == 1 then
+                    card.ability.extra.used = true
+                    local target_card = context.scoring_hand[1]
+                    local enhancements = { G.P_CENTERS.m_lucky, G.P_CENTERS.m_steel, G.P_CENTERS.m_gold, G.P_CENTERS.m_glass }
+                    local chosen_enh = pseudorandom_element(enhancements, pseudoseed('dj_joker'))
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'after',
+                        delay = 0.2,
+                        func = function()
+                            play_sound('tarot1')
+                            target_card:set_ability(chosen_enh)
+                            target_card:juice_up(0.5, 0.5)
+                            card:juice_up(0.3, 0.5)
+                            card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Remixed!', colour = G.C.SECONDARY_SET.Enhanced })
+                            return true
+                        end
+                    }))
+                end
             end
+        end
+
+        if (context.end_of_round or context.setting_blind) and not context.individual and not context.repetition and not context.blueprint then
+            card.ability.extra = card.ability.extra or {}
+            card.ability.extra.used = false
         end
     end
 }

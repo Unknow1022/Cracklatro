@@ -42,7 +42,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Masterful Joker**: +25 Multi si la mano jugada contiene un Poker (*Four of a Kind*) o Repóker (*Five of a Kind*).
 * **Outstanding Joker**: +250 Fichas, +50 Multi y $5 si la mano jugada contiene un Poker o Repóker.
 * **Blueberry**: +1 Mano al seleccionar Ciega. Se autodestruye tras 3 rondas.
-* **DJ Joker**: Al jugarse una sola carta, la convierte en una carta mejorada aleatoria (*Suerte, Metal, Oro o Vidrio*).
+* **DJ Joker**: Al jugarse una sola carta, la convierte en una carta mejorada aleatoria (*Suerte, Metal, Oro o Vidrio*) (**1 vez por ronda**).
 * **Injured Joker (Joker Lesionado)**: Tras jugar 3 Escaleras, se autodestruye y genera a *Sr. Huesos* (*Mr. Bones*).
 * **Designer Joker (Joker Diseñador)**: Las cartas versátiles (*Wild Cards*) otorgan **+$1** al ser puntuadas.
 * **TTS**: Los Ases generan **+20 Multi** y **+10 Fichas** al puntuar, y otorgan **+$2** si se mantienen en mano al final de la ronda.
@@ -77,7 +77,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Joke Joker?**: No hace nada aparente... pero en secreto, si posees el Vale Blank, lo transforma inmediatamente en Antimatter (+1 espacio de Joker).
 * **Perfectionism**: Al derrotar una Ciega Grande o Ciega Jefe, aplica Policromo a un Joker aleatorio (1 en 5 de probabilidad de otorgar Negativo en su lugar).
 * **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Comodín Invisible* (*Invisible Joker*) (**1 vez por ronda**).
-* **Infostealer Joker**: Siempre es **Eterno** (*Eternal*). Posee interacción activa ("Usar" para drenar $1): por cada $20 absorbidos, gana permanentemente **+X2 Multi**.
+* **Infostealer Joker**: Siempre es **Eterno** (*Eternal*). Posee botón interactivo dinámico ("USE $20"): al pagar su coste (inicia en $20), gana permanentemente **+X1 Multi** y el coste del siguiente pago se incrementa en **+$1** (20, 21, 22, 23...).
 * **Supersaturated Joker (Joker Sobresaturado)**: Al puntuar, coloca una mejora faltante aleatoria (*Sello, Mejora o Edición*). Si la carta ya cuenta con Sello, Mejora y Edición simultáneamente, otorga **+$10**.
 
 ---

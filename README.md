@@ -1,10 +1,16 @@
-# The Cracked Balatro (Cracklatro) - Rewritten Update
+# The Cracked Balatro (Cracklatro) - Version: 2.5 (Void Update)
 
 Una expansión masiva y completa para **Balatro** creada sobre el framework **Steamodded (SMODS)**. Introduce nuevas mecánicas, una nueva rareza exclusiva, tipos de consumibles inéditos, paquetes de refuerzo temáticos, ciegas jefe desafiantes, barajas estratégicas, etiquetas y vales de tienda.
 
 ---
 
-## ⚡ Novedades de la "Rewritten Update"
+## ⚡ Novedades de la "Void Update" (v2.5)
+* 🕳️ **Ciegas Jefe Dinámicas con Paletas de Color Personalizadas**: Cada una de las 11 Ciegas Jefe cambia fluidamente el color del fondo/mesa y CRT de Balatro a sus tonalidades temáticas únicas (*The Pole, The Rod, The Magician, The Mountain, The Door, The Triangle, The Cube, The Void, The Guitar, The Phone, The Pincer*).
+* 🃏 **11 Nuevos Jokers**: DJ Joker, Injured Joker (*"My Leg!"*), Designer Joker, TTS, Motorized Joker, Hired Joker, Seal of Approval, Paint Puddle, Reaper Joker, Infostealer Joker (*Eterno interactivo*) y Supersaturated Joker.
+* ✨ **Nuevos Sellos & Reworks**: Sello Verde Oscuro (*X1.5 Multi + 1 en 4 de convertir en Piedra*), Sello Blanco (*crea Planeta al puntuar*) y Sello de Plata (*+15 Fichas, 1 en 2 de dar +25 Fichas y 1 en 5 de convertir en Oro*).
+* 🌀 **Nuevas Espectrales & Cartas de Trabajo Mejoradas**: Refuerzo y Supernova añadidas, con animaciones y efectos sonoros completos en las 10 cartas de trabajo y espectrales.
+* 🏷️ **Nuevas Etiquetas & Barajas**: Etiqueta de Brujería (*Tag Brujería*), Etiqueta de Oferta (*Tag Oferta*) y Baraja Amistosa (*Friendly Deck*).
+* 🌐 **Estandarización y Localización al Inglés**: Todos los Jokers cuentan con nombres y descripciones en inglés pulido y compatible con *JokerDisplay*.
 
 ---
 

@@ -63,16 +63,23 @@ SMODS.Tag {
             "{C:spectral}Mega Spectral Pack{}"
         }
     },
+    loc_vars = function(self, info_queue)
+        local pack_center = G.P_CENTERS['p_spectral_mega_1'] or G.P_CENTERS['p_spectral_mega_2'] or { key = 'p_spectral_mega_1', set = 'Booster' }
+        if pack_center then
+            table.insert(info_queue, pack_center)
+        end
+        return { vars = {} }
+    end,
     apply = function(self, tag, context)
-        if context.type == 'new_blind_choice' or context.type == 'immediate' or context.type == 'round_start_bonus' or context.type == 'tag_add' or context.type == 'shop_pack' then
+        if context.type == 'new_blind_choice' then
             tag:yep('+', G.C.SECONDARY_SET.Spectral, function()
                 local pack_center = G.P_CENTERS['p_spectral_mega_1'] or G.P_CENTERS['p_spectral_mega_2'] or G.P_CENTERS['p_spectral_jumbo_1'] or G.P_CENTERS['p_spectral_normal_1']
                 if pack_center then
-                    local pack = Card(G.play.T.x + G.play.T.w/2, G.play.T.y, G.CARD_W*1.27, G.CARD_H*1.27, G.P_CARDS.empty, pack_center, {bypass_discovery_center = true, bypass_discovery_ui = true})
+                    local pack = Card(G.play.T.x + G.play.T.w/2 - G.CARD_W*1.27/2, G.play.T.y + G.play.T.h/2 - G.CARD_H*1.27/2, G.CARD_W*1.27, G.CARD_H*1.27, G.P_CARDS.empty, pack_center, {bypass_discovery_center = true, bypass_discovery_ui = true})
                     pack.cost = 0
                     pack.from_tag = true
                     G.FUNCS.use_card({config = {ref_table = pack}})
-                    card_eval_status_text(pack, 'extra', nil, nil, nil, { message = 'Mega Spectral Pack!', colour = G.C.SECONDARY_SET.Spectral })
+                    pack:start_materialize()
                 end
                 return true
             end)

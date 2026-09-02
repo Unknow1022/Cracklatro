@@ -689,14 +689,14 @@ SMODS.Joker {
             "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
         }
     },
-    config = { extra = { xmult = 1.0, cost = 20, cost_increase = 1, xmult_gain = 1.0, times_fed = 0 } },
+    config = { extra = { xmult = 1.0, cost = 10, cost_increase = 1, xmult_gain = 1.0, times_fed = 0 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 1.0
-        local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
+        local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 10
         local gain = (card and card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 1.0
         local increase = (card and card.ability and card.ability.extra and card.ability.extra.cost_increase) or 1
         return { vars = { xmult, cost, gain, increase } }
@@ -706,12 +706,12 @@ SMODS.Joker {
         if card.ability then card.ability.eternal = true end
     end,
     can_use = function(self, card)
-        local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
+        local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 10
         return G.GAME and G.GAME.dollars and G.GAME.dollars >= cost
     end,
     use = function(self, card, area, copier)
         card.ability.extra = card.ability.extra or {}
-        local cost = card.ability.extra.cost or 20
+        local cost = card.ability.extra.cost or 10
         if (G.GAME.dollars or 0) < cost then return end
 
         ease_dollars(-cost)
@@ -746,84 +746,100 @@ SMODS.Joker {
     loc_txt = {
         name = 'Supersaturated Joker',
         text = {
-            "Each scored card randomly gains a missing",
+            "First scored card randomly gains a missing",
             "{C:attention}Enhancement{}, {C:attention}Seal{}, or {C:dark_edition}Edition{}.",
             "If a card cannot receive any more improvements,",
-            "it earns {C:money}+$10{} instead"
+            "it earns {C:money}+$10{} instead",
+            "{C:inactive}(Once per round, #1#){}"
         }
     },
-    config = {},
+    config = { extra = { used = false } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    loc_vars = function(self, info_queue, card)
+        local used = (card and card.ability and card.ability.extra and card.ability.extra.used) or false
+        local status_text = used and "Used this round" or "Available"
+        return { vars = { status_text } }
+    end,
     calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play then
-            local pcard = context.other_card
-            local has_enh = (pcard.config and pcard.config.center and pcard.config.center ~= G.P_CENTERS.c_base) or (pcard.ability and pcard.ability.effect and pcard.ability.effect ~= 'Base')
-            local has_seal = (pcard.seal ~= nil)
-            local has_edition = (pcard.edition ~= nil)
+        if context.individual and context.cardarea == G.play and not context.blueprint then
+            card.ability.extra = card.ability.extra or {}
+            if not card.ability.extra.used then
+                local pcard = context.other_card
+                local has_enh = (pcard.config and pcard.config.center and pcard.config.center ~= G.P_CENTERS.c_base) or (pcard.ability and pcard.ability.effect and pcard.ability.effect ~= 'Base')
+                local has_seal = (pcard.seal ~= nil)
+                local has_edition = (pcard.edition ~= nil)
 
-            if has_enh and has_seal and has_edition then
-                ease_dollars(10)
-                return {
-                    dollars = 10,
-                    message = '+$10 Saturated!',
-                    colour = G.C.MONEY,
-                    card = card
-                }
-            else
-                local missing = {}
-                if not has_enh then table.insert(missing, 'enhancement') end
-                if not has_seal then table.insert(missing, 'seal') end
-                if not has_edition then table.insert(missing, 'edition') end
+                if has_enh and has_seal and has_edition then
+                    card.ability.extra.used = true
+                    ease_dollars(10)
+                    return {
+                        dollars = 10,
+                        message = '+$10 Saturated!',
+                        colour = G.C.MONEY,
+                        card = card
+                    }
+                else
+                    local missing = {}
+                    if not has_enh then table.insert(missing, 'enhancement') end
+                    if not has_seal then table.insert(missing, 'seal') end
+                    if not has_edition then table.insert(missing, 'edition') end
 
-                if #missing > 0 then
-                    local chosen_type = pseudorandom_element(missing, pseudoseed('sobresaturado_type'))
-                    if chosen_type == 'enhancement' then
-                        local enhs = { G.P_CENTERS.m_bonus, G.P_CENTERS.m_mult, G.P_CENTERS.m_wild, G.P_CENTERS.m_glass, G.P_CENTERS.m_steel, G.P_CENTERS.m_stone, G.P_CENTERS.m_gold, G.P_CENTERS.m_lucky }
-                        local chosen_enh = pseudorandom_element(enhs, pseudoseed('sobresaturado_enh'))
-                        G.E_MANAGER:add_event(Event({
-                            trigger = 'after',
-                            delay = 0.2,
-                            func = function()
-                                play_sound('tarot1')
-                                pcard:set_ability(chosen_enh)
-                                pcard:juice_up(0.4, 0.4)
-                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Enhanced!', colour = G.C.SECONDARY_SET.Enhanced })
-                                return true
-                            end
-                        }))
-                    elseif chosen_type == 'seal' then
-                        local seals = { 'Gold', 'Blue', 'Red', 'Purple', 'Crackedlatro_dark_green', 'Crackedlatro_silver', 'Crackedlatro_white' }
-                        local chosen_seal = pseudorandom_element(seals, pseudoseed('sobresaturado_seal'))
-                        G.E_MANAGER:add_event(Event({
-                            trigger = 'after',
-                            delay = 0.2,
-                            func = function()
-                                play_sound('gold_seal')
-                                pcard:set_seal(chosen_seal, nil, true)
-                                pcard:juice_up(0.4, 0.4)
-                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Sealed!', colour = G.C.GOLD })
-                                return true
-                            end
-                        }))
-                    elseif chosen_type == 'edition' then
-                        local eds = { 'e_foil', 'e_holo', 'e_polychrome' }
-                        local chosen_ed = pseudorandom_element(eds, pseudoseed('sobresaturado_ed'))
-                        G.E_MANAGER:add_event(Event({
-                            trigger = 'after',
-                            delay = 0.2,
-                            func = function()
-                                play_sound('polychrome1')
-                                pcard:set_edition(chosen_ed, true)
-                                pcard:juice_up(0.4, 0.4)
-                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Polished!', colour = G.C.DARK_EDITION })
-                                return true
-                            end
-                        }))
+                    if #missing > 0 then
+                        card.ability.extra.used = true
+                        local chosen_type = pseudorandom_element(missing, pseudoseed('sobresaturado_type'))
+                        if chosen_type == 'enhancement' then
+                            local enhs = { G.P_CENTERS.m_bonus, G.P_CENTERS.m_mult, G.P_CENTERS.m_wild, G.P_CENTERS.m_glass, G.P_CENTERS.m_steel, G.P_CENTERS.m_stone, G.P_CENTERS.m_gold, G.P_CENTERS.m_lucky }
+                            local chosen_enh = pseudorandom_element(enhs, pseudoseed('sobresaturado_enh'))
+                            G.E_MANAGER:add_event(Event({
+                                trigger = 'after',
+                                delay = 0.2,
+                                func = function()
+                                    play_sound('tarot1')
+                                    pcard:set_ability(chosen_enh)
+                                    pcard:juice_up(0.4, 0.4)
+                                    card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Enhanced!', colour = G.C.SECONDARY_SET.Enhanced })
+                                    return true
+                                end
+                            }))
+                        elseif chosen_type == 'seal' then
+                            local seals = { 'Gold', 'Blue', 'Red', 'Purple', 'Crackedlatro_dark_green', 'Crackedlatro_silver', 'Crackedlatro_white' }
+                            local chosen_seal = pseudorandom_element(seals, pseudoseed('sobresaturado_seal'))
+                            G.E_MANAGER:add_event(Event({
+                                trigger = 'after',
+                                delay = 0.2,
+                                func = function()
+                                    play_sound('gold_seal')
+                                    pcard:set_seal(chosen_seal, nil, true)
+                                    pcard:juice_up(0.4, 0.4)
+                                    card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Sealed!', colour = G.C.GOLD })
+                                    return true
+                                end
+                            }))
+                        elseif chosen_type == 'edition' then
+                            local eds = { 'e_foil', 'e_holo', 'e_polychrome' }
+                            local chosen_ed = pseudorandom_element(eds, pseudoseed('sobresaturado_ed'))
+                            G.E_MANAGER:add_event(Event({
+                                trigger = 'after',
+                                delay = 0.2,
+                                func = function()
+                                    play_sound('polychrome1')
+                                    pcard:set_edition(chosen_ed, true)
+                                    pcard:juice_up(0.4, 0.4)
+                                    card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Polished!', colour = G.C.DARK_EDITION })
+                                    return true
+                                end
+                            }))
+                        end
                     end
                 end
             end
+        end
+
+        if (context.end_of_round or context.setting_blind) and not context.individual and not context.repetition and not context.blueprint then
+            card.ability.extra = card.ability.extra or {}
+            card.ability.extra.used = false
         end
     end
 }

@@ -32,7 +32,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **RayTracing**: Crea 2 cartas Espectrales Negativas aleatorias al final de la ronda (excepto La Muchachada). (*"Depradosini Negrini"*)
 * **Paco**: Otorga X2 Multi por cada descarte restante que tengas en la ronda. (*"No es necesario descartar, todas las cartas son utiles"*)
 * **Gabi**: Otorga X4 Multi por cada carta puntuada, pero resta 3/4 de las Fichas finales al terminar el cálculo. (*"Todo tiene un precio..."*)
-* **Yairo**: Los 6s y 7s puntuados otorgan X3 Multi y X1.5 Fichas. Habilidad secreta: si juegas un "6" y un "As", otorga X4 Multi y X2 Fichas secretas. (*"El 6 y el 7 tienen el poder..."*)
+* **Yairo**: "67!!!!" (*"El 6 y el 7 tienen el poder..."*)
 
 ---
 
@@ -116,13 +116,13 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **Supernova**: Añade un **Sello Blanco** a 1 carta seleccionada.
 
 #### Mejoras y Sellos
-* **Diamond Card (Carta de Diamante)**: Otorga X1.5 Multi al reactivarse; otorga $5 si se mantiene en mano al finalizar la ronda.
-* **Investment Card (Carta de Inversión)**: Gana un 10% de interés sobre tu dinero actual (máx. $6) al tenerla en mano al final de la ronda.
+* **Diamond Card (Carta de Diamante)**: Otorga X1.5 Multi al reactivarse; otorga $3 si se mantiene en mano al finalizar la ronda.
+* **Investment Card (Carta de Inversión)**: Gana un 10% de interés sobre tu dinero actual (máx. $10) al tenerla en mano al final de la ronda.
 * **Lead Card (Carta de Plomo)**: Otorga +10 Fichas. Se transmuta permanentemente en Carta de Oro si se puntúa en una mano que gana la ronda.
-* **Jeweled Card (Carta Engarzada)**: Otorga X1.1 Multi y $1 al puntuar si el palo es Diamantes o Corazones.
-* **Dark Green Seal (Sello Verde Oscuro - Rework)**: Otorga **X1.5 Multi** al ser puntuada. 1 en 4 de probabilidad de transformarse permanentemente en Carta de Piedra al terminar de puntuarse la mano.
-* **White Seal (Sello Blanco)**: Genera una carta de Planeta aleatoria al ser jugada y puntuada (1 vez por ronda).
-* **Silver Seal (Sello de Plata)**: Otorga **+15 Fichas** extra al puntuar (1 en 2 de dar +25, y 1 en 5 de transmutarse permanentemente a Carta de Oro).
+* **Jeweled Card (Carta Engarzada / Carta de Joyería)**: Otorga X1.25 Multi y $2 al puntuar si el palo es Diamantes o Corazones.
+* **Dark Green Seal (Sello Verde Oscuro)**: Otorga **X2.5 Multi** al ser puntuada. 1 en 5 de probabilidad de romperse al ser jugada.
+* **White Seal (Sello Blanco)**: Sube el nivel de una mano de poker aleatoria en **+1 nivel** al puntuar (1 vez por ronda).
+* **Silver Seal (Sello de Plata)**: Mejora una carta aleatoria de la mano jugada a Carta de Oro, Acero o Diamante al jugarse y puntuarse.
 
 ---
 

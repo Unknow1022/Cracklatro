@@ -615,7 +615,7 @@ jd_def["j_Crackedlatro_sobresaturado_joker"] = {
         { text = "Enh/Seal/Ed", colour = G.C.SECONDARY_SET.Enhanced }
     },
     reminder_text = {
-        { text = "(Or +$10)" }
+        { text = "(1/round)" }
     }
 }
 

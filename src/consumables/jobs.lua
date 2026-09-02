@@ -73,6 +73,12 @@ SMODS.Consumable {
             "into a {C:attention}Diamond Card{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = get_diamond_enhancement_center()
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,
@@ -178,6 +184,12 @@ SMODS.Consumable {
             "into an {C:attention}Investment Card{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = get_investment_enhancement_center()
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,
@@ -300,6 +312,12 @@ SMODS.Consumable {
             "into a {C:attention}Lead Card{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = get_lead_enhancement_center()
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,
@@ -354,6 +372,15 @@ SMODS.Consumable {
             "with random {C:attention}Steel{}, {C:attention}Glass{}, {C:attention}Wild{}, or {C:attention}Lucky{} enhancements"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_steel
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_glass
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_wild
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_lucky
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,
@@ -432,6 +459,21 @@ SMODS.Consumable {
             "a {C:gold}Gold Seal{} or {C:blue}Blue Seal{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            if G.P_SEALS and G.P_SEALS.Gold then
+                info_queue[#info_queue + 1] = G.P_SEALS.Gold
+            else
+                info_queue[#info_queue + 1] = { key = 'gold_seal', set = 'Other' }
+            end
+            if G.P_SEALS and G.P_SEALS.Blue then
+                info_queue[#info_queue + 1] = G.P_SEALS.Blue
+            else
+                info_queue[#info_queue + 1] = { key = 'blue_seal', set = 'Other' }
+            end
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,
@@ -485,6 +527,12 @@ SMODS.Consumable {
             "hand into {C:mult}Mult Cards{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_mult
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,
@@ -539,6 +587,14 @@ SMODS.Consumable {
             "{C:dark_edition}Foil{}, {C:dark_edition}Holographic{}, or {C:dark_edition}Polychrome{} edition"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.e_foil
+            info_queue[#info_queue + 1] = G.P_CENTERS.e_holo
+            info_queue[#info_queue + 1] = G.P_CENTERS.e_polychrome
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,
@@ -591,6 +647,12 @@ SMODS.Consumable {
             "into a {C:attention}Jeweled Card{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = get_jeweled_enhancement_center()
+        end
+        return { vars = {} }
+    end,
     in_pool = function(self, args)
         return true
     end,

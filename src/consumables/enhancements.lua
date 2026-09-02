@@ -66,13 +66,15 @@ SMODS.Seal {
     atlas = 's_dark_green',
     pos = { x = 0, y = 0 },
     badge_colour = HEX('1b4d2e'),
+    discovered = true,
+    unlocked = true,
     loc_txt = {
         name = 'Dark Green Seal',
         label = 'Dark Green Seal',
         text = {
-            "Gives {X:mult,C:white}X1.5{} Mult when scored.",
-            "{C:green}#1# in 4{} chance to permanently turn",
-            "into a {C:attention}Stone Card{} at end of scoring"
+            "Gives {X:mult,C:white}X2.5{} Mult when scored,",
+            "{C:green}#1# in 5{} chance to break",
+            "when played"
         }
     },
     loc_vars = function(self, info_queue, card)
@@ -81,21 +83,18 @@ SMODS.Seal {
     calculate = function(self, card, context)
         if (context.main_scoring or context.individual) and context.cardarea == G.play then
             local prob = (G.GAME and G.GAME.probabilities.normal or 1)
-            if pseudorandom('dark_green_stone') < (prob / 4) then
+            if pseudorandom('dark_green_break') < (prob / 5) then
                 G.E_MANAGER:add_event(Event({
                     trigger = 'after',
                     delay = 0.3,
                     func = function()
-                        play_sound('tarot1')
-                        card:set_ability(G.P_CENTERS.m_stone)
-                        card:juice_up(0.5, 0.5)
-                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Petrified!', colour = G.C.GREY })
+                        card:shatter()
                         return true
                     end
                 }))
             end
             return {
-                x_mult = 1.5
+                x_mult = 2.5
             }
         end
     end
@@ -114,34 +113,47 @@ SMODS.Seal {
     atlas = 's_white',
     pos = { x = 0, y = 0 },
     badge_colour = HEX('ffffff'),
+    discovered = true,
+    unlocked = true,
     loc_txt = {
         name = 'White Seal',
         label = 'White Seal',
         text = {
-            "Creates a random {C:planet}Planet card{}",
-            "when this card is played and scored",
-            "{C:inactive}(Once per round, must have room){}"
+            "Upgrades a random {C:attention}poker hand{}",
+            "by {C:attention}+1 level{} when scored",
+            "{C:inactive}(Once per round){}"
         }
     },
     calculate = function(self, card, context)
         if (context.main_scoring or context.individual) and context.cardarea == G.play then
             if not card.ability.white_seal_triggered then
                 card.ability.white_seal_triggered = true
-                if G.consumeables and #G.consumeables.cards < G.consumeables.config.card_limit then
-                    G.E_MANAGER:add_event(Event({
-                        trigger = 'after',
-                        delay = 0.2,
-                        func = function()
-                            play_sound('tarot1')
-                            card:juice_up(0.3, 0.5)
-                            local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, nil, 'white_seal')
-                            planet_card:add_to_deck()
-                            G.consumeables:emplace(planet_card)
-                            card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Planet Card!', colour = G.C.SECONDARY_SET.Planet })
-                            return true
+                local hands = {}
+                if G.GAME and G.GAME.hands then
+                    for k, v in pairs(G.GAME.hands) do
+                        if v.visible then
+                            table.insert(hands, k)
                         end
-                    }))
+                    end
+                    if #hands == 0 then
+                        for k, v in pairs(G.GAME.hands) do
+                            table.insert(hands, k)
+                        end
+                    end
                 end
+                local chosen_hand = pseudorandom_element(hands, pseudoseed('white_seal_hand')) or 'High Card'
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.2,
+                    func = function()
+                        play_sound('tarot1')
+                        card:juice_up(0.3, 0.5)
+                        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname = chosen_hand, level = (G.GAME.hands[chosen_hand] and G.GAME.hands[chosen_hand].level or 1) + 1})
+                        level_up_hand(card, chosen_hand, false, 1)
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Level Up!', colour = G.C.SECONDARY_SET.Planet })
+                        return true
+                    end
+                }))
             end
         end
         if context.end_of_round and card.ability then
@@ -163,44 +175,65 @@ SMODS.Seal {
     atlas = 's_silver',
     pos = { x = 0, y = 0 },
     badge_colour = HEX('bdc3c7'),
+    discovered = true,
+    unlocked = true,
     loc_txt = {
         name = 'Silver Seal',
         label = 'Silver Seal',
         text = {
-            "{C:chips}+#1#{} extra Chips when scored,",
-            "{C:green}#2# in 2{} chance to give {C:chips}+#3#{} Chips instead,",
-            "{C:green}#2# in 5{} chance to turn permanently",
-            "into a {C:gold}Gold Card{} at end of scoring"
+            "Enhances a random card from the",
+            "played hand into a {C:gold}Gold{},",
+            "{C:attention}Steel{}, or {C:attention}Diamond Card{}",
+            "when played and scored"
         }
     },
     loc_vars = function(self, info_queue, card)
-        return { vars = { 15, (G.GAME and G.GAME.probabilities.normal or 1), 25 } }
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_gold
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_steel
+            info_queue[#info_queue + 1] = get_diamond_enhancement_center()
+        end
+        return { vars = {} }
     end,
     calculate = function(self, card, context)
         if (context.main_scoring or context.individual) and context.cardarea == G.play then
-            local prob = (G.GAME and G.GAME.probabilities.normal or 1)
-            local chips_to_give = 15
-            if pseudorandom('silver_chips') < (prob / 2) then
-                chips_to_give = 25
-            end
-            
-            if pseudorandom('silver_gold') < (prob / 5) then
-                G.E_MANAGER:add_event(Event({
-                    trigger = 'after',
-                    delay = 0.3,
-                    func = function()
-                        play_sound('gold_seal')
-                        card:set_ability(G.P_CENTERS.m_gold)
-                        card:juice_up(0.5, 0.5)
-                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Transmuted to Gold!', colour = G.C.GOLD })
-                        return true
+            if not card.ability.silver_seal_triggered then
+                card.ability.silver_seal_triggered = true
+                local eligible_cards = {}
+                if G.play and G.play.cards then
+                    for _, c in ipairs(G.play.cards) do
+                        table.insert(eligible_cards, c)
                     end
-                }))
+                elseif context.scoring_hand then
+                    for _, c in ipairs(context.scoring_hand) do
+                        table.insert(eligible_cards, c)
+                    end
+                end
+                if #eligible_cards > 0 then
+                    local target_card = pseudorandom_element(eligible_cards, pseudoseed('silver_seal_target'))
+                    local enh_choices = {
+                        G.P_CENTERS.m_gold,
+                        G.P_CENTERS.m_steel,
+                        get_diamond_enhancement_center()
+                    }
+                    local chosen_enh = pseudorandom_element(enh_choices, pseudoseed('silver_seal_enh'))
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'after',
+                        delay = 0.3,
+                        func = function()
+                            play_sound('gold_seal')
+                            target_card:set_ability(chosen_enh)
+                            target_card:juice_up(0.5, 0.5)
+                            local enh_name = (chosen_enh == G.P_CENTERS.m_gold and 'Gold Card') or (chosen_enh == G.P_CENTERS.m_steel and 'Steel Card') or 'Diamond Card'
+                            card_eval_status_text(target_card, 'extra', nil, nil, nil, { message = enh_name .. '!', colour = HEX('bdc3c7') })
+                            return true
+                        end
+                    }))
+                end
             end
-
-            return {
-                chips = chips_to_give
-            }
+        end
+        if context.end_of_round and card.ability then
+            card.ability.silver_seal_triggered = nil
         end
     end
 }
@@ -217,7 +250,9 @@ SMODS.Enhancement {
     key = 'diamond',
     atlas = 'm_diamond',
     pos = { x = 0, y = 0 },
-    config = { extra = { x_mult = 1.5, dollars = 5 }, h_dollars = 5 },
+    discovered = true,
+    unlocked = true,
+    config = { extra = { x_mult = 1.5, dollars = 3 }, h_dollars = 3 },
     loc_txt = {
         name = 'Diamond Card',
         text = {
@@ -227,7 +262,7 @@ SMODS.Enhancement {
     },
     loc_vars = function(self, info_queue, card)
         local x_mult = (card and card.ability and card.ability.extra and card.ability.extra.x_mult) or (self.config and self.config.extra and self.config.extra.x_mult) or 1.5
-        local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or (self.config and self.config.extra and self.config.extra.dollars) or 5
+        local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or (self.config and self.config.extra and self.config.extra.dollars) or 3
         return { vars = { x_mult, dollars } }
     end,
     calculate = function(self, card, context)
@@ -260,7 +295,9 @@ SMODS.Enhancement {
     key = 'investment',
     atlas = 'm_investment',
     pos = { x = 0, y = 0 },
-    config = { extra = { interest_pct = 10, max_interest = 6 } },
+    discovered = true,
+    unlocked = true,
+    config = { extra = { interest_pct = 10, max_interest = 10 } },
     loc_txt = {
         name = 'Investment Card',
         text = {
@@ -270,7 +307,7 @@ SMODS.Enhancement {
     },
     loc_vars = function(self, info_queue, card)
         local interest_pct = (card and card.ability and card.ability.extra and card.ability.extra.interest_pct) or (self.config and self.config.extra and self.config.extra.interest_pct) or 10
-        local max_interest = (card and card.ability and card.ability.extra and card.ability.extra.max_interest) or (self.config and self.config.extra and self.config.extra.max_interest) or 6
+        local max_interest = (card and card.ability and card.ability.extra and card.ability.extra.max_interest) or (self.config and self.config.extra and self.config.extra.max_interest) or 10
         return { vars = { interest_pct, max_interest } }
     end,
     calculate = function(self, card, context)
@@ -300,6 +337,8 @@ SMODS.Enhancement {
     key = 'lead',
     atlas = 'm_lead',
     pos = { x = 0, y = 0 },
+    discovered = true,
+    unlocked = true,
     config = { extra = { chips = 10 } },
     loc_txt = {
         name = 'Lead Card',
@@ -334,7 +373,9 @@ SMODS.Enhancement {
     key = 'jeweled',
     atlas = 'm_jeweled',
     pos = { x = 0, y = 0 },
-    config = { extra = { x_mult = 1.1, dollars = 1 } },
+    discovered = true,
+    unlocked = true,
+    config = { extra = { x_mult = 1.25, dollars = 2 } },
     loc_txt = {
         name = 'Jeweled Card',
         text = {
@@ -343,8 +384,8 @@ SMODS.Enhancement {
         }
     },
     loc_vars = function(self, info_queue, card)
-        local x_mult = (card and card.ability and card.ability.extra and card.ability.extra.x_mult) or (self.config and self.config.extra and self.config.extra.x_mult) or 1.1
-        local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or (self.config and self.config.extra and self.config.extra.dollars) or 1
+        local x_mult = (card and card.ability and card.ability.extra and card.ability.extra.x_mult) or (self.config and self.config.extra and self.config.extra.x_mult) or 1.25
+        local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or (self.config and self.config.extra and self.config.extra.dollars) or 2
         return { vars = { x_mult, dollars } }
     end,
     calculate = function(self, card, context)

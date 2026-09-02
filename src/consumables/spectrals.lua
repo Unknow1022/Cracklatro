@@ -21,6 +21,17 @@ SMODS.Consumable {
             "{C:blue}-1 Hand{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_steel
+            if G.P_SEALS and G.P_SEALS.Red then
+                info_queue[#info_queue + 1] = G.P_SEALS.Red
+            else
+                info_queue[#info_queue + 1] = { key = 'red_seal', set = 'Other' }
+            end
+        end
+        return { vars = {} }
+    end,
     can_use = function(self, card)
         return G.hand and #G.hand.cards > 0
     end,
@@ -100,6 +111,13 @@ SMODS.Consumable {
             "to {C:attention}1 selected card{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            local dark_green_seal = (G.P_SEALS and (G.P_SEALS['Crackedlatro_dark_green'] or G.P_SEALS['dark_green'])) or { set = 'Seal', key = 'Crackedlatro_dark_green' }
+            info_queue[#info_queue + 1] = dark_green_seal
+        end
+        return { vars = {} }
+    end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
     end,
@@ -151,6 +169,12 @@ SMODS.Consumable {
             "{C:red}-1 Discard{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = { key = 'eternal', set = 'Other' }
+        end
+        return { vars = {} }
+    end,
     can_use = function(self, card)
         return G.jokers and #G.jokers.cards > 0
     end,
@@ -271,6 +295,12 @@ SMODS.Consumable {
             "{C:red}-1 level{} to all other hands"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.e_negative
+        end
+        return { vars = {} }
+    end,
     can_use = function(self, card)
         return true
     end,
@@ -330,6 +360,18 @@ SMODS.Consumable {
             "of random rank and suit"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_wild
+            info_queue[#info_queue + 1] = G.P_CENTERS.e_polychrome
+            if G.P_SEALS and G.P_SEALS.Red then
+                info_queue[#info_queue + 1] = G.P_SEALS.Red
+            else
+                info_queue[#info_queue + 1] = { key = 'red_seal', set = 'Other' }
+            end
+        end
+        return { vars = {} }
+    end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 5
     end,
@@ -475,6 +517,13 @@ SMODS.Consumable {
             "to {C:attention}1 selected card{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            local silver_seal = (G.P_SEALS and (G.P_SEALS['Crackedlatro_silver'] or G.P_SEALS['silver'])) or { set = 'Seal', key = 'Crackedlatro_silver' }
+            info_queue[#info_queue + 1] = silver_seal
+        end
+        return { vars = {} }
+    end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
     end,
@@ -525,6 +574,13 @@ SMODS.Consumable {
             "to {C:attention}1 selected card{}"
         }
     },
+    loc_vars = function(self, info_queue, card)
+        if info_queue then
+            local white_seal = (G.P_SEALS and (G.P_SEALS['Crackedlatro_white'] or G.P_SEALS['white'])) or { set = 'Seal', key = 'Crackedlatro_white' }
+            info_queue[#info_queue + 1] = white_seal
+        end
+        return { vars = {} }
+    end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
     end,

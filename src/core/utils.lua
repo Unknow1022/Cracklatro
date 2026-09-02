@@ -94,6 +94,7 @@ end
 -- UIBox ability table hook
 local card_generate_UIBox_ref = Card.generate_UIBox_ability_table
 function Card:generate_UIBox_ability_table(...)
+    ensure_custom_seals_discovered()
     local is_secret = is_secret_card(self)
     if is_secret then
         G.GAME_IS_RENDERING_SECRET_CARD = true
@@ -760,7 +761,7 @@ end
 G.FUNCS.can_use_infostealer = function(e)
     local card = e.config.ref_table
     local can_use = false
-    local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
+    local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 10
     if card and card.area == G.jokers and (G.GAME.dollars or 0) >= cost then
         if G.STATE ~= G.STATES.HAND_PLAYED and G.STATE ~= G.STATES.DRAW_TO_HAND then
             can_use = true
@@ -780,7 +781,7 @@ G.FUNCS.use_infostealer = function(e)
     local card = e.config.ref_table
     if not card or card.area ~= G.jokers then return end
     card.ability.extra = card.ability.extra or {}
-    local cost = card.ability.extra.cost or 20
+    local cost = card.ability.extra.cost or 10
     if (G.GAME.dollars or 0) < cost then return end
 
     ease_dollars(-cost)
@@ -816,7 +817,7 @@ if G.UIDEF and G.UIDEF.use_and_sell_buttons then
     function G.UIDEF.use_and_sell_buttons(card)
         local retval = use_and_sell_buttons_ref(card)
         if is_infostealer_card(card) and card.area == G.jokers then
-            local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 20
+            local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 10
             local feed_btn = {
                 n = G.UIT.R,
                 config = { align = "cl" },
@@ -856,5 +857,33 @@ if G.UIDEF and G.UIDEF.use_and_sell_buttons then
         return retval
     end
 end
+
+-- Ensure Custom Seals Discovery in UI and Collection
+function ensure_custom_seals_discovered()
+    local seal_keys = {
+        'dark_green', 'Crackedlatro_dark_green',
+        'white', 'Crackedlatro_white',
+        'silver', 'Crackedlatro_silver'
+    }
+    if G and G.P_SEALS then
+        for _, k in ipairs(seal_keys) do
+            if G.P_SEALS[k] then
+                G.P_SEALS[k].discovered = true
+                G.P_SEALS[k].unlocked = true
+            end
+        end
+    end
+    if G and G.P_CENTER_POOLS and G.P_CENTER_POOLS.Seal then
+        for _, s in ipairs(G.P_CENTER_POOLS.Seal) do
+            if s.key and (string.find(s.key, 'dark_green') or string.find(s.key, 'white') or string.find(s.key, 'silver')) then
+                s.discovered = true
+                s.unlocked = true
+            end
+        end
+    end
+end
+
+ensure_custom_seals_discovered()
+
 
 

@@ -342,30 +342,25 @@ SMODS.Joker {
         text = {
             "Scored cards give {C:chips}+#1#{} Chips and {C:mult}+#2#{} Mult",
             "per letter in their English rank name.",
-            "Earn {C:money}$#5#{} if hand has {C:attention}#3#+ letters{} {C:inactive}(#4#){}"
+            "Earn {C:money}$#5#{} every {C:attention}#3# letters{} played",
+            "{C:inactive}(#4#/#3# letters){}"
         }
     },
-    config = { extra = { chips_per_letter = 4, mult_per_letter = 1, letters_target = 20, donation = 5 } },
+    config = { extra = { chips_per_letter = 4, mult_per_letter = 1, letters_target = 50, donation = 10, letters_progress = 0 } },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        local current_hand_letters = 0
-        if G.play and G.play.cards then
-            local letter_counts = {
-                ['2'] = 3, ['3'] = 5, ['4'] = 4, ['5'] = 4, ['6'] = 3,
-                ['7'] = 5, ['8'] = 5, ['9'] = 4, ['10'] = 3,
-                ['Jack'] = 4, ['Queen'] = 5, ['King'] = 4, ['Ace'] = 3
-            }
-            for _, c in ipairs(G.play.cards) do
-                local val = c.base and c.base.value
-                current_hand_letters = current_hand_letters + (letter_counts[val] or 4)
-            end
-        end
-        return { vars = { ex.chips_per_letter, ex.mult_per_letter, ex.letters_target, current_hand_letters, ex.donation } }
+        local progress = (card and card.ability and card.ability.extra and card.ability.extra.letters_progress) or 0
+        return { vars = { ex.chips_per_letter, ex.mult_per_letter, ex.letters_target, progress, ex.donation } }
     end,
     calculate = function(self, card, context)
+        local rank_names = {
+            ['2'] = 'Two', ['3'] = 'Three', ['4'] = 'Four', ['5'] = 'Five', ['6'] = 'Six',
+            ['7'] = 'Seven', ['8'] = 'Eight', ['9'] = 'Nine', ['10'] = 'Ten',
+            ['Jack'] = 'Jack', ['Queen'] = 'Queen', ['King'] = 'King', ['Ace'] = 'Ace'
+        }
         local letter_counts = {
             ['2'] = 3, ['3'] = 5, ['4'] = 4, ['5'] = 4, ['6'] = 3,
             ['7'] = 5, ['8'] = 5, ['9'] = 4, ['10'] = 3,
@@ -374,40 +369,34 @@ SMODS.Joker {
 
         if context.individual and context.cardarea == G.play then
             local val = context.other_card.base and context.other_card.base.value
-            local letters = letter_counts[val] or 4
+            local name = rank_names[val] or tostring(val or 'Card')
+            local letters = letter_counts[val] or #name
             return {
                 chips = letters * card.ability.extra.chips_per_letter,
                 mult = letters * card.ability.extra.mult_per_letter,
-                message = letters .. ' Letters (' .. tostring(val) .. ')',
+                message = name,
                 colour = G.C.MULT,
                 card = card
             }
         end
 
-        if context.before and not context.blueprint and context.scoring_hand then
-            local total_letters = 0
-            for _, c in ipairs(context.scoring_hand) do
-                local val = c.base and c.base.value
-                total_letters = total_letters + (letter_counts[val] or 4)
-            end
-            if total_letters >= card.ability.extra.letters_target then
-                ease_dollars(card.ability.extra.donation)
-                return {
-                    message = 'TTS DONATION! +$' .. card.ability.extra.donation,
-                    colour = G.C.MONEY
-                }
-            end
-        end
-
-        if context.discard and not context.blueprint and context.other_card then
-            local val = context.other_card.base and context.other_card.base.value
-            local letters = letter_counts[val] or 4
-            if letters >= 5 then
-                ease_dollars(1)
-                return {
-                    message = 'Spamming Chat! +$1',
-                    colour = G.C.MONEY
-                }
+        if context.before and not context.blueprint then
+            local played = context.full_hand or context.scoring_hand
+            if played then
+                local hand_letters = 0
+                for _, c in ipairs(played) do
+                    local val = c.base and c.base.value
+                    hand_letters = hand_letters + (letter_counts[val] or 4)
+                end
+                card.ability.extra.letters_progress = (card.ability.extra.letters_progress or 0) + hand_letters
+                if card.ability.extra.letters_progress >= card.ability.extra.letters_target then
+                    card.ability.extra.letters_progress = card.ability.extra.letters_progress - card.ability.extra.letters_target
+                    ease_dollars(card.ability.extra.donation)
+                    return {
+                        message = 'TTS DONATION! +$' .. card.ability.extra.donation,
+                        colour = G.C.MONEY
+                    }
+                end
             end
         end
     end

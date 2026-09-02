@@ -44,7 +44,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Blueberry**: +1 Mano al seleccionar Ciega. Se autodestruye tras 3 rondas.
 * **DJ Joker**: Al jugarse una sola carta, la convierte en una carta mejorada aleatoria (*Suerte, Metal, Oro o Vidrio*) (**1 vez por ronda**).
 * **Designer Joker (Joker Diseñador)**: Las cartas versátiles (*Wild Cards*) otorgan **+$1** al ser puntuadas.
-* **TTS**: Cada carta puntuada deletrea su rango en inglés: otorga **+4 Fichas** y **+1 Multi** por cada letra. Si la mano jugada suma **20 o más letras**, recibes una donación de **+$5**. Descartar cartas de 5 o más letras dona **+$1**.
+* **TTS**: Cada carta puntuada deletrea su rango en inglés: otorga **+4 Fichas** y **+1 Multi** por cada letra (mostrando su nombre en inglés, ej: "Ace"). Acumular **50 letras** entre cartas jugadas otorga una donación de **+$10**.
 
 #### Poco Comunes (14)
 * **Shareholder Joker**: El precio de la acción fluctúa cada Ciega (**$2** a **$15**). Otorga Multiplicador equivalente al doble del precio y paga el valor de la acción al final de la ronda. Ganar en 1 mano desata un **Bull Market** ($12-$18); usar tu última mano provoca un **Bear Market** ($2-$5).

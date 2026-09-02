@@ -15,21 +15,25 @@ SMODS.Joker {
     loc_txt = {
         name = 'Shareholder Joker',
         text = {
-            "Earn {C:money}$#1#{} ({C:money}$#2#{} on {C:attention}Big Blind{}, {C:money}$#3#{} on {C:attention}Boss Blind{})",
-            "when defeating the Blind in only {C:attention}1 hand{}"
-        },
-        unlock = {
-            "Have at least",
-            "{C:money}$100{} at once"
+            "Stock price fluctuates each Blind {C:inactive}(Current: {C:money}$#1#{C:inactive}){}",
+            "Gives {C:mult}+#2#{} Mult {C:inactive}(2x Price){}. Pays {C:money}$#1#{} at round end.",
+            "Defeating Blind in {C:attention}1 hand{} triggers a {C:green}Bull Market{} {C:inactive}($12-$18){},",
+            "while using your last hand triggers a {C:red}Bear Market{} {C:inactive}($2-$5){}"
         }
     },
-    config = { extra = { small = 5, big = 6, boss = 8 } },
+    unlock = {
+        "Have at least",
+        "{C:money}$100{} at once"
+    },
+    config = { extra = { current_price = 8, min_price = 2, max_price = 15, market_trend = 'Normal' } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.small, card.ability.extra.big, card.ability.extra.boss } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        local price = ex.current_price or 8
+        return { vars = { price, price * 2 } }
     end,
     check_for_unlock = function(self, args)
         if G.GAME and G.GAME.dollars and G.GAME.dollars >= 100 then
@@ -37,22 +41,51 @@ SMODS.Joker {
         end
     end,
     calculate = function(self, card, context)
-        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
-            if G.GAME.current_round and G.GAME.current_round.hands_played == 1 then
-                local reward = card.ability.extra.small
-                if G.GAME.blind then
-                    if G.GAME.blind.boss then
-                        reward = card.ability.extra.boss
-                    elseif G.GAME.blind.name == 'Big Blind' or G.GAME.blind.key == 'b_big' then
-                        reward = card.ability.extra.big
-                    end
+        -- New blind stock price change
+        if (context.setting_blind or context.first_hand_drawn) and not context.blueprint and not context.individual and not context.repetition then
+            if not card.ability.extra.priced_this_round then
+                card.ability.extra.priced_this_round = true
+                if card.ability.extra.market_trend == 'Bull' then
+                    card.ability.extra.current_price = pseudorandom('stock_price', 12, 18)
+                    card.ability.extra.market_trend = 'Normal'
+                elseif card.ability.extra.market_trend == 'Bear' then
+                    card.ability.extra.current_price = pseudorandom('stock_price', 2, 5)
+                    card.ability.extra.market_trend = 'Normal'
+                else
+                    card.ability.extra.current_price = pseudorandom('stock_price', 4, 14)
                 end
-                return {
-                    dollars = reward,
-                    message = '+$' .. reward,
-                    colour = G.C.MONEY
-                }
             end
+        end
+
+        if context.joker_main then
+            local p = card.ability.extra.current_price or 8
+            return {
+                mult = p * 2
+            }
+        end
+
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
+            card.ability.extra.priced_this_round = nil
+            local p = card.ability.extra.current_price or 8
+            ease_dollars(p)
+
+            local msg = 'Dividend +$' .. p
+            local col = G.C.MONEY
+
+            if G.GAME.current_round and G.GAME.current_round.hands_played == 1 then
+                card.ability.extra.market_trend = 'Bull'
+                msg = 'BULL MARKET! +$' .. p
+                col = G.C.GREEN
+            elseif G.GAME.current_round and G.GAME.current_round.hands_left == 0 then
+                card.ability.extra.market_trend = 'Bear'
+                msg = 'BEAR MARKET! +$' .. p
+                col = G.C.RED
+            end
+
+            return {
+                message = msg,
+                colour = col
+            }
         end
     end
 }
@@ -72,23 +105,24 @@ SMODS.Joker {
     loc_txt = {
         name = 'Builder Joker',
         text = {
-            "Gains {X:mult,C:white}X#2#{} Mult if played hand contains",
-            "a {C:attention}Three of a Kind{}, {C:attention}Four of a Kind{},",
-            "or {C:attention}Five of a Kind{}",
-            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
-        },
-        unlock = {
-            "Play a {C:attention}Three of a Kind{},",
-            "{C:attention}Four of a Kind{}, and {C:attention}Five of a Kind{}",
-            "consecutively in one run"
+            "If scoring cards are in {C:attention}strictly ascending order{} of rank,",
+            "construct a {C:attention}Stable Pyramid{}: {X:mult,C:white}X#1#{} Mult per card scored!",
+            "Scoring {C:attention}4 or more cards{} in order permanently adds {C:chips}+#2#{} Chips",
+            "to the highest card {C:inactive}(Otherwise: +10 Chips){}"
         }
     },
-    config = { extra = { xmult = 1.0, xmult_gain = 0.1 } },
+    unlock = {
+        "Play a {C:attention}Three of a Kind{},",
+        "{C:attention}Four of a Kind{}, and {C:attention}Five of a Kind{}",
+        "consecutively in one run"
+    },
+    config = { extra = { xmult_per_card = 0.5, bonus_chips = 20 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.xmult, card.ability.extra.xmult_gain } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        return { vars = { 1 + (ex.xmult_per_card or 0.5), ex.bonus_chips or 20 } }
     end,
     check_for_unlock = function(self, args)
         if (args.type == 'hand' or args.type == 'play_hand') and args.handname then
@@ -106,23 +140,36 @@ SMODS.Joker {
         end
     end,
     calculate = function(self, card, context)
-        if context.before and not context.blueprint then
-            local is_valid_hand = (context.poker_hands['Three of a Kind'] and next(context.poker_hands['Three of a Kind'])) or
-                                  (context.poker_hands['Four of a Kind'] and next(context.poker_hands['Four of a Kind'])) or
-                                  (context.poker_hands['Five of a Kind'] and next(context.poker_hands['Five of a Kind']))
-            if is_valid_hand then
-                card.ability.extra.xmult = card.ability.extra.xmult + card.ability.extra.xmult_gain
+        if context.joker_main and context.scoring_hand and #context.scoring_hand >= 2 then
+            local is_ascending = true
+            for i = 1, #context.scoring_hand - 1 do
+                local cur_id = context.scoring_hand[i]:get_id() or 0
+                local next_id = context.scoring_hand[i + 1]:get_id() or 0
+                if cur_id >= next_id then
+                    is_ascending = false
+                    break
+                end
+            end
+
+            if is_ascending then
+                local multiplier = 1 + (#context.scoring_hand * card.ability.extra.xmult_per_card)
+                if #context.scoring_hand >= 4 and not context.blueprint then
+                    local top_card = context.scoring_hand[#context.scoring_hand]
+                    top_card.ability = top_card.ability or {}
+                    top_card.ability.perma_bonus = (top_card.ability.perma_bonus or 0) + card.ability.extra.bonus_chips
+                end
                 return {
-                    message = 'Built!',
+                    Xmult = multiplier,
+                    message = 'Stable Pyramid! X' .. multiplier,
                     colour = G.C.MULT
                 }
+            else
+                return {
+                    chips = 10,
+                    message = 'Unstable Structure',
+                    colour = G.C.GREY
+                }
             end
-        end
-
-        if context.joker_main and card.ability.extra.xmult > 1 then
-            return {
-                Xmult = card.ability.extra.xmult
-            }
         end
     end
 }
@@ -141,28 +188,56 @@ SMODS.Joker {
     loc_txt = {
         name = 'Banquet',
         text = {
-            "When {C:attention}sold{}, creates an {C:attention}Ice Cream{},",
-            "{C:attention}Popcorn{}, and {C:attention}Ramen{}",
-            "{C:inactive}(Must have room){}"
+            "Cards held in hand when scoring {C:attention}dine at the banquet{}:",
+            "each permanently gains {C:chips}+#1#{} Chips to its base value.",
+            "If you have {C:attention}#2# or more cards{} held in hand, gives {X:mult,C:white}X#3#{} Mult.",
+            "When {C:attention}sold{}, grants {C:money}$#4#{} and creates a random {C:dark_edition}Negative{} Food Joker"
         }
     },
-    config = { extra = {} },
+    config = { extra = { perma_chips = 2, hand_threshold = 7, xmult = 2.5, sell_cash = 15 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     blueprint_compat = false,
+    loc_vars = function(self, info_queue, card)
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        return { vars = { ex.perma_chips or 2, ex.hand_threshold or 7, ex.xmult or 2.5, ex.sell_cash or 15 } }
+    end,
     calculate = function(self, card, context)
+        -- Cards remaining in hand dine at the banquet
+        if context.individual and context.cardarea == G.hand and not context.end_of_round and not context.blueprint then
+            context.other_card.ability = context.other_card.ability or {}
+            context.other_card.ability.perma_bonus = (context.other_card.ability.perma_bonus or 0) + card.ability.extra.perma_chips
+            return {
+                chips = card.ability.extra.perma_chips,
+                card = card
+            }
+        end
+
+        -- Full banquet table bonus
+        if context.joker_main then
+            local held_count = (G.hand and G.hand.cards) and #G.hand.cards or 0
+            if held_count >= (card.ability.extra.hand_threshold or 7) then
+                return {
+                    Xmult = card.ability.extra.xmult,
+                    message = 'Full Feast! X' .. card.ability.extra.xmult,
+                    colour = G.C.XMULT
+                }
+            end
+        end
+
+        -- Selling reward
         if context.selling_self and not context.blueprint then
+            ease_dollars(card.ability.extra.sell_cash)
             G.E_MANAGER:add_event(Event({
                 func = function()
-                    local food_jokers = { 'j_ice_cream', 'j_popcorn', 'j_ramen' }
-                    for _, food_key in ipairs(food_jokers) do
-                        if #G.jokers.cards < G.jokers.config.card_limit then
-                            local new_food = create_card('Joker', G.jokers, nil, nil, nil, nil, food_key, nil)
-                            new_food:add_to_deck()
-                            G.jokers:emplace(new_food)
-                        end
-                    end
+                    local food_keys = { 'j_ice_cream', 'j_popcorn', 'j_ramen', 'j_turtle_bean', 'j_diet_cola', 'j_selzer' }
+                    local chosen_food = pseudorandom_element(food_keys, 'banquet_food')
+                    local new_food = create_card('Joker', G.jokers, nil, nil, nil, nil, chosen_food, nil)
+                    new_food:set_edition({ negative = true }, true)
+                    new_food:add_to_deck()
+                    G.jokers:emplace(new_food)
+                    new_food:juice_up(0.6, 0.6)
                     return true
                 end
             }))
@@ -229,35 +304,99 @@ SMODS.Atlas {
 SMODS.Joker {
     key = 'runway_joker',
     atlas = 'runway_joker',
+    unlocked = false,
     loc_txt = {
         name = 'Runway',
         text = {
-            "{C:green}#1# in #2#{} chance for played {C:attention}Enhanced cards{}",
-            "to permanently gain a random {C:dark_edition}Edition{}",
-            "{C:inactive}(Foil, Holographic, or Polychrome){}"
+            "The {C:attention}center card{} of the played hand is in the {C:attention}Spotlight{}:",
+            "it gains {X:mult,C:white}+X#1#{} Mult for each unique trait",
+            "{C:inactive}(Enhancement, Edition, Seal){} across all other played cards.",
+            "Defeating the Blind permanently bequeaths one trait to the model"
         }
     },
-    config = { extra = { odds = 10 } },
+    unlock = {
+        "Have 5 cards with",
+        "{C:attention}Editions{} in your deck"
+    },
+    config = { extra = { xmult_per_trait = 0.5 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
-    cost = 7,
+    cost = 6,
     loc_vars = function(self, info_queue, card)
-        return { vars = { (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        return { vars = { ex.xmult_per_trait or 0.5 } }
+    end,
+    check_for_unlock = function(self, args)
+        if G.playing_cards then
+            local ed_count = 0
+            for _, c in ipairs(G.playing_cards) do
+                if c.edition and (c.edition.foil or c.edition.holo or c.edition.polychrome) then
+                    ed_count = ed_count + 1
+                end
+            end
+            if ed_count >= 5 then
+                return true
+            end
+        end
     end,
     calculate = function(self, card, context)
-        if context.before and not context.blueprint and context.scoring_hand then
-            for _, pcard in ipairs(context.scoring_hand) do
-                local has_enhancement = (pcard.config and pcard.config.center and pcard.config.center ~= G.P_CENTERS.c_base) or (pcard.ability and pcard.ability.effect and pcard.ability.effect ~= 'Base')
-                if has_enhancement and not pcard.edition then
-                    if pseudorandom('runway') < (G.GAME and G.GAME.probabilities.normal or 1) / card.ability.extra.odds then
-                        local editions = { 'e_foil', 'e_holo', 'e_polychrome' }
-                        local chosen_edition = pseudorandom_element(editions, 'runway_choice')
-                        G.E_MANAGER:add_event(Event({
-                            func = function()
-                                pcard:set_edition(chosen_edition, true)
-                                return true
+        if context.scoring_hand and #context.scoring_hand >= 1 then
+            local center_idx = math.ceil(#context.scoring_hand / 2)
+            local center_card = context.scoring_hand[center_idx]
+
+            if context.individual and context.cardarea == G.play and context.other_card == center_card then
+                local traits = {}
+                for i, sc in ipairs(context.scoring_hand) do
+                    if sc ~= center_card then
+                        if sc.seal then traits['seal_' .. sc.seal] = sc.seal end
+                        if sc.edition then
+                            for ed_k, ed_v in pairs(sc.edition) do
+                                if ed_v and ed_k ~= 'type' then traits['ed_' .. ed_k] = ed_k end
                             end
-                        }))
+                        end
+                        if sc.ability and sc.ability.set == 'Enhanced' then
+                            traits['enh_' .. sc.ability.name] = sc.config.center
+                        end
+                    end
+                end
+
+                local trait_count = 0
+                for _ in pairs(traits) do trait_count = trait_count + 1 end
+
+                if trait_count > 0 then
+                    local total_xmult = 1 + (trait_count * card.ability.extra.xmult_per_trait)
+                    return {
+                        x_mult = total_xmult,
+                        message = 'TOP MODEL! X' .. total_xmult,
+                        colour = G.C.DARK_EDITION,
+                        card = card
+                    }
+                end
+            end
+
+            -- If hand defeats blind, bestow a permanent trait
+            if context.after and not context.blueprint and G.GAME.chips >= G.GAME.blind.chips then
+                if center_card and not center_card.runway_bestowed then
+                    center_card.runway_bestowed = true
+                    local pool = {}
+                    for i, sc in ipairs(context.scoring_hand) do
+                        if sc ~= center_card then
+                            if sc.seal and not center_card.seal then table.insert(pool, { type = 'seal', val = sc.seal }) end
+                            if sc.edition and not center_card.edition then
+                                for ed_k, ed_v in pairs(sc.edition) do
+                                    if ed_v and ed_k ~= 'type' then table.insert(pool, { type = 'edition', val = 'e_' .. ed_k }) end
+                                end
+                            end
+                        end
+                    end
+                    if #pool > 0 then
+                        local chosen = pseudorandom_element(pool, pseudoseed('runway_trait'))
+                        if chosen.type == 'seal' then
+                            center_card:set_seal(chosen.val, true)
+                        elseif chosen.type == 'edition' then
+                            center_card:set_edition(chosen.val, true)
+                        end
+                        center_card:juice_up(0.6, 0.6)
                     end
                 end
             end
@@ -280,25 +419,24 @@ SMODS.Joker {
     loc_txt = {
         name = 'Slot Machine',
         text = {
-            "Each scored card has a chance to win:",
-            "{C:green}#1# in 8{}: {C:money}$3{} | {C:green}#1# in 15{}: {C:money}$5{} | {C:green}#1# in 25{}: {C:money}$15{} | {C:green}#1# in 35{}: {C:money}$30{}",
-            "{C:green}#1# in 40{}: {C:attention}Uncommon Joker{} | {C:green}#1# in 65{}: {C:red}Rare Joker{}",
-            "{C:green}#1# in 125{}: {C:dark_edition}Negative{} {C:red}Rare Joker{}",
-            "{C:green}#1# in 200{}: {C:dark_edition}Negative{} {C:eternal}Eternal{} {C:attention}Blueprint{}",
-            "{C:green}#1# in 777{}: {C:dark_edition}Negative{} {C:spectral}The Soul{}"
-        },
-        unlock = {
-            "Trigger both {C:mult}+20 Mult{} and",
-            "{C:money}$20{} from a single",
-            "{C:attention}Lucky Card{}"
+            "Spins 3 visual reels each hand: {C:attention}[ 🍒 | 🍋 | 🔔 | 7️⃣ ]{}",
+            "{C:attention}2 Match{}: {C:money}+$#1#{} & {C:mult}+#2#{} Mult | {C:attention}3 Match{}: {C:money}+$#3#{} & {X:mult,C:white}X#4#{} Mult",
+            "{C:attention}Triple 7️⃣{}: {C:dark_edition}JACKPOT!{} {C:money}+$#5#{}, {X:mult,C:white}X#6#{} Mult & Spectral Card!",
+            "{C:attention}Lucky Cards{} force the 1st reel to stop on {C:attention}7️⃣{}"
         }
     },
-    config = { extra = { odds_base = 1 } },
+    unlock = {
+        "Trigger both {C:mult}+20 Mult{} and",
+        "{C:money}$20{} from a single",
+        "{C:attention}Lucky Card{}"
+    },
+    config = { extra = { pair_cash = 3, pair_mult = 15, triple_cash = 12, triple_xmult = 2.5, jackpot_cash = 35, jackpot_xmult = 4.0 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     loc_vars = function(self, info_queue, card)
-        return { vars = { (G.GAME and G.GAME.probabilities.normal or 1) } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        return { vars = { ex.pair_cash, ex.pair_mult, ex.triple_cash, ex.triple_xmult, ex.jackpot_cash, ex.jackpot_xmult } }
     end,
     check_for_unlock = function(self, args)
         if args.type == 'lucky_both' or (G.GAME and G.GAME.lucky_hit_both) then
@@ -306,124 +444,65 @@ SMODS.Joker {
         end
     end,
     calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play then
-            local prob = (G.GAME and G.GAME.probabilities.normal or 1)
-            local hit = false
-            local ret = {}
-
-            -- $3 (1 in 8)
-            if pseudorandom('slot_3') < prob / 8 then
-                ease_dollars(3)
-                ret.dollars = (ret.dollars or 0) + 3
-                hit = true
-            end
-
-            -- $5 (1 in 15)
-            if pseudorandom('slot_5') < prob / 15 then
-                ease_dollars(5)
-                ret.dollars = (ret.dollars or 0) + 5
-                hit = true
-            end
-
-            -- $15 (1 in 25)
-            if pseudorandom('slot_15') < prob / 25 then
-                ease_dollars(15)
-                ret.dollars = (ret.dollars or 0) + 15
-                hit = true
-            end
-
-            -- $30 (1 in 35)
-            if pseudorandom('slot_30') < prob / 35 then
-                ease_dollars(30)
-                ret.dollars = (ret.dollars or 0) + 30
-                hit = true
-            end
-
-            -- Uncommon Joker (1 in 40)
-            if pseudorandom('slot_uncommon') < prob / 40 then
-                if #G.jokers.cards < G.jokers.config.card_limit then
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            local new_joker = create_card('Joker', G.jokers, nil, 0.8, nil, nil, nil, 'slot_uncommon')
-                            new_joker:add_to_deck()
-                            G.jokers:emplace(new_joker)
-                            return true
-                        end
-                    }))
-                    hit = true
+        if context.before and not context.blueprint and context.scoring_hand then
+            local symbols = { '🍒', '🍋', '🔔', '7' }
+            local has_lucky = false
+            for _, sc in ipairs(context.scoring_hand) do
+                if sc.ability and (sc.ability.name == 'Lucky Card' or sc.ability.effect == 'Lucky Card') then
+                    has_lucky = true
+                    break
                 end
             end
 
-            -- Rare Joker (1 in 65)
-            if pseudorandom('slot_rare') < prob / 65 then
-                if #G.jokers.cards < G.jokers.config.card_limit then
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            local new_joker = create_card('Joker', G.jokers, nil, 0.99, nil, nil, nil, 'slot_rare')
-                            new_joker:add_to_deck()
-                            G.jokers:emplace(new_joker)
-                            return true
-                        end
-                    }))
-                    hit = true
-                end
-            end
+            local r1 = has_lucky and '7' or pseudorandom_element(symbols, 'slot_r1')
+            local r2 = pseudorandom_element(symbols, 'slot_r2')
+            local r3 = pseudorandom_element(symbols, 'slot_r3')
+            card.ability.extra.last_spin = { r1, r2, r3 }
 
-            -- Negative Rare Joker (1 in 125)
-            if pseudorandom('slot_neg_rare') < prob / 125 then
+            return {
+                message = '[ ' .. r1 .. ' | ' .. r2 .. ' | ' .. r3 .. ' ]',
+                colour = G.C.GOLD
+            }
+        end
+
+        if context.joker_main and card.ability.extra.last_spin then
+            local r = card.ability.extra.last_spin
+            local r1, r2, r3 = r[1], r[2], r[3]
+            local ex = card.ability.extra
+
+            if r1 == '7' and r2 == '7' and r3 == '7' then
+                ease_dollars(ex.jackpot_cash)
                 G.E_MANAGER:add_event(Event({
                     func = function()
-                        local new_joker = create_card('Joker', G.jokers, nil, 0.99, nil, nil, nil, 'slot_neg_rare')
-                        new_joker:set_edition({negative = true}, true)
-                        new_joker:add_to_deck()
-                        G.jokers:emplace(new_joker)
+                        local sc = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'slot_jackpot')
+                        sc:add_to_deck()
+                        G.consumeables:emplace(sc)
+                        sc:juice_up(0.6, 0.6)
                         return true
                     end
                 }))
-                hit = true
-                ret.message = 'NEGATIVE RARE!'
-                ret.colour = G.C.DARK_EDITION
-            end
-
-            -- Negative Eternal Blueprint (1 in 200)
-            if pseudorandom('slot_blueprint') < prob / 200 then
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local blueprint = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_blueprint', 'slot_blueprint')
-                        blueprint:set_edition({negative = true}, true)
-                        blueprint.eternal = true
-                        if blueprint.ability then
-                            blueprint.ability.eternal = true
-                        end
-                        blueprint:add_to_deck()
-                        G.jokers:emplace(blueprint)
-                        return true
-                    end
-                }))
-                hit = true
-                ret.message = 'BLUEPRINT!'
-                ret.colour = G.C.BLUE
-            end
-
-            -- Negative Soul (1 in 777)
-            if pseudorandom('slot_soul') < prob / 777 then
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local soul_card = create_card('Spectral', G.consumeables, nil, nil, nil, nil, 'c_soul', 'slot_soul')
-                        soul_card:set_edition({negative = true}, true)
-                        soul_card:add_to_deck()
-                        G.consumeables:emplace(soul_card)
-                        return true
-                    end
-                }))
-                hit = true
-                ret.message = 'JACKPOT!'
-                ret.colour = G.C.DARK_EDITION
-            end
-
-            if hit then
-                ret.card = card
-                return ret
+                return {
+                    Xmult = ex.jackpot_xmult,
+                    dollars = ex.jackpot_cash,
+                    message = '777 JACKPOT! +$' .. ex.jackpot_cash,
+                    colour = G.C.GOLD
+                }
+            elseif r1 == r2 and r2 == r3 then
+                ease_dollars(ex.triple_cash)
+                return {
+                    Xmult = ex.triple_xmult,
+                    dollars = ex.triple_cash,
+                    message = 'TRIPLE MATCH! +$' .. ex.triple_cash,
+                    colour = G.C.MONEY
+                }
+            elseif r1 == r2 or r2 == r3 or r1 == r3 then
+                ease_dollars(ex.pair_cash)
+                return {
+                    mult = ex.pair_mult,
+                    dollars = ex.pair_cash,
+                    message = 'PAIR MATCH! +$' .. ex.pair_cash,
+                    colour = G.C.MULT
+                }
             end
         end
     end

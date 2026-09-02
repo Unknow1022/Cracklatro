@@ -9,25 +9,36 @@ local jd_def = JokerDisplay.Definitions
 jd_def["j_Crackedlatro_masterful_joker"] = {
     text = {
         { text = "+" },
-        { ref_table = "card.ability.extra", ref_value = "mult" }
+        { ref_table = "card.joker_display_values", ref_value = "mult" }
     },
     text_config = { colour = G.C.MULT },
     reminder_text = {
-        { text = "(4/5 of a Kind)" }
-    }
+        { text = "(Mastered Ranks)" }
+    },
+    calc_function = function(card)
+        local count = 0
+        if card.ability and card.ability.extra and card.ability.extra.mastered_ranks then
+            for _ in pairs(card.ability.extra.mastered_ranks) do count = count + 1 end
+        end
+        card.joker_display_values.mult = count * ((card.ability and card.ability.extra and card.ability.extra.mult_per_rank) or 10)
+    end
 }
 
 jd_def["j_Crackedlatro_outstanding_joker"] = {
     text = {
-        { text = "+", colour = G.C.CHIPS },
-        { ref_table = "card.ability.extra", ref_value = "chips", colour = G.C.CHIPS },
-        { text = " +", colour = G.C.MULT },
-        { ref_table = "card.ability.extra", ref_value = "mult", colour = G.C.MULT },
-        { text = " $", colour = G.C.MONEY },
-        { ref_table = "card.ability.extra", ref_value = "dollars", colour = G.C.MONEY }
+        { text = "Highest Absorbs", colour = G.C.CHIPS }
     },
     reminder_text = {
-        { text = "(4/5 of a Kind)" }
+        { text = "(+Chips & Retrigger)" }
+    }
+}
+
+jd_def["j_Crackedlatro_tts_joker"] = {
+    text = {
+        { text = "+4C / +1M per letter", colour = G.C.MULT }
+    },
+    reminder_text = {
+        { text = "(20+ letters: +$5)" }
     }
 }
 
@@ -45,47 +56,37 @@ jd_def["j_Crackedlatro_blueberry_joker"] = {
 -- Uncommon
 jd_def["j_Crackedlatro_shareholder_joker"] = {
     text = {
-        { text = "+$" },
-        { ref_table = "card.joker_display_values", ref_value = "dollars" }
+        { text = "Stock: $" },
+        { ref_table = "card.ability.extra", ref_value = "current_price" },
+        { text = " (+" },
+        { ref_table = "card.joker_display_values", ref_value = "mult" },
+        { text = "M)" }
     },
     text_config = { colour = G.C.MONEY },
     reminder_text = {
-        { text = "(1 Hand Win)" }
+        { text = "(Pays Price | 1-Hand Bull)" }
     },
     calc_function = function(card)
-        local reward = (card.ability and card.ability.extra and card.ability.extra.small) or 5
-        if G.GAME and G.GAME.blind then
-            if G.GAME.blind.boss then
-                reward = (card.ability and card.ability.extra and card.ability.extra.boss) or 8
-            elseif G.GAME.blind.name == 'Big Blind' or G.GAME.blind.key == 'b_big' then
-                reward = (card.ability and card.ability.extra and card.ability.extra.big) or 6
-            end
-        end
-        card.joker_display_values.dollars = reward
+        local p = (card.ability and card.ability.extra and card.ability.extra.current_price) or 8
+        card.joker_display_values.mult = p * 2
     end
 }
 
 jd_def["j_Crackedlatro_builder_joker"] = {
     text = {
-        {
-            border_nodes = {
-                { text = "X" },
-                { ref_table = "card.ability.extra", ref_value = "xmult" }
-            }
-        }
+        { text = "Pyramid: Ascending", colour = G.C.ORANGE }
     },
-    text_config = { colour = G.C.WHITE },
     reminder_text = {
-        { text = "(3/4/5 of a Kind)" }
+        { text = "(+X0.5 per card in order)" }
     }
 }
 
 jd_def["j_Crackedlatro_banquet_joker"] = {
     text = {
-        { text = "3 Food Jokers", colour = G.C.ORANGE }
+        { text = "+2 Chips in Hand", colour = G.C.CHIPS }
     },
     reminder_text = {
-        { text = "(On Sell)" }
+        { text = "(7+ in Hand: X2.5 | Sell Neg)" }
     }
 }
 
@@ -117,34 +118,20 @@ jd_def["j_Crackedlatro_appraiser_joker"] = {
 
 jd_def["j_Crackedlatro_runway_joker"] = {
     text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "odds" },
-        { text = " in " },
-        { ref_table = "card.ability.extra", ref_value = "odds" },
-        { text = ")" }
+        { text = "Spotlight Model", colour = G.C.DARK_EDITION }
     },
-    text_config = { colour = G.C.GREEN },
     reminder_text = {
-        { text = "Edition Chance" }
-    },
-    calc_function = function(card)
-        card.joker_display_values.odds = "" .. (G.GAME and G.GAME.probabilities.normal or 1)
-    end
+        { text = "(+X0.5 per unique trait)" }
+    }
 }
 
 jd_def["j_Crackedlatro_slot_machine_joker"] = {
     text = {
-        { text = "Odds: " },
-        { ref_table = "card.joker_display_values", ref_value = "prob" },
-        { text = "X" }
+        { text = "Reels: [ 🍒 | 🍋 | 🔔 | 7 ]", colour = G.C.GOLD }
     },
-    text_config = { colour = G.C.GREEN },
     reminder_text = {
-        { text = "(Scored Cards)" }
-    },
-    calc_function = function(card)
-        card.joker_display_values.prob = "" .. (G.GAME and G.GAME.probabilities.normal or 1)
-    end
+        { text = "(2/3 Match | 777: +$35 & Spec)" }
+    }
 }
 
 jd_def["j_Crackedlatro_duel_of_value_joker"] = {
@@ -191,10 +178,10 @@ jd_def["j_Crackedlatro_chameleon_joker"] = {
 -- Rare
 jd_def["j_Crackedlatro_doctor_jo_joker"] = {
     text = {
-        { text = "Revive", colour = G.C.RED }
+        { text = "Medical Immunity", colour = G.C.GREEN }
     },
     reminder_text = {
-        { text = "(On Destroyed)" }
+        { text = "(CLEAR! +1 Hand X3 | Poly Copy)" }
     }
 }
 
@@ -237,52 +224,46 @@ jd_def["j_Crackedlatro_merchant_joker"] = {
 
 jd_def["j_Crackedlatro_lover_joker"] = {
     text = {
-        { text = "+", colour = G.C.CHIPS },
-        { ref_table = "card.ability.extra", ref_value = "chips", colour = G.C.CHIPS },
-        { text = " +", colour = G.C.MULT },
-        { ref_table = "card.ability.extra", ref_value = "mult", colour = G.C.MULT }
+        { text = "Soulmates (X3 / +$6)", colour = G.C.HEARTS }
     },
     reminder_text = {
-        { text = "(Hearts)" }
+        { text = "(Draws Partner | +10M Hearts)" }
     }
 }
 
 jd_def["j_Crackedlatro_blacksmith_joker"] = {
     text = {
-        {
-            border_nodes = {
-                { text = "X" },
-                { ref_table = "card.ability.extra", ref_value = "xmult" }
-            }
-        }
+        { ref_table = "card.ability.extra", ref_value = "temp" },
+        { text = "°C Forge", colour = G.C.ORANGE }
     },
-    text_config = { colour = G.C.WHITE },
     reminder_text = {
-        { text = "(+X0.05/Spade)" }
+        { text = "(100°C: Steel Forge | +X/10°C)" }
     }
 }
 
 jd_def["j_Crackedlatro_lucky_one_joker"] = {
     text = {
-        { text = "+$", colour = G.C.MONEY },
-        { ref_table = "card.ability.extra", ref_value = "dollars", colour = G.C.MONEY },
-        { text = " +", colour = G.C.MULT },
-        { ref_table = "card.ability.extra", ref_value = "mult", colour = G.C.MULT }
+        { text = "4-Leaf Clover: " },
+        { ref_table = "card.joker_display_values", ref_value = "status" }
     },
+    text_config = { colour = G.C.GREEN },
     reminder_text = {
-        { text = "(Clubs)" }
-    }
+        { text = "(100% Win Next Probability)" }
+    },
+    calc_function = function(card)
+        local has = card.ability and card.ability.extra and card.ability.extra.has_four_leaf
+        card.joker_display_values.status = has and "READY (X2)" or ((card.ability and card.ability.extra and card.ability.extra.petals or 0) .. "/4")
+    end
 }
 
 jd_def["j_Crackedlatro_miner_joker"] = {
     text = {
-        { text = "X", colour = G.C.XMULT },
-        { ref_table = "card.ability.extra", ref_value = "xmult", colour = G.C.XMULT },
-        { text = " +", colour = G.C.CHIPS },
-        { ref_table = "card.ability.extra", ref_value = "chips", colour = G.C.CHIPS }
+        { text = "Mine: " },
+        { ref_table = "card.ability.extra", ref_value = "depth" },
+        { text = "m", colour = G.C.BLUE }
     },
     reminder_text = {
-        { text = "(Diamonds)" }
+        { text = "(Coal, Gold, Diamond, Core)" }
     }
 }
 

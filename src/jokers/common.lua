@@ -14,24 +14,64 @@ SMODS.Joker {
     loc_txt = {
         name = 'Masterful Joker',
         text = {
-            "{C:mult}+#1#{} Mult if played hand contains",
-            "a {C:attention}Four of a Kind{} or {C:attention}Five of a Kind{}"
+            "When a {C:attention}Four of a Kind{} or {C:attention}Five of a Kind{} scores,",
+            "this Joker {C:attention}masters{} that rank.",
+            "Cards of {C:attention}mastered ranks{} count as {C:attention}all suits{}.",
+            "{C:mult}+#1#{} Mult per mastered rank {C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult){}"
         }
     },
-    config = { extra = { mult = 25 } },
+    config = { extra = { mult_per_rank = 10, bonus_mult = 0, mastered_ranks = {} } },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.mult } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        local count = 0
+        if ex.mastered_ranks then
+            for _ in pairs(ex.mastered_ranks) do count = count + 1 end
+        end
+        local current_mult = count * (ex.mult_per_rank or 10)
+        return { vars = { ex.mult_per_rank or 10, current_mult } }
     end,
     calculate = function(self, card, context)
-        if context.joker_main and context.poker_hands then
+        if context.before and not context.blueprint and context.poker_hands then
             local has_poker_or_five = (context.poker_hands['Four of a Kind'] and next(context.poker_hands['Four of a Kind'])) or
-                                      (context.poker_hands['Five of a Kind'] and next(context.poker_hands['Five of a Kind']))
-            if has_poker_or_five then
+                                      (context.poker_hands['Five of a Kind'] and next(context.poker_hands['Five of a Kind'])) or
+                                      (context.poker_hands['Flush Five'] and next(context.poker_hands['Flush Five']))
+            if has_poker_or_five and context.scoring_hand then
+                local rank_counts = {}
+                local target_value = nil
+                for _, c in ipairs(context.scoring_hand) do
+                    local val = c.base and c.base.value
+                    if val then
+                        rank_counts[val] = (rank_counts[val] or 0) + 1
+                        if rank_counts[val] >= 4 then
+                            target_value = val
+                        end
+                    end
+                end
+                if target_value then
+                    card.ability.extra.mastered_ranks = card.ability.extra.mastered_ranks or {}
+                    if not card.ability.extra.mastered_ranks[target_value] then
+                        card.ability.extra.mastered_ranks[target_value] = true
+                        return {
+                            message = 'Mastered ' .. target_value .. '!',
+                            colour = G.C.PURPLE
+                        }
+                    end
+                end
+            end
+        end
+
+        if context.joker_main then
+            local count = 0
+            if card.ability.extra.mastered_ranks then
+                for _ in pairs(card.ability.extra.mastered_ranks) do count = count + 1 end
+            end
+            local total_mult = count * (card.ability.extra.mult_per_rank or 10)
+            if total_mult > 0 then
                 return {
-                    mult = card.ability.extra.mult
+                    mult = total_mult
                 }
             end
         end
@@ -53,21 +93,21 @@ SMODS.Joker {
     loc_txt = {
         name = 'Outstanding Joker',
         text = {
-            "{C:chips}+#1#{} Chips, {C:mult}+#2#{} Mult, and {C:money}$#3#{}",
-            "if played hand contains a {C:attention}Four of a Kind{}",
-            "or {C:attention}Five of a Kind{}"
-        },
-        unlock = {
-            "Play a",
-            "{C:attention}Five of a Kind{}"
+            "The scored card with the strictly {C:attention}highest rank{}",
+            "is {C:attention}Outstanding{}: it absorbs the {C:chips}Chips{} of all other",
+            "scoring cards multiplied by the hand size and {C:attention}retriggers 1 time{}"
         }
     },
-    config = { extra = { chips = 250, mult = 50, dollars = 5 } },
+    unlock = {
+        "Play a",
+        "{C:attention}Five of a Kind{}"
+    },
+    config = { extra = {} },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.chips, card.ability.extra.mult, card.ability.extra.dollars } }
+        return { vars = {} }
     end,
     check_for_unlock = function(self, args)
         if (args.type == 'hand' or args.type == 'play_hand') and (args.handname == 'Five of a Kind' or args.handname == 'Flush Five') then
@@ -78,16 +118,50 @@ SMODS.Joker {
         end
     end,
     calculate = function(self, card, context)
-        if context.joker_main and context.poker_hands then
-            local has_poker_or_five = (context.poker_hands['Four of a Kind'] and next(context.poker_hands['Four of a Kind'])) or
-                                      (context.poker_hands['Five of a Kind'] and next(context.poker_hands['Five of a Kind']))
-            if has_poker_or_five then
-                ease_dollars(card.ability.extra.dollars)
-                return {
-                    chips = card.ability.extra.chips,
-                    mult = card.ability.extra.mult,
-                    dollars = card.ability.extra.dollars
-                }
+        local highest_card = nil
+        local highest_rank = -1
+        local is_tied = false
+        if context.scoring_hand and #context.scoring_hand >= 2 then
+            for _, c in ipairs(context.scoring_hand) do
+                local r = c:get_id() or 0
+                if r > highest_rank then
+                    highest_rank = r
+                    highest_card = c
+                    is_tied = false
+                elseif r == highest_rank then
+                    is_tied = true
+                end
+            end
+        end
+
+        if highest_card and not is_tied then
+            if context.repetition and context.cardarea == G.play then
+                if context.other_card == highest_card then
+                    return {
+                        repetitions = 1,
+                        card = card
+                    }
+                end
+            end
+
+            if context.individual and context.cardarea == G.play then
+                if context.other_card == highest_card then
+                    local other_chips = 0
+                    for _, c in ipairs(context.scoring_hand) do
+                        if c ~= highest_card then
+                            other_chips = other_chips + (c.base and c.base.nominal or 0) + (c.ability and c.ability.perma_bonus or 0)
+                        end
+                    end
+                    local bonus_chips = other_chips * #context.scoring_hand
+                    if bonus_chips > 0 then
+                        return {
+                            chips = bonus_chips,
+                            message = 'Outstanding! +' .. bonus_chips .. ' Chips',
+                            colour = G.C.CHIPS,
+                            card = card
+                        }
+                    end
+                end
             end
         end
     end
@@ -268,47 +342,73 @@ SMODS.Joker {
     loc_txt = {
         name = 'TTS',
         text = {
-            "Scored {C:attention}Aces{} give {C:mult}+#1#{} Mult and {C:chips}+#2#{} Chips.",
-            "{C:attention}Aces{} held in hand give {C:money}$#3#{} at end of round"
+            "Each scored card spells its rank name: grants",
+            "{C:chips}+#1#{} Chips and {C:mult}+#2#{} Mult per letter in English.",
+            "If played hand has {C:attention}#3# or more letters{} {C:inactive}(#4#){},",
+            "receive a {C:money}$#5#{} {C:attention}Donation{}!"
         }
     },
-    config = { extra = { mult = 20, chips = 10, dollars = 2 } },
+    config = { extra = { chips_per_letter = 4, mult_per_letter = 1, letters_target = 20, donation = 5 } },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
     loc_vars = function(self, info_queue, card)
-        local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or 20
-        local chips = (card and card.ability and card.ability.extra and card.ability.extra.chips) or 10
-        local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or 2
-        return { vars = { mult, chips, dollars } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        local current_hand_letters = 0
+        if G.play and G.play.cards then
+            local letter_counts = {
+                ['2'] = 3, ['3'] = 5, ['4'] = 4, ['5'] = 4, ['6'] = 3,
+                ['7'] = 5, ['8'] = 5, ['9'] = 4, ['10'] = 3,
+                ['Jack'] = 4, ['Queen'] = 5, ['King'] = 4, ['Ace'] = 3
+            }
+            for _, c in ipairs(G.play.cards) do
+                local val = c.base and c.base.value
+                current_hand_letters = current_hand_letters + (letter_counts[val] or 4)
+            end
+        end
+        return { vars = { ex.chips_per_letter, ex.mult_per_letter, ex.letters_target, current_hand_letters, ex.donation } }
     end,
     calculate = function(self, card, context)
+        local letter_counts = {
+            ['2'] = 3, ['3'] = 5, ['4'] = 4, ['5'] = 4, ['6'] = 3,
+            ['7'] = 5, ['8'] = 5, ['9'] = 4, ['10'] = 3,
+            ['Jack'] = 4, ['Queen'] = 5, ['King'] = 4, ['Ace'] = 3
+        }
+
         if context.individual and context.cardarea == G.play then
-            local id = context.other_card:get_id()
-            if id == 14 then
+            local val = context.other_card.base and context.other_card.base.value
+            local letters = letter_counts[val] or 4
+            return {
+                chips = letters * card.ability.extra.chips_per_letter,
+                mult = letters * card.ability.extra.mult_per_letter,
+                message = letters .. ' Letters (' .. tostring(val) .. ')',
+                colour = G.C.MULT,
+                card = card
+            }
+        end
+
+        if context.before and not context.blueprint and context.scoring_hand then
+            local total_letters = 0
+            for _, c in ipairs(context.scoring_hand) do
+                local val = c.base and c.base.value
+                total_letters = total_letters + (letter_counts[val] or 4)
+            end
+            if total_letters >= card.ability.extra.letters_target then
+                ease_dollars(card.ability.extra.donation)
                 return {
-                    mult = card.ability.extra.mult,
-                    chips = card.ability.extra.chips,
-                    card = card
+                    message = 'TTS DONATION! +$' .. card.ability.extra.donation,
+                    colour = G.C.MONEY
                 }
             end
         end
 
-        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
-            local ace_count = 0
-            if G.hand and G.hand.cards then
-                for _, hc in ipairs(G.hand.cards) do
-                    if hc:get_id() == 14 then
-                        ace_count = ace_count + 1
-                    end
-                end
-            end
-            if ace_count > 0 then
-                local total_money = ace_count * card.ability.extra.dollars
-                ease_dollars(total_money)
+        if context.discard and not context.blueprint and context.other_card then
+            local val = context.other_card.base and context.other_card.base.value
+            local letters = letter_counts[val] or 4
+            if letters >= 5 then
+                ease_dollars(1)
                 return {
-                    dollars = total_money,
-                    message = '+$' .. total_money,
+                    message = 'Spamming Chat! +$1',
                     colour = G.C.MONEY
                 }
             end

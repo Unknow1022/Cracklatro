@@ -687,8 +687,10 @@ function Card:start_dissolve(dissolve_colours, silent, dissolve_time_fac, no_sou
                             new_card:set_debuff(false)
                         end
 
+                        new_card:set_edition({ polychrome = true }, true)
                         new_card:add_to_deck()
                         G.jokers:emplace(new_card)
+                        new_card:juice_up(0.8, 0.8)
                         
                         return true
                     end
@@ -885,5 +887,38 @@ end
 
 ensure_custom_seals_discovered()
 
+-- Masterful Joker: Mastered ranks count as any suit
+local card_is_suit_ref = Card.is_suit
+function Card:is_suit(suit, bypass_debuff, flush_calc)
+    if G and G.jokers and G.jokers.cards then
+        for _, j in ipairs(G.jokers.cards) do
+            if j.config and (j.config.center.key == 'j_Crackedlatro_masterful_joker' or j.config.center_key == 'j_Crackedlatro_masterful_joker') and not j.debuff then
+                if j.ability and j.ability.extra and j.ability.extra.mastered_ranks then
+                    local rank = self.base and self.base.value
+                    if rank and j.ability.extra.mastered_ranks[rank] then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return card_is_suit_ref(self, suit, bypass_debuff, flush_calc)
+end
 
-
+-- Lucky One: 4-Leaf Clover guarantees 100% success on next probability roll
+local pseudorandom_ref = pseudorandom
+function pseudorandom(seed, min, max)
+    if not min and not max and G and G.jokers and G.jokers.cards then
+        for _, j in ipairs(G.jokers.cards) do
+            if j.config and (j.config.center.key == 'j_Crackedlatro_lucky_one_joker' or j.config.center_key == 'j_Crackedlatro_lucky_one_joker') and not j.debuff then
+                if j.ability and j.ability.extra and j.ability.extra.has_four_leaf then
+                    j.ability.extra.has_four_leaf = false
+                    card_eval_status_text(j, 'extra', nil, nil, nil, { message = 'Clover Miracle!', colour = G.C.GREEN })
+                    play_sound('tarot1')
+                    return 0.0000000001
+                end
+            end
+        end
+    end
+    return pseudorandom_ref(seed, min, max)
+end

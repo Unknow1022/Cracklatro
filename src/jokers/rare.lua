@@ -14,17 +14,84 @@ SMODS.Joker {
     loc_txt = {
         name = 'Doctor Jo.',
         text = {
-            "When another compatible {C:attention}Joker{} is {C:red}destroyed{},",
-            "{C:attention}Doctor Jo. self-destructs{} to create an exact",
-            "copy of it without debuffs or negative stickers",
-            "{C:inactive}(e.g. Perishable, Rental, Debuffed){}"
+            "{C:attention}Medical Immunity{}: Joker {C:attention}Perishable{} counters never decrease,",
+            "and {C:money}Rental{} Jokers have their fees fully reimbursed.",
+            "{C:red}CLEAR! (Defibrillator){}: If final hand falls short of Blind,",
+            "removes Debuffs and grants {C:blue}+1 Emergency Hand{} with {X:mult,C:white}X3{} Mult {C:inactive}(1/Blind){}",
+            "When another Joker is {C:red}destroyed{}, sacrifices self to create a clean {C:dark_edition}Polychrome{} copy"
         }
     },
-    config = { extra = {} },
+    config = { extra = { defibrillator_used = false } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
-    blueprint_compat = false
+    blueprint_compat = false,
+    calculate = function(self, card, context)
+        -- Start of shop or round: heal debuffs and reset defib
+        if (context.starting_shop or context.setting_blind) and not context.blueprint then
+            card.ability.extra.defibrillator_used = false
+            if G.jokers and G.jokers.cards then
+                for _, j in ipairs(G.jokers.cards) do
+                    if j.debuff then
+                        j.debuff = false
+                        j.debuffed_by_blind = nil
+                        if j.set_debuff then j:set_debuff(false) end
+                    end
+                end
+            end
+        end
+
+        -- Medical Insurance: Reimburse rental fees and preserve perishable
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
+            card.ability.extra.defibrillator_used = false
+            local rental_reimburse = 0
+            if G.jokers and G.jokers.cards then
+                for _, j in ipairs(G.jokers.cards) do
+                    if j.ability and j.ability.rental then
+                        rental_reimburse = rental_reimburse + 3
+                    end
+                    if j.ability and j.ability.perishable then
+                        j.ability.perish_tally = (j.ability.perish_tally or 5) + 1
+                    end
+                end
+            end
+            if rental_reimburse > 0 then
+                ease_dollars(rental_reimburse)
+                return {
+                    message = 'Medical Insurance! +$' .. rental_reimburse,
+                    colour = G.C.MONEY
+                }
+            end
+        end
+
+        -- Emergency Defibrillator
+        if context.after and not context.blueprint and G.GAME.chips < G.GAME.blind.chips then
+            if G.GAME.current_round and G.GAME.current_round.hands_left == 0 and not card.ability.extra.defibrillator_used then
+                card.ability.extra.defibrillator_used = true
+                ease_hands_played(1)
+                play_sound('tarot1')
+                if G.jokers and G.jokers.cards then
+                    for _, j in ipairs(G.jokers.cards) do
+                        if j.debuff then
+                            j.debuff = false
+                            if j.set_debuff then j:set_debuff(false) end
+                        end
+                    end
+                end
+                return {
+                    message = 'CLEAR! +1 Hand (X3)',
+                    colour = G.C.RED
+                }
+            end
+        end
+
+        -- Emergency Hand X3 Mult boost
+        if context.joker_main and card.ability.extra.defibrillator_used then
+            return {
+                Xmult = 3.0
+            }
+        end
+    end
 }
 
 -- Symmetrical Joker
@@ -223,42 +290,119 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lover',
         text = {
-            "Scored {C:hearts}Hearts{} give {C:chips}+#1#{} Chips and {C:mult}+#2#{} Mult.",
-            "{C:green}#3# in #4#{} chance to create a {C:dark_edition}Negative{}",
-            "{C:tarot}The Lovers{} Tarot card {C:inactive}(Must have room){}"
-        },
-        unlock = {
-            "Play a {C:attention}Flush{} of all 4 suits",
-            "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
-            "in a single run"
+            "Selects 2 cards in deck as {C:attention}Soulmates{}.",
+            "Having 1 Soulmate in hand immediately {C:attention}draws its partner{} from deck.",
+            "Scoring {C:attention}both Soulmates{} in the same hand gives {X:mult,C:white}X#1#{} Mult, {C:money}+$#2#{},",
+            "and permanently adds {C:chips}+#3#{} Chips to both. Scored {C:hearts}Hearts{} give {C:mult}+#4#{} Mult"
         }
     },
-    config = { extra = { chips = 50, mult = 25, odds = 4 } },
+    unlock = {
+        "Play a {C:attention}Flush{} of all 4 suits",
+        "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
+        "in a single run"
+    },
+    config = { extra = { xmult = 3.0, dollars = 6, perma_chips = 10, heart_mult = 10 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.chips, card.ability.extra.mult, (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        return { vars = { ex.xmult, ex.dollars, ex.perma_chips, ex.heart_mult } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
+    add_to_deck = function(self, card, from_debuff)
+        if G.playing_cards and #G.playing_cards >= 2 then
+            local unbonded = {}
+            for _, c in ipairs(G.playing_cards) do
+                if not c.is_soulmate then table.insert(unbonded, c) end
+            end
+            if #unbonded >= 2 then
+                local s1 = pseudorandom_element(unbonded, pseudoseed('soulmate_1'))
+                s1.is_soulmate = true
+                local unbonded2 = {}
+                for _, c in ipairs(unbonded) do if c ~= s1 then table.insert(unbonded2, c) end end
+                local s2 = pseudorandom_element(unbonded2, pseudoseed('soulmate_2'))
+                s2.is_soulmate = true
+                s1:juice_up(0.6, 0.6)
+                s2:juice_up(0.6, 0.6)
+            end
+        end
+    end,
     calculate = function(self, card, context)
+        -- Ensure soulmates exist if cards were added
+        if (context.setting_blind or context.first_hand_drawn) and not context.blueprint then
+            local count = 0
+            if G.playing_cards then
+                for _, c in ipairs(G.playing_cards) do
+                    if c.is_soulmate then count = count + 1 end
+                end
+                if count < 2 and #G.playing_cards >= 2 then
+                    for _, c in ipairs(G.playing_cards) do
+                        if not c.is_soulmate then
+                            c.is_soulmate = true
+                            count = count + 1
+                            if count >= 2 then break end
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Soulmate summon: If 1 in hand and 1 in deck, draw missing partner
+        if (context.first_hand_drawn or context.before) and not context.blueprint then
+            local in_hand = {}
+            local in_deck = {}
+            if G.hand and G.hand.cards then
+                for _, c in ipairs(G.hand.cards) do
+                    if c.is_soulmate then table.insert(in_hand, c) end
+                end
+            end
+            if #in_hand == 1 and G.deck and G.deck.cards then
+                for _, c in ipairs(G.deck.cards) do
+                    if c.is_soulmate then table.insert(in_deck, c) end
+                end
+                if #in_deck >= 1 then
+                    local partner = in_deck[1]
+                    draw_card(G.deck, G.hand, 1, 'up', nil, partner)
+                    return {
+                        message = 'Soulmates Reunited!',
+                        colour = G.C.HEARTS
+                    }
+                end
+            end
+        end
+
+        -- Individual Hearts mult
         if context.individual and context.cardarea == G.play then
             if context.other_card:is_suit('Hearts') then
-                if pseudorandom('lover_joker') < (G.GAME and G.GAME.probabilities.normal or 1) / card.ability.extra.odds then
-                    G.E_MANAGER:add_event(Event({
-                        func = function()
-                            local lovers_card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, 'c_lovers')
-                            lovers_card:set_edition({negative = true}, true)
-                            lovers_card:add_to_deck()
-                            G.consumeables:emplace(lovers_card)
-                            return true
-                        end
-                    }))
+                return {
+                    mult = card.ability.extra.heart_mult,
+                    card = card
+                }
+            end
+        end
+
+        -- Both soulmates score in the same hand!
+        if context.joker_main and context.scoring_hand then
+            local soulmates_scored = {}
+            for _, sc in ipairs(context.scoring_hand) do
+                if sc.is_soulmate then
+                    table.insert(soulmates_scored, sc)
+                end
+            end
+            if #soulmates_scored >= 2 then
+                ease_dollars(card.ability.extra.dollars)
+                if not context.blueprint then
+                    for _, sm in ipairs(soulmates_scored) do
+                        sm.ability = sm.ability or {}
+                        sm.ability.perma_bonus = (sm.ability.perma_bonus or 0) + card.ability.extra.perma_chips
+                    end
                 end
                 return {
-                    chips = card.ability.extra.chips,
-                    mult = card.ability.extra.mult,
-                    card = card
+                    Xmult = card.ability.extra.xmult,
+                    dollars = card.ability.extra.dollars,
+                    message = 'TRUE LOVE! X' .. card.ability.extra.xmult,
+                    colour = G.C.HEARTS
                 }
             end
         end
@@ -280,40 +424,75 @@ SMODS.Joker {
     loc_txt = {
         name = 'Blacksmith',
         text = {
-            "This Joker gains {X:mult,C:white}X#2#{} Mult for each",
-            "scored {C:spades}Spade{} card played",
-            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
-        },
-        unlock = {
-            "Play a {C:attention}Flush{} of all 4 suits",
-            "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
-            "in a single run"
+            "Scored {C:spades}Spades{} heat the forge: {C:attention}+#2#°C{} per card.",
+            "Gives {X:mult,C:white}+X#3#{} Mult per 10°C {C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult, {C:attention}#4#°C{C:inactive}){}",
+            "At {C:attention}100°C{}, the forge strikes the yunque: permanently transforms",
+            "the highest card into a {C:attention}Steel Card{} with {C:chips}double base Chips{} and resets heat"
         }
     },
-    config = { extra = { xmult = 1.0, xmult_gain = 0.05 } },
+    unlock = {
+        "Play a {C:attention}Flush{} of all 4 suits",
+        "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
+        "in a single run"
+    },
+    config = { extra = { temp = 0, temp_per_spade = 15, max_temp = 100, xmult_per_10c = 0.05 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.xmult, card.ability.extra.xmult_gain } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        if info_queue then
+            info_queue[#info_queue + 1] = G.P_CENTERS.m_steel
+        end
+        local current_temp = ex.temp or 0
+        local current_xmult = 1 + (math.floor(current_temp / 10) * (ex.xmult_per_10c or 0.05))
+        return { vars = { current_xmult, ex.temp_per_spade or 15, ex.xmult_per_10c or 0.05, current_temp } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play and not context.blueprint then
             if context.other_card:is_suit('Spades') then
-                card.ability.extra.xmult = card.ability.extra.xmult + card.ability.extra.xmult_gain
+                card.ability.extra.temp = (card.ability.extra.temp or 0) + card.ability.extra.temp_per_spade
                 return {
-                    message = 'Upgraded!',
-                    colour = G.C.MULT,
+                    message = '+' .. card.ability.extra.temp_per_spade .. '°C Heat!',
+                    colour = G.C.ORANGE,
                     card = card
                 }
             end
         end
 
-        if context.joker_main and card.ability.extra.xmult > 1 then
-            return {
-                Xmult = card.ability.extra.xmult
-            }
+        if context.joker_main then
+            local current_temp = card.ability.extra.temp or 0
+            local current_xmult = 1 + (math.floor(current_temp / 10) * (card.ability.extra.xmult_per_10c or 0.05))
+
+            if current_temp >= (card.ability.extra.max_temp or 100) and context.scoring_hand and #context.scoring_hand >= 1 and not context.blueprint then
+                local highest_card = context.scoring_hand[1]
+                local highest_rank = -1
+                for _, sc in ipairs(context.scoring_hand) do
+                    local r = sc:get_id() or 0
+                    if r > highest_rank then
+                        highest_rank = r
+                        highest_card = sc
+                    end
+                end
+
+                if highest_card then
+                    play_sound('gold_seal')
+                    highest_card:set_ability(G.P_CENTERS.m_steel)
+                    highest_card.ability.perma_bonus = (highest_card.ability.perma_bonus or 0) + (highest_card.base and highest_card.base.nominal or 10)
+                    highest_card:juice_up(0.8, 0.8)
+                end
+                card.ability.extra.temp = 0
+                return {
+                    Xmult = current_xmult,
+                    message = 'STEEL FORGED! 0°C',
+                    colour = G.C.GREY
+                }
+            elseif current_xmult > 1 then
+                return {
+                    Xmult = current_xmult
+                }
+            end
         end
     end
 }
@@ -333,47 +512,55 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lucky One',
         text = {
-            "Scored {C:clubs}Clubs{} give {C:money}$#1#{} and {C:mult}+#2#{} Mult.",
-            "{C:green}#3# in #4#{} chance to create a random",
-            "{C:attention}Common{} or {C:attention}Uncommon Joker{} {C:inactive}(Must have room){}"
-        },
-        unlock = {
-            "Play a {C:attention}Flush{} of all 4 suits",
-            "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
-            "in a single run"
+            "Scored {C:clubs}Clubs{} gather petals {C:inactive}(#1#/4){}.",
+            "At 4 petals, forms a {C:attention}Four-Leaf Clover{}:",
+            "Grants {X:mult,C:white}X#2#{} Mult and {C:green}guarantees 100% success{}",
+            "on the next probability roll in the game {C:inactive}(Consumes clover){}"
         }
     },
-    config = { extra = { dollars = 1, mult = 5, odds = 4 } },
+    unlock = {
+        "Play a {C:attention}Flush{} of all 4 suits",
+        "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
+        "in a single run"
+    },
+    config = { extra = { petals = 0, leaves_needed = 4, has_four_leaf = false, xmult = 2.0 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.dollars, card.ability.extra.mult, (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        local p = ex.has_four_leaf and "READY!" or tostring(ex.petals or 0)
+        return { vars = { p, ex.xmult or 2.0 } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play then
+        if context.individual and context.cardarea == G.play and not context.blueprint then
             if context.other_card:is_suit('Clubs') then
-                if pseudorandom('lucky_one_joker') < (G.GAME and G.GAME.probabilities.normal or 1) / card.ability.extra.odds then
-                    if #G.jokers.cards < G.jokers.config.card_limit then
-                        G.E_MANAGER:add_event(Event({
-                            func = function()
-                                local rarities = { 0, 0.8 }
-                                local chosen_rarity = pseudorandom_element(rarities, 'lucky_one_rarity')
-                                local new_joker = create_card('Joker', G.jokers, nil, chosen_rarity, nil, nil, nil, 'lucky_one')
-                                new_joker:add_to_deck()
-                                G.jokers:emplace(new_joker)
-                                return true
-                            end
-                        }))
+                if not card.ability.extra.has_four_leaf then
+                    card.ability.extra.petals = (card.ability.extra.petals or 0) + 1
+                    if card.ability.extra.petals >= (card.ability.extra.leaves_needed or 4) then
+                        card.ability.extra.has_four_leaf = true
+                        card.ability.extra.petals = 0
+                        return {
+                            message = '4-Leaf Clover Assembled!',
+                            colour = G.C.GREEN,
+                            card = card
+                        }
+                    else
+                        return {
+                            message = 'Petal ' .. card.ability.extra.petals .. '/4',
+                            colour = G.C.CLUBS,
+                            card = card
+                        }
                     end
                 end
-                return {
-                    dollars = card.ability.extra.dollars,
-                    mult = card.ability.extra.mult,
-                    card = card
-                }
             end
+        end
+
+        if context.joker_main and card.ability.extra.has_four_leaf then
+            return {
+                Xmult = card.ability.extra.xmult
+            }
         end
     end
 }
@@ -393,56 +580,97 @@ SMODS.Joker {
     loc_txt = {
         name = 'Miner',
         text = {
-            "Scored {C:diamonds}Diamonds{} give {X:mult,C:white}X#1#{} Mult and {C:chips}+#2#{} Chips.",
-            "{C:green}#3# in #4#{} chance at end of round to collapse and",
-            "transform into a {C:attention}Rough Gem{}"
-        },
-        unlock = {
-            "Play a {C:attention}Flush{} of all 4 suits",
-            "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
-            "in a single run"
+            "Scored {C:diamonds}Diamonds{} dig down {C:attention}+#1#m{} {C:inactive}(Current: {C:attention}#2#m{C:inactive}){}:",
+            "{C:attention}0-50m{} (Coal): {C:chips}+25{} Chips | {C:attention}50-100m{} (Gold): {C:money}+$2{}",
+            "{C:attention}100-200m{} (Diamond): {X:mult,C:white}X1.35{} Mult",
+            "{C:red}200m+{} (Magma Core): {X:mult,C:white}X1.5{} Mult, {C:attention}retriggers{}, and extracts a Spectral Card!"
         }
     },
-    config = { extra = { xmult = 1.5, chips = 10, odds = 7 } },
+    unlock = {
+        "Play a {C:attention}Flush{} of all 4 suits",
+        "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
+        "in a single run"
+    },
+    config = { extra = { depth = 0, depth_per_card = 15 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.xmult, card.ability.extra.chips, (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        local d = ex.depth or 0
+        return { vars = { ex.depth_per_card or 15, d } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play then
-            if context.other_card:is_suit('Diamonds') then
+        -- Depth retrigger in Magma Core
+        if context.repetition and context.cardarea == G.play then
+            if context.other_card:is_suit('Diamonds') and (card.ability.extra.depth or 0) >= 200 then
                 return {
-                    x_mult = card.ability.extra.xmult,
-                    chips = card.ability.extra.chips,
+                    repetitions = 1,
                     card = card
                 }
             end
         end
 
+        -- Individual stratum bonuses
+        if context.individual and context.cardarea == G.play then
+            if context.other_card:is_suit('Diamonds') then
+                if not context.blueprint then
+                    card.ability.extra.depth = (card.ability.extra.depth or 0) + (card.ability.extra.depth_per_card or 15)
+                end
+                local d = card.ability.extra.depth or 0
+                if d < 50 then
+                    return {
+                        chips = 25,
+                        message = d .. 'm: Coal (+25 Chips)',
+                        colour = G.C.DARK_EDITION,
+                        card = card
+                    }
+                elseif d < 100 then
+                    ease_dollars(2)
+                    return {
+                        dollars = 2,
+                        message = d .. 'm: Gold (+$2)',
+                        colour = G.C.GOLD,
+                        card = card
+                    }
+                elseif d < 200 then
+                    return {
+                        x_mult = 1.35,
+                        message = d .. 'm: Diamond (X1.35)',
+                        colour = G.C.BLUE,
+                        card = card
+                    }
+                else
+                    return {
+                        x_mult = 1.5,
+                        message = d .. 'm: THE CORE! (X1.5)',
+                        colour = G.C.RED,
+                        card = card
+                    }
+                end
+            end
+        end
+
+        -- Round end core extraction
         if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
-            if pseudorandom('miner_cavein') < (G.GAME and G.GAME.probabilities.normal or 1) / card.ability.extra.odds then
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        play_sound('tarot1')
-                        card:start_dissolve()
-                        local gem = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_rough_gem')
-                        gem:add_to_deck()
-                        G.jokers:emplace(gem)
-                        return true
-                    end
-                }))
-                return {
-                    message = 'CAVE-IN!',
-                    colour = G.C.RED
-                }
-            else
-                return {
-                    message = 'Mining!',
-                    colour = G.C.GOLD
-                }
+            if (card.ability.extra.depth or 0) >= 200 then
+                if #G.consumeables.cards < G.consumeables.config.card_limit then
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            play_sound('tarot1')
+                            local sc = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'miner_core')
+                            sc:add_to_deck()
+                            G.consumeables:emplace(sc)
+                            sc:juice_up(0.6, 0.6)
+                            return true
+                        end
+                    }))
+                    return {
+                        message = 'Core Gem Extracted!',
+                        colour = G.C.SECONDARY_SET.Spectral
+                    }
+                end
             end
         end
     end

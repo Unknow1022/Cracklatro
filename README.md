@@ -39,23 +39,20 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 ### 🎭 Jokers Estándar (35 Jokers)
 
 #### Comunes (6)
-* **Masterful Joker**: +25 Multi si la mano jugada contiene un Poker (*Four of a Kind*) o Repóker (*Five of a Kind*).
-* **Outstanding Joker**: +250 Fichas, +50 Multi y $5 si la mano jugada contiene un Poker o Repóker.
+* **Masterful Joker**: Al puntuar un Poker (*Four of a Kind*) o Repóker (*Five of a Kind*), **asimila ese rango**. Todas las cartas de rangos asimilados cuentan permanentemente como **todos los palos a la vez** (*Corazones, Diamantes, Picas, Tréboles*). Otorga **+10 Multi** por cada rango asimilado.
+* **Outstanding Joker**: La carta puntuada con el rango estrictamente más alto es **Sobresaliente**: absorbe las Fichas base de todas las demás cartas puntuadas multiplicadas por el tamaño de la mano y se **reactiva 1 vez**.
 * **Blueberry**: +1 Mano al seleccionar Ciega. Se autodestruye tras 3 rondas.
 * **DJ Joker**: Al jugarse una sola carta, la convierte en una carta mejorada aleatoria (*Suerte, Metal, Oro o Vidrio*) (**1 vez por ronda**).
 * **Designer Joker (Joker Diseñador)**: Las cartas versátiles (*Wild Cards*) otorgan **+$1** al ser puntuadas.
-* **TTS**: Los Ases generan **+20 Multi** y **+10 Fichas** al puntuar, y otorgan **+$2** si se mantienen en mano al final de la ronda.
+* **TTS**: Cada carta puntuada deletrea su rango en inglés: otorga **+4 Fichas** y **+1 Multi** por cada letra. Si la mano jugada suma **20 o más letras**, recibes una donación de **+$5**. Descartar cartas de 5 o más letras dona **+$1**.
 
 #### Poco Comunes (14)
-* **Shareholder Joker**: Gana $5 ($6 en Ciega Grande, $8 en Ciega Jefe) al derrotar la Ciega en solo 1 mano.
-* **Builder Joker**: Gana permanentemente +X0.1 Multi si la mano jugada contiene un Trío, Poker o Repóker.
-* **Banquet**: Al venderse, crea un Ice Cream, Popcorn y Ramen (si hay espacio).
+* **Shareholder Joker**: El precio de la acción fluctúa cada Ciega (**$2** a **$15**). Otorga Multiplicador equivalente al doble del precio y paga el valor de la acción al final de la ronda. Ganar en 1 mano desata un **Bull Market** ($12-$18); usar tu última mano provoca un **Bear Market** ($2-$5).
+* **Builder Joker**: Si las cartas puntuadas están en **orden estrictamente ascendente de rango**, construye una Pirámide Estable: otorga **+X0.5 Multi por cada carta puntuada** (hasta X3.5). Puntuar 4 o más cartas en orden añade permanentemente **+20 Fichas** a la más alta.
+* **Banquet**: Las cartas retenidas en mano al puntuar "comen en el banquete" y ganan permanentemente **+2 Fichas base**. Si tienes 7 o más cartas en mano al puntuar, otorga **+X2.5 Multi**. Al venderse, otorga **+$15** y crea un Joker de comida aleatorio **Negativo**.
 * **Appraiser**: Gana $1 al final de la ronda por cada carta con Edición (Foil, Holo, Poly) en tu baraja completa.
-* **Runway**: 1 en 10 de probabilidad para que las cartas mejoradas jugadas ganen una Edición permanente aleatoria (Foil, Holo, Poly).
-* **Slot Machine**: Cada carta puntuada tiene probabilidades de otorgar premios:
-  * 1 en 8: `$3` | 1 en 15: `$5` | 1 en 25: `$15` | 1 en 35: `$30`
-  * 1 en 40: Joker Poco Común | 1 en 65: Joker Raro
-  * 1 en 125: Joker Raro Negativo | 1 en 200: Blueprint Eterno Negativo | 1 en 777: Carta Espectral The Soul Negativa
+* **Runway**: La carta central de la mano jugada está bajo el **Foco de la Pasarela**: gana **+X0.5 Multi** por cada rasgo único (*Mejora, Edición, Sello*) presente en las demás cartas de la mano. Al derrotar la Ciega, hereda permanentemente uno de esos rasgos.
+* **Slot Machine**: Gira 3 rodillos visuales en cada mano: `[ 🍒 | 🍋 | 🔔 | 7️⃣ ]`. 2 iguales: **+$3** y **+15 Multi**. 3 iguales: **+$12** y **+X2.5 Multi**. Triple 7️⃣: **¡JACKPOT!** (+$35, +X4 Multi y crea una carta Espectral). Las Cartas de la Suerte fuerzan al 1er rodillo a caer en 7️⃣.
 * **Duel of Value**: X3 Multi si la mano jugada es Doble Pareja puntuada con exactamente 2 cartas pares y 2 cartas impares.
 * **Reading Deficiency (Falta de Lectura)**: X5 Multi si la mano jugada no activa ningún otro Joker.
 * **Chameleon Joker**: Copia la habilidad del Joker a su izquierda si la mano jugada contiene al menos una carta del rango requerido (el rango cambia cada ronda).
@@ -66,14 +63,14 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Paint Puddle (Charco de Pintura)**: Selecciona un palo aleatorio por ronda (nunca repite el mismo palo dos veces consecutivas); las cartas de ese palo otorgan **+25 Multi** (+50 Multi si la carta es Versátil / *Wild Card*).
 
 #### Raros (13)
-* **Doctor Jo.**: Cuando otro Joker compatible es destruido, Doctor Jo. se autodestruye para crear una copia exacta del mismo sin debuffs ni pegatinas negativas (elimina Perecedero, Alquiler, etc.).
+* **Doctor Jo.**: **Inmunidad Médica**: los contadores de Jokers Perecederos nunca disminuyen y los Jokers de Alquiler son totalmente reembolsados. **¡DESPEJEN!**: si la última mano no supera la Ciega, remueve Debuffs y otorga **+1 Mano de Emergencia** con **X3 Multi** (1 vez por Ciega). Al destruirse otro Joker, crea una copia limpia **Policroma**.
 * **Symmetrical Joker**: X4 Multi si la mano jugada es un Poker o Repóker donde todas las cartas puntuadas comparten el mismo palo.
 * **Balance**: Crea 2 cartas Espectrales si la mano jugada es un Poker con exactamente 4 cartas del mismo palo.
 * **Merchant**: En tienda: +1 ranura de carta, +1 vale, +1 paquete de refuerzo, 25% de descuento en todos los artículos y mayor tasa de Jokers Raros. Pierdes $5 al salir de la tienda.
-* **Lover**: Los Corazones puntuados otorgan +50 Fichas y +25 Multi. 1 en 4 de probabilidad de crear una carta de Tarot The Lovers Negativa.
-* **Blacksmith**: Gana +X0.05 Multi permanente por cada carta de Picas puntuada.
-* **Lucky One**: Los Tréboles puntuados otorgan $1 y +5 Multi. 1 en 4 de probabilidad de crear un Joker Común o Poco Común aleatorio.
-* **Miner**: Los Diamantes puntuados otorgan X1.5 Multi y +10 Fichas. 1 en 7 de probabilidad al final de la ronda de derrumbarse y transformarse en Rough Gem.
+* **Lover**: Vincula 2 cartas de tu baraja como **Almas Gemelas**. Tener a una en mano **roba a su pareja de la baraja** de inmediato. Si ambas puntúan en la misma mano, otorgan **X3 Multi**, **+$6** y **+10 Fichas permanentes**. Los Corazones puntuados dan +10 Multi.
+* **Blacksmith**: Las Picas calentitas elevan la forja en **+15°C** cada una (+X0.05 Multi por cada 10°C). Al llegar a **100°C**, golpea el yunque: convierte permanentemente la carta más alta en **Carta de Acero** con **fichas base duplicadas** y enfría la forja a 0°C.
+* **Lucky One**: Los Tréboles puntuados recolectan pétalos. Al juntar 4 pétalos, formas un **Trébol de 4 Hojas**: otorga **X2 Multi** y **garantiza al 100% de éxito la próxima probabilidad del juego** (Rueda de la Fortuna, Lucky Cards, Space Joker, etc.) consumiendo el trébol.
+* **Miner**: Los Diamantes descienden **+15m** en la mina: 0-50m (Carbón: **+25 Fichas**), 50-100m (Oro: **+$2**), 100-200m (Diamante: **+X1.35 Multi**), 200m+ (Núcleo Magmático: **+X1.5 Multi**, **reactivación** y extrae una carta Espectral al final de la ronda).
 * **Joke Joker?**: No hace nada aparente... pero en secreto, si posees el Vale Blank, lo transforma inmediatamente en Antimatter (+1 espacio de Joker).
 * **Perfectionism**: Al derrotar una Ciega Grande o Ciega Jefe, aplica Policromo a un Joker aleatorio (1 en 5 de probabilidad de otorgar Negativo en su lugar).
 * **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Comodín Invisible* (*Invisible Joker*) (**1 vez por ronda**).

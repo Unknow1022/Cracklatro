@@ -181,59 +181,40 @@ SMODS.Seal {
         name = 'Silver Seal',
         label = 'Silver Seal',
         text = {
-            "Enhances a random card from the",
-            "played hand into a {C:gold}Gold{},",
-            "{C:attention}Steel{}, or {C:attention}Diamond Card{}",
-            "when played and scored"
+            "{C:green}#1# in 4{} chance to convert into a {C:attention}Steel Card{} when played.",
+            "With {C:attention}Steel Card{}: gives {X:mult,C:white}X#2#{} Mult",
+            "when scored and {X:mult,C:white}X#3#{} Mult while held in hand"
         }
     },
     loc_vars = function(self, info_queue, card)
         if info_queue then
-            info_queue[#info_queue + 1] = G.P_CENTERS.m_gold
             info_queue[#info_queue + 1] = G.P_CENTERS.m_steel
-            info_queue[#info_queue + 1] = get_diamond_enhancement_center()
         end
-        return { vars = {} }
+        return { vars = { (G.GAME and G.GAME.probabilities.normal or 1), 2, 2.5 } }
     end,
     calculate = function(self, card, context)
         if (context.main_scoring or context.individual) and context.cardarea == G.play then
-            if not card.ability.silver_seal_triggered then
-                card.ability.silver_seal_triggered = true
-                local eligible_cards = {}
-                if G.play and G.play.cards then
-                    for _, c in ipairs(G.play.cards) do
-                        table.insert(eligible_cards, c)
+            local is_steel = (card.ability and card.ability.name == 'Steel Card') or (card.config and card.config.center == G.P_CENTERS.m_steel)
+            local norm = (G.GAME and G.GAME.probabilities.normal or 1)
+            if not is_steel and pseudorandom('silver_to_steel') < (norm / 4) then
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.2,
+                    func = function()
+                        play_sound('gold_seal')
+                        card:set_ability(G.P_CENTERS.m_steel)
+                        card:juice_up(0.6, 0.6)
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Forged into Steel!', colour = G.C.GREY })
+                        return true
                     end
-                elseif context.scoring_hand then
-                    for _, c in ipairs(context.scoring_hand) do
-                        table.insert(eligible_cards, c)
-                    end
-                end
-                if #eligible_cards > 0 then
-                    local target_card = pseudorandom_element(eligible_cards, pseudoseed('silver_seal_target'))
-                    local enh_choices = {
-                        G.P_CENTERS.m_gold,
-                        G.P_CENTERS.m_steel,
-                        get_diamond_enhancement_center()
-                    }
-                    local chosen_enh = pseudorandom_element(enh_choices, pseudoseed('silver_seal_enh'))
-                    G.E_MANAGER:add_event(Event({
-                        trigger = 'after',
-                        delay = 0.3,
-                        func = function()
-                            play_sound('gold_seal')
-                            target_card:set_ability(chosen_enh)
-                            target_card:juice_up(0.5, 0.5)
-                            local enh_name = (chosen_enh == G.P_CENTERS.m_gold and 'Gold Card') or (chosen_enh == G.P_CENTERS.m_steel and 'Steel Card') or 'Diamond Card'
-                            card_eval_status_text(target_card, 'extra', nil, nil, nil, { message = enh_name .. '!', colour = HEX('bdc3c7') })
-                            return true
-                        end
-                    }))
-                end
+                }))
             end
-        end
-        if context.end_of_round and card.ability then
-            card.ability.silver_seal_triggered = nil
+            if is_steel then
+                return {
+                    x_mult = 2.0,
+                    card = card
+                }
+            end
         end
     end
 }

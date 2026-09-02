@@ -138,7 +138,7 @@ function Card:generate_UIBox_ability_table(...)
                 }
             }
         }
-        table.insert(res.main, job_ui_box)
+        table.insert(res.main, { job_ui_box })
     end
 
     return res
@@ -361,6 +361,42 @@ function Card:eval_card(context)
 end
 
 -- Blind hook for Detective Job, Stick Penalty & Custom Boss Backgrounds
+-- Helper to reset UI and background colors back to Balatro originals after Boss Blind
+function reset_cracklatro_boss_ui()
+    if G.C and G.C.DYN_UI then
+        local def_ui = HEX('374244')
+        local def_boss_main = darken(G.C.BLACK, 0.05)
+        local def_boss_dark = lighten(G.C.BLACK, 0.07)
+
+        if G.C.DYN_UI.MAIN then
+            ease_colour(G.C.DYN_UI.MAIN, def_ui)
+        end
+        if G.C.DYN_UI.DARK then
+            ease_colour(G.C.DYN_UI.DARK, def_ui)
+        end
+        if G.C.DYN_UI.BOSS_MAIN then
+            ease_colour(G.C.DYN_UI.BOSS_MAIN, def_boss_main)
+        end
+        if G.C.DYN_UI.BOSS_DARK then
+            ease_colour(G.C.DYN_UI.BOSS_DARK, def_boss_dark)
+        end
+    end
+    if G.GAME then
+        G.GAME.blind_color = nil
+    end
+    if G.ARGS then
+        G.ARGS.blind_colour = nil
+    end
+    if ease_background_colour_blind then
+        ease_background_colour_blind(G.STATE or (G.STATES and G.STATES.ROUND_EVAL) or 'Round Evaluation')
+    elseif ease_background_colour then
+        local bg_d = (G.C and G.C.BACKGROUND and G.C.BACKGROUND.D) or HEX('374244')
+        local bg_l = (G.C and G.C.BACKGROUND and G.C.BACKGROUND.L) or HEX('374244')
+        ease_background_colour{new_colour = bg_d, special_colour = bg_l, contrast = 1}
+    end
+end
+
+-- Blind hook for Detective Job, Stick Penalty & Custom Boss Backgrounds
 local set_blind_ref = Blind.set_blind
 function Blind:set_blind(blind, reset, silent)
     local ret = set_blind_ref(self, blind, reset, silent)
@@ -369,8 +405,10 @@ function Blind:set_blind(blind, reset, silent)
         G.GAME.stick_penalty = nil
     end
 
-    if self.boss and not self.disabled and ease_custom_blind_background then
+    if blind and self.boss and not self.disabled and ease_custom_blind_background then
         ease_custom_blind_background(self)
+    elseif not blind or not self.boss or self.disabled then
+        reset_cracklatro_boss_ui()
     end
 
     G.E_MANAGER:add_event(Event({
@@ -409,21 +447,8 @@ if Blind.disable then
     local blind_disable_ref = Blind.disable
     function Blind:disable()
         local ret = blind_disable_ref(self)
-        if self.boss and G.C and G.C.DYN_UI then
-            local default_main = (G.C.BLIND and G.C.BLIND.Small) or G.C.RED
-            local default_dark = G.C.BLACK
-            local bg_d = (G.C.BACKGROUND and G.C.BACKGROUND.D) or HEX('374244')
-            local bg_l = (G.C.BACKGROUND and G.C.BACKGROUND.L) or HEX('374244')
-
-            if G.C.DYN_UI.MAIN then
-                ease_colour(G.C.DYN_UI.MAIN, default_main)
-            end
-            if G.C.DYN_UI.DARK then
-                ease_colour(G.C.DYN_UI.DARK, default_dark)
-            end
-            if ease_background_colour then
-                ease_background_colour{new_colour = bg_d, special_colour = bg_l, contrast = 1}
-            end
+        if self.boss then
+            reset_cracklatro_boss_ui()
         end
         return ret
     end
@@ -434,21 +459,8 @@ if Blind.defeat then
     local blind_defeat_ref = Blind.defeat
     function Blind:defeat(silent)
         local ret = blind_defeat_ref(self, silent)
-        if self.boss and G.C and G.C.DYN_UI then
-            local default_main = (G.C.BLIND and G.C.BLIND.Small) or G.C.RED
-            local default_dark = G.C.BLACK
-            local bg_d = (G.C.BACKGROUND and G.C.BACKGROUND.D) or HEX('374244')
-            local bg_l = (G.C.BACKGROUND and G.C.BACKGROUND.L) or HEX('374244')
-
-            if G.C.DYN_UI.MAIN then
-                ease_colour(G.C.DYN_UI.MAIN, default_main)
-            end
-            if G.C.DYN_UI.DARK then
-                ease_colour(G.C.DYN_UI.DARK, default_dark)
-            end
-            if ease_background_colour then
-                ease_background_colour{new_colour = bg_d, special_colour = bg_l, contrast = 1}
-            end
+        if self.boss then
+            reset_cracklatro_boss_ui()
         end
         return ret
     end
@@ -504,6 +516,63 @@ function Card:set_cost()
     if G.GAME and G.GAME.overseer_deck and self.ability and self.ability.set == 'Joker' then
         self.cost = math.max(1, math.floor(self.cost * 1.5))
     end
+end
+
+-- Silver Seal Hand XMult Hook (Steel card with Silver Seal gives X2.5 in hand)
+local card_get_chip_h_x_mult_ref = Card.get_chip_h_x_mult
+function Card:get_chip_h_x_mult()
+    local is_silver = (self.seal == 'silver' or self.seal == 'Crackedlatro_silver')
+    local is_steel = (self.ability and self.ability.name == 'Steel Card') or (self.config and self.config.center == G.P_CENTERS.m_steel)
+    if is_silver and is_steel then
+        return 2.5
+    end
+    if card_get_chip_h_x_mult_ref then
+        return card_get_chip_h_x_mult_ref(self)
+    end
+    return 1
+end
+
+-- Lover Joker Soulmates Helpers (No special characters)
+function format_soulmate_card_name(c)
+    if not c or not c.base then return "None" end
+    local val = tostring(c.base.value or '?')
+    local suit = tostring(c.base.suit or '')
+    return val .. " of " .. suit
+end
+
+function get_or_pick_soulmates()
+    if not G.playing_cards or #G.playing_cards < 2 then return nil, nil end
+    local sm1, sm2 = nil, nil
+    for _, c in ipairs(G.playing_cards) do
+        if c.ability and c.ability.is_soulmate then
+            if not sm1 then sm1 = c
+            elseif not sm2 and c ~= sm1 then sm2 = c end
+        end
+    end
+    if not sm1 or not sm2 then
+        local unbonded = {}
+        for _, c in ipairs(G.playing_cards) do
+            if not (c.ability and c.ability.is_soulmate) then
+                table.insert(unbonded, c)
+            end
+        end
+        if not sm1 and #unbonded > 0 then
+            sm1 = pseudorandom_element(unbonded, pseudoseed('soulmate_1'))
+            if sm1 then
+                sm1.ability = sm1.ability or {}
+                sm1.ability.is_soulmate = true
+                for i = #unbonded, 1, -1 do if unbonded[i] == sm1 then table.remove(unbonded, i) end end
+            end
+        end
+        if not sm2 and #unbonded > 0 then
+            sm2 = pseudorandom_element(unbonded, pseudoseed('soulmate_2'))
+            if sm2 then
+                sm2.ability = sm2.ability or {}
+                sm2.ability.is_soulmate = true
+            end
+        end
+    end
+    return sm1, sm2
 end
 
 -- Voucher & Rarity calculation helpers

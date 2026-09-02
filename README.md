@@ -20,7 +20,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 *Poseen badge exclusivo negro `Secreto`, animación legendaria de 2 capas y únicamente pueden ser invocados mediante la carta espectral **La Muchachada**.*
 
 * **Esteban**: X2.5 Multi por cada carta puntuada de Picas o Tréboles. (*"*Ignores the kid*"*)
-* **Thiago**: Otorga X1 Multi por cada 20 Fichas obtenidas en el cálculo final de la mano. (*"Son, Hijillo, Brochacho 😭"*)
+* **Thiago**: Otorga X1 Multi por cada 20 Fichas obtenidas en el cálculo final de la mano. (*"Son, Hijillo, Brochacho"*)
 * **Paula**: Al inicio de la ronda, destruye los Jokers adyacentes y gana +X1 Multi permanente por cada Joker devorado. (*"*Ñam Ñam ñam* NOO MAMA ESPERA NO ESTOY COMIENDO"*)
 * **Black Hole**: Eleva las Fichas finales a la potencia de `^1.5` y el Multi final a la potencia de `^1.5`.
 * **Squele**: Los Corazones puntuados otorgan +10 Multi y X1.5 Multi. 1 en 10 de probabilidad de Proyectar y crear un Bloodstone Negativo. (*"Ahhh me proyecto"*)
@@ -32,7 +32,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **RayTracing**: Crea 2 cartas Espectrales Negativas aleatorias al final de la ronda (excepto La Muchachada). (*"Depradosini Negrini"*)
 * **Paco**: Otorga X2 Multi por cada descarte restante que tengas en la ronda. (*"No es necesario descartar, todas las cartas son utiles"*)
 * **Gabi**: Otorga X4 Multi por cada carta puntuada, pero resta 3/4 de las Fichas finales al terminar el cálculo. (*"Todo tiene un precio..."*)
-* **Yairo**: "67!!!!" (*"El 6 y el 7 tienen el poder..."*)
+* **Yairo**: Las cartas 6 y 7 puntuadas otorgan X3 Multi y X1.5 Fichas. Si la mano jugada contiene un 6 y un As, otorga X4 Multi y X2 Fichas. (*"67!!!!"*)
 
 ---
 
@@ -52,7 +52,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Banquet**: Las cartas retenidas en mano al puntuar "comen en el banquete" y ganan permanentemente **+2 Fichas base**. Si tienes 7 o más cartas en mano al puntuar, otorga **+X2.5 Multi**. Al venderse, otorga **+$15** y crea un Joker de comida aleatorio **Negativo**.
 * **Appraiser**: Gana $1 al final de la ronda por cada carta con Edición (Foil, Holo, Poly) en tu baraja completa.
 * **Runway**: La carta central de la mano jugada está bajo el **Foco de la Pasarela**: gana **+X0.5 Multi** por cada rasgo único (*Mejora, Edición, Sello*) presente en las demás cartas de la mano. Al derrotar la Ciega, hereda permanentemente uno de esos rasgos.
-* **Slot Machine**: Gira 3 rodillos visuales en cada mano: `[ 🍒 | 🍋 | 🔔 | 7️⃣ ]`. 2 iguales: **+$3** y **+15 Multi**. 3 iguales: **+$12** y **+X2.5 Multi**. Triple 7️⃣: **¡JACKPOT!** (+$35, +X4 Multi y crea una carta Espectral). Las Cartas de la Suerte fuerzan al 1er rodillo a caer en 7️⃣.
+* **Slot Machine**: Gira 3 rodillos en cada mano jugada: 2 iguales otorgan **+$3** y **+15 Multi**; 3 iguales otorgan **+$12** y **+X2.5 Multi**; Triple 7 otorga **+$35**, **+X4 Multi** y una carta Espectral. Las Cartas de la Suerte fuerzan al 1er rodillo a caer en 7.
 * **Duel of Value**: X3 Multi si la mano jugada es Doble Pareja puntuada con exactamente 2 cartas pares y 2 cartas impares.
 * **Reading Deficiency (Falta de Lectura)**: X5 Multi si la mano jugada no activa ningún otro Joker.
 * **Chameleon Joker**: Copia la habilidad del Joker a su izquierda si la mano jugada contiene al menos una carta del rango requerido (el rango cambia cada ronda).
@@ -67,14 +67,14 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Symmetrical Joker**: X4 Multi si la mano jugada es un Poker o Repóker donde todas las cartas puntuadas comparten el mismo palo.
 * **Balance**: Crea 2 cartas Espectrales si la mano jugada es un Poker con exactamente 4 cartas del mismo palo.
 * **Merchant**: En tienda: +1 ranura de carta, +1 vale, +1 paquete de refuerzo, 25% de descuento en todos los artículos y mayor tasa de Jokers Raros. Pierdes $5 al salir de la tienda.
-* **Lover**: Vincula 2 cartas de tu baraja como **Almas Gemelas**. Tener a una en mano **roba a su pareja de la baraja** de inmediato. Si ambas puntúan en la misma mano, otorgan **X3 Multi**, **+$6** y **+10 Fichas permanentes**. Los Corazones puntuados dan +10 Multi.
-* **Blacksmith**: Las Picas calentitas elevan la forja en **+15°C** cada una (+X0.05 Multi por cada 10°C). Al llegar a **100°C**, golpea el yunque: convierte permanentemente la carta más alta en **Carta de Acero** con **fichas base duplicadas** y enfría la forja a 0°C.
+* **Lover**: Vincula 2 cartas de tu baraja como **Almas Gemelas** (especificadas en su descripción). Tener a una en mano **roba a su pareja de la baraja** de inmediato. Si ambas puntúan juntas en la misma mano, otorgan **X3 Multi**, **+$6** y **+10 Fichas permanentes** a ambas. Los Corazones puntuados dan +10 Multi.
+* **Blacksmith**: Las cartas jugadas otorgan **+5 Heat** a la forja. A los **300 Heat**, golpea el yunque: **1 en 2** de probabilidad de aplicar un **Sello de Plata** o una **Carta de Acero (Metal)** a la carta puntuada más alta y enfría a 0 Heat.
 * **Lucky One**: Los Tréboles puntuados recolectan pétalos. Al juntar 4 pétalos, formas un **Trébol de 4 Hojas**: otorga **X2 Multi** y **garantiza al 100% de éxito la próxima probabilidad del juego** (Rueda de la Fortuna, Lucky Cards, Space Joker, etc.) consumiendo el trébol.
 * **Miner**: Los Diamantes descienden **+15m** en la mina: 0-50m (Carbón: **+25 Fichas**), 50-100m (Oro: **+$2**), 100-200m (Diamante: **+X1.35 Multi**), 200m+ (Núcleo Magmático: **+X1.5 Multi**, **reactivación** y extrae una carta Espectral al final de la ronda).
 * **Joke Joker?**: No hace nada aparente... pero en secreto, si posees el Vale Blank, lo transforma inmediatamente en Antimatter (+1 espacio de Joker).
 * **Perfectionism**: Al derrotar una Ciega Grande o Ciega Jefe, aplica Policromo a un Joker aleatorio (1 en 5 de probabilidad de otorgar Negativo en su lugar).
 * **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Comodín Invisible* (*Invisible Joker*) (**1 vez por ronda**).
-* **Infostealer Joker**: Siempre es **Eterno** (*Eternal*). Posee botón interactivo dinámico ("USE $20"): al pagar su coste (inicia en $20), gana permanentemente **+X1 Multi** y el coste del siguiente pago se incrementa en **+$1** (20, 21, 22, 23...).
+* **Infostealer Joker**: Siempre es **Eterno** (*Eternal*). Al salir de la tienda descuenta **$10** y gana **+X0.5 Multi**; si no puedes pagar, pierde **-X0.5 Multi** (mínimo X1).
 * **Supersaturated Joker (Joker Sobresaturado)**: Al puntuar, coloca una mejora faltante aleatoria (*Sello, Mejora o Edición*). Si la carta ya cuenta con Sello, Mejora y Edición simultáneamente, otorga **+$10**.
 
 ---
@@ -119,7 +119,7 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **Jeweled Card (Carta Engarzada / Carta de Joyería)**: Otorga X1.25 Multi y $2 al puntuar si el palo es Diamantes o Corazones.
 * **Dark Green Seal (Sello Verde Oscuro)**: Otorga **X2.5 Multi** al ser puntuada. 1 en 5 de probabilidad de romperse al ser jugada.
 * **White Seal (Sello Blanco)**: Sube el nivel de una mano de poker aleatoria en **+1 nivel** al puntuar (1 vez por ronda).
-* **Silver Seal (Sello de Plata)**: Mejora una carta aleatoria de la mano jugada a Carta de Oro, Acero o Diamante al jugarse y puntuarse.
+* **Silver Seal (Sello de Plata)**: 1 en 4 de probabilidad de convertir la carta en **Carta de Acero (Metal)** al ser jugada. Al estar en una **Carta de Acero (Metal)**, otorga **X2 Multi** al ser jugada y **X2.5 Multi** mientras se mantiene en la mano.
 
 ---
 

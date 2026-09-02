@@ -14,11 +14,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Doctor Jo.',
         text = {
-            "{C:attention}Medical Immunity{}: Joker {C:attention}Perishable{} counters never decrease,",
-            "and {C:money}Rental{} Jokers have their fees fully reimbursed.",
-            "{C:red}CLEAR! (Defibrillator){}: If final hand falls short of Blind,",
-            "removes Debuffs and grants {C:blue}+1 Emergency Hand{} with {X:mult,C:white}X3{} Mult {C:inactive}(1/Blind){}",
-            "When another Joker is {C:red}destroyed{}, sacrifices self to create a clean {C:dark_edition}Polychrome{} copy"
+            "Reimburses {C:money}Rental{} fees and stops {C:attention}Perishable{} loss.",
+            "On final hand, if short on chips: grants",
+            "{C:blue}+1 Hand{} with {X:mult,C:white}X3{} Mult and removes all debuffs {C:inactive}(1 per Blind){}"
         }
     },
     config = { extra = { defibrillator_used = false } },
@@ -108,9 +106,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Symmetrical Joker',
         text = {
-            "{X:mult,C:white}X#1#{} Mult if played hand is a",
-            "{C:attention}Four of a Kind{} or {C:attention}Five of a Kind{}",
-            "where all scoring cards share the {C:attention}same suit{}"
+            "{X:mult,C:white}X#1#{} Mult if played {C:attention}Four or Five of a Kind{}",
+            "shares the same suit across all scoring cards"
         }
     },
     config = { extra = { xmult = 4.0 } },
@@ -158,9 +155,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Balance',
         text = {
-            "Creates {C:spectral}#2# Spectral cards{} if played hand",
-            "is a {C:attention}Four of a Kind{} with exactly {C:attention}#1# scoring cards{}",
-            "of the {C:attention}same suit{} {C:inactive}(Must have room){}"
+            "Creates {C:spectral}#2# Spectral cards{} if played",
+            "{C:attention}Four of a Kind{} has all cards of the same suit",
+            "{C:inactive}(Must have room){}"
         }
     },
     config = { extra = { cards_needed = 4, spectral_count = 2 } },
@@ -227,9 +224,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Merchant',
         text = {
-            "In shop: {C:attention}+1{} Card slot, {C:attention}+1{} Voucher, {C:attention}+1{} Booster Pack,",
-            "{C:money}25% discount{} on all items, and {C:red}higher Rare Joker rate{}",
-            "Lose {C:money}$#1#{} when leaving the shop"
+            "+1 card slot, +1 voucher, +1 pack, and 25% discount in shop.",
+            "Lose {C:money}$#1#{} upon leaving shop"
         },
         unlock = {
             "Enter a shop with at least {C:money}$50{}",
@@ -290,10 +286,10 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lover',
         text = {
-            "Selects 2 cards in deck as {C:attention}Soulmates{}.",
-            "Having 1 Soulmate in hand immediately {C:attention}draws its partner{} from deck.",
-            "Scoring {C:attention}both Soulmates{} in the same hand gives {X:mult,C:white}X#1#{} Mult, {C:money}+$#2#{},",
-            "and permanently adds {C:chips}+#3#{} Chips to both. Scored {C:hearts}Hearts{} give {C:mult}+#4#{} Mult"
+            "Bonds 2 cards as {C:attention}Soulmates{}: drawing one draws partner.",
+            "Scoring both gives {X:mult,C:white}X#1#{} Mult, {C:money}+$#2#{}, and permanent {C:chips}+#3#{} Chips.",
+            "Scored {C:hearts}Hearts{} give {C:mult}+#4#{} Mult",
+            "{C:inactive}(Soulmates: #5# and #6#){}"
         }
     },
     unlock = {
@@ -307,45 +303,19 @@ SMODS.Joker {
     cost = 8,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        return { vars = { ex.xmult, ex.dollars, ex.perma_chips, ex.heart_mult } }
+        local sm1, sm2 = get_or_pick_soulmates()
+        local sm1_str = format_soulmate_card_name(sm1)
+        local sm2_str = format_soulmate_card_name(sm2)
+        return { vars = { ex.xmult, ex.dollars, ex.perma_chips, ex.heart_mult, sm1_str, sm2_str } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     add_to_deck = function(self, card, from_debuff)
-        if G.playing_cards and #G.playing_cards >= 2 then
-            local unbonded = {}
-            for _, c in ipairs(G.playing_cards) do
-                if not c.is_soulmate then table.insert(unbonded, c) end
-            end
-            if #unbonded >= 2 then
-                local s1 = pseudorandom_element(unbonded, pseudoseed('soulmate_1'))
-                s1.is_soulmate = true
-                local unbonded2 = {}
-                for _, c in ipairs(unbonded) do if c ~= s1 then table.insert(unbonded2, c) end end
-                local s2 = pseudorandom_element(unbonded2, pseudoseed('soulmate_2'))
-                s2.is_soulmate = true
-                s1:juice_up(0.6, 0.6)
-                s2:juice_up(0.6, 0.6)
-            end
-        end
+        get_or_pick_soulmates()
     end,
     calculate = function(self, card, context)
-        -- Ensure soulmates exist if cards were added
+        -- Ensure soulmates exist
         if (context.setting_blind or context.first_hand_drawn) and not context.blueprint then
-            local count = 0
-            if G.playing_cards then
-                for _, c in ipairs(G.playing_cards) do
-                    if c.is_soulmate then count = count + 1 end
-                end
-                if count < 2 and #G.playing_cards >= 2 then
-                    for _, c in ipairs(G.playing_cards) do
-                        if not c.is_soulmate then
-                            c.is_soulmate = true
-                            count = count + 1
-                            if count >= 2 then break end
-                        end
-                    end
-                end
-            end
+            get_or_pick_soulmates()
         end
 
         -- Soulmate summon: If 1 in hand and 1 in deck, draw missing partner
@@ -354,12 +324,12 @@ SMODS.Joker {
             local in_deck = {}
             if G.hand and G.hand.cards then
                 for _, c in ipairs(G.hand.cards) do
-                    if c.is_soulmate then table.insert(in_hand, c) end
+                    if c.ability and c.ability.is_soulmate then table.insert(in_hand, c) end
                 end
             end
             if #in_hand == 1 and G.deck and G.deck.cards then
                 for _, c in ipairs(G.deck.cards) do
-                    if c.is_soulmate then table.insert(in_deck, c) end
+                    if c.ability and c.ability.is_soulmate then table.insert(in_deck, c) end
                 end
                 if #in_deck >= 1 then
                     local partner = in_deck[1]
@@ -386,7 +356,7 @@ SMODS.Joker {
         if context.joker_main and context.scoring_hand then
             local soulmates_scored = {}
             for _, sc in ipairs(context.scoring_hand) do
-                if sc.is_soulmate then
+                if sc.ability and sc.ability.is_soulmate then
                     table.insert(soulmates_scored, sc)
                 end
             end
@@ -424,10 +394,10 @@ SMODS.Joker {
     loc_txt = {
         name = 'Blacksmith',
         text = {
-            "Scored {C:spades}Spades{} heat the forge: {C:attention}+#2#°C{} per card.",
-            "Gives {X:mult,C:white}+X#3#{} Mult per 10°C {C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult, {C:attention}#4#°C{C:inactive}){}",
-            "At {C:attention}100°C{}, the forge strikes the yunque: permanently transforms",
-            "the highest card into a {C:attention}Steel Card{} with {C:chips}double base Chips{} and resets heat"
+            "Played cards add {C:attention}+#1#{} Heat to the forge.",
+            "At {C:attention}#2# Heat{}, strikes the anvil: {C:green}1 in 2{} chance",
+            "to apply a {C:attention}Silver Seal{} or {C:attention}Steel Card{} enhancement",
+            "to the highest scored card and cools to 0 {C:inactive}(Current: #3#/#2# Heat){}"
         }
     },
     unlock = {
@@ -435,37 +405,39 @@ SMODS.Joker {
         "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
         "in a single run"
     },
-    config = { extra = { temp = 0, temp_per_spade = 15, max_temp = 100, xmult_per_10c = 0.05 } },
+    config = { extra = { temp = 0, heat_per_card = 5, max_temp = 300 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         if info_queue then
+            local silver_seal = (G.P_SEALS and (G.P_SEALS['Crackedlatro_silver'] or G.P_SEALS['silver'])) or { set = 'Seal', key = 'silver' }
+            info_queue[#info_queue + 1] = silver_seal
             info_queue[#info_queue + 1] = G.P_CENTERS.m_steel
         end
         local current_temp = ex.temp or 0
-        local current_xmult = 1 + (math.floor(current_temp / 10) * (ex.xmult_per_10c or 0.05))
-        return { vars = { current_xmult, ex.temp_per_spade or 15, ex.xmult_per_10c or 0.05, current_temp } }
+        local max_temp = ex.max_temp or 300
+        local heat_per_card = ex.heat_per_card or 5
+        return { vars = { heat_per_card, max_temp, current_temp } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play and not context.blueprint then
-            if context.other_card:is_suit('Spades') then
-                card.ability.extra.temp = (card.ability.extra.temp or 0) + card.ability.extra.temp_per_spade
-                return {
-                    message = '+' .. card.ability.extra.temp_per_spade .. '°C Heat!',
-                    colour = G.C.ORANGE,
-                    card = card
-                }
-            end
+            local heat_gain = (card.ability and card.ability.extra and card.ability.extra.heat_per_card) or 5
+            card.ability.extra.temp = (card.ability.extra.temp or 0) + heat_gain
+            return {
+                message = '+' .. heat_gain .. ' Heat!',
+                colour = G.C.ORANGE,
+                card = card
+            }
         end
 
-        if context.joker_main then
-            local current_temp = card.ability.extra.temp or 0
-            local current_xmult = 1 + (math.floor(current_temp / 10) * (card.ability.extra.xmult_per_10c or 0.05))
+        if context.joker_main and not context.blueprint then
+            local current_temp = (card.ability and card.ability.extra and card.ability.extra.temp) or 0
+            local max_temp = (card.ability and card.ability.extra and card.ability.extra.max_temp) or 300
 
-            if current_temp >= (card.ability.extra.max_temp or 100) and context.scoring_hand and #context.scoring_hand >= 1 and not context.blueprint then
+            if current_temp >= max_temp and context.scoring_hand and #context.scoring_hand >= 1 then
                 local highest_card = context.scoring_hand[1]
                 local highest_rank = -1
                 for _, sc in ipairs(context.scoring_hand) do
@@ -478,20 +450,24 @@ SMODS.Joker {
 
                 if highest_card then
                     play_sound('gold_seal')
-                    highest_card:set_ability(G.P_CENTERS.m_steel)
-                    highest_card.ability.perma_bonus = (highest_card.ability.perma_bonus or 0) + (highest_card.base and highest_card.base.nominal or 10)
-                    highest_card:juice_up(0.8, 0.8)
+                    card.ability.extra.temp = 0
+                    local is_seal = pseudorandom('blacksmith_reward') < 0.5
+                    if is_seal then
+                        highest_card:set_seal('silver', nil, true)
+                        highest_card:juice_up(0.8, 0.8)
+                        return {
+                            message = 'Silver Seal Forged!',
+                            colour = HEX('bdc3c7')
+                        }
+                    else
+                        highest_card:set_ability(G.P_CENTERS.m_steel)
+                        highest_card:juice_up(0.8, 0.8)
+                        return {
+                            message = 'Steel Card Forged!',
+                            colour = G.C.GREY
+                        }
+                    end
                 end
-                card.ability.extra.temp = 0
-                return {
-                    Xmult = current_xmult,
-                    message = 'STEEL FORGED! 0°C',
-                    colour = G.C.GREY
-                }
-            elseif current_xmult > 1 then
-                return {
-                    Xmult = current_xmult
-                }
             end
         end
     end
@@ -512,10 +488,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lucky One',
         text = {
-            "Scored {C:clubs}Clubs{} gather petals {C:inactive}(#1#/4){}.",
-            "At 4 petals, forms a {C:attention}Four-Leaf Clover{}:",
-            "Grants {X:mult,C:white}X#2#{} Mult and {C:green}guarantees 100% success{}",
-            "on the next probability roll in the game {C:inactive}(Consumes clover){}"
+            "Scored {C:clubs}Clubs{} gather a Petal {C:inactive}(#1#/4){}.",
+            "At 4 Petals, gives {X:mult,C:white}X#2#{} Mult and",
+            "guarantees success on next probability roll"
         }
     },
     unlock = {
@@ -580,10 +555,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Miner',
         text = {
-            "Scored {C:diamonds}Diamonds{} dig down {C:attention}+#1#m{} {C:inactive}(Current: {C:attention}#2#m{C:inactive}){}:",
-            "{C:attention}0-50m{} (Coal): {C:chips}+25{} Chips | {C:attention}50-100m{} (Gold): {C:money}+$2{}",
-            "{C:attention}100-200m{} (Diamond): {X:mult,C:white}X1.35{} Mult",
-            "{C:red}200m+{} (Magma Core): {X:mult,C:white}X1.5{} Mult, {C:attention}retriggers{}, and extracts a Spectral Card!"
+            "Scored {C:diamonds}Diamonds{} dig deeper {C:inactive}(Current: #2#m){}:",
+            "0-50m: {C:chips}+25{} Chips | 50-100m: {C:money}+$2{} | 100-200m: {X:mult,C:white}X1.35{} Mult",
+            "200m+: {X:mult,C:white}X1.5{} Mult, retriggers, and extracts a Spectral card"
         }
     },
     unlock = {
@@ -743,10 +717,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Perfectionism',
         text = {
-            "When defeating a {C:attention}Big Blind{}",
-            "or {C:attention}Boss Blind{}, apply {C:dark_edition}Polychrome{}",
-            "to a random {C:attention}Joker{} {C:inactive}(Except itself){}",
-            "{C:inactive}({C:green}#1# in #2#{} chance for {C:dark_edition}Negative{}{C:inactive}){}"
+            "Defeating Big or Boss Blind adds {C:dark_edition}Polychrome{}",
+            "to a random Joker {C:inactive}(#1# in #2# chance for Negative){}"
         },
         unlock = {
             "Have {C:attention}5 Jokers{} with an",
@@ -850,10 +822,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Reaper Joker',
         text = {
-            "When another {C:attention}Joker{} is sold,",
-            "creates an {C:attention}Invisible Joker{}",
-            "{C:inactive}(Once per round, #1#){}",
-            "{C:inactive}(Must have room){}"
+            "Selling another Joker creates an {C:attention}Invisible Joker{}",
+            "{C:inactive}(Once per round, #1#){}"
         }
     },
     config = { extra = { used = false } },
@@ -912,12 +882,12 @@ SMODS.Joker {
         name = 'Infostealer Joker',
         text = {
             "{C:eternal}Always Eternal{}.",
-            "Click {C:attention}Use{} to pay {C:money}$#2#{} and gain {X:mult,C:white}+X#3#{} Mult.",
-            "Cost increases by {C:money}+$#4#{} per payment",
+            "Losing {C:money}$#2#{} upon leaving shop grants {X:mult,C:white}+X#3#{} Mult.",
+            "If unable to pay, loses {X:mult,C:white}-X#3#{} Mult",
             "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
         }
     },
-    config = { extra = { xmult = 1.0, cost = 10, cost_increase = 1, xmult_gain = 1.0, times_fed = 0 } },
+    config = { extra = { xmult = 1.0, cost = 10, xmult_change = 0.5 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
@@ -925,34 +895,37 @@ SMODS.Joker {
     loc_vars = function(self, info_queue, card)
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 1.0
         local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 10
-        local gain = (card and card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 1.0
-        local increase = (card and card.ability and card.ability.extra and card.ability.extra.cost_increase) or 1
-        return { vars = { xmult, cost, gain, increase } }
+        local change = (card and card.ability and card.ability.extra and card.ability.extra.xmult_change) or 0.5
+        return { vars = { xmult, cost, change } }
     end,
     add_to_deck = function(self, card, from_debuff)
         card:set_eternal(true)
         if card.ability then card.ability.eternal = true end
     end,
-    can_use = function(self, card)
-        local cost = (card and card.ability and card.ability.extra and card.ability.extra.cost) or 10
-        return G.GAME and G.GAME.dollars and G.GAME.dollars >= cost
-    end,
-    use = function(self, card, area, copier)
-        card.ability.extra = card.ability.extra or {}
-        local cost = card.ability.extra.cost or 10
-        if (G.GAME.dollars or 0) < cost then return end
-
-        ease_dollars(-cost)
-        card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + (card.ability.extra.xmult_gain or 1.0)
-        card.ability.extra.times_fed = (card.ability.extra.times_fed or 0) + 1
-        card.ability.extra.cost = cost + (card.ability.extra.cost_increase or 1)
-
-        play_sound('foil1')
-        card:juice_up(0.5, 0.5)
-        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. (card.ability.extra.xmult_gain or 1) .. ' XMult!', colour = G.C.XMULT })
-    end,
     calculate = function(self, card, context)
-        if context.joker_main and card.ability.extra.xmult > 1 then
+        if context.ending_shop and not context.blueprint then
+            card.ability.extra = card.ability.extra or {}
+            local cost = card.ability.extra.cost or 10
+            local change = card.ability.extra.xmult_change or 0.5
+            local current_dollars = (G.GAME and G.GAME.dollars) or 0
+
+            if current_dollars >= cost then
+                ease_dollars(-cost)
+                card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + change
+                return {
+                    message = '+X' .. change .. ' Mult',
+                    colour = G.C.XMULT
+                }
+            else
+                card.ability.extra.xmult = math.max(1.0, (card.ability.extra.xmult or 1.0) - change)
+                return {
+                    message = '-X' .. change .. ' Mult',
+                    colour = G.C.RED
+                }
+            end
+        end
+
+        if context.joker_main and card.ability.extra and card.ability.extra.xmult and card.ability.extra.xmult > 1 then
             return {
                 Xmult = card.ability.extra.xmult
             }
@@ -974,10 +947,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Supersaturated Joker',
         text = {
-            "First scored card randomly gains a missing",
-            "{C:attention}Enhancement{}, {C:attention}Seal{}, or {C:dark_edition}Edition{}.",
-            "If a card cannot receive any more improvements,",
-            "it earns {C:money}+$10{} instead",
+            "First scored card gains a missing Enhancement, Seal, or Edition.",
+            "If already fully improved, gives {C:money}+$10{} instead",
             "{C:inactive}(Once per round, #1#){}"
         }
     },

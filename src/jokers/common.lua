@@ -14,10 +14,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Masterful Joker',
         text = {
-            "When a {C:attention}Four of a Kind{} or {C:attention}Five of a Kind{} scores,",
-            "this Joker {C:attention}masters{} that rank.",
+            "Scores in {C:attention}4 or 5 of a Kind{} master that rank.",
             "Cards of {C:attention}mastered ranks{} count as {C:attention}all suits{}.",
-            "{C:mult}+#1#{} Mult per mastered rank {C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult){}"
+            "{C:mult}+#1#{} Mult per mastered rank {C:inactive}(Currently {C:mult}+#2#{C:inactive}){}"
         }
     },
     config = { extra = { mult_per_rank = 10, bonus_mult = 0, mastered_ranks = {} } },
@@ -93,9 +92,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Outstanding Joker',
         text = {
-            "The scored card with the strictly {C:attention}highest rank{}",
-            "is {C:attention}Outstanding{}: it absorbs the {C:chips}Chips{} of all other",
-            "scoring cards multiplied by the hand size and {C:attention}retriggers 1 time{}"
+            "Strictly highest scored card {C:attention}retriggers 1 time{}",
+            "and gains {C:chips}+Chips{} equal to base Chips of",
+            "all other scoring cards times hand size"
         }
     },
     unlock = {
@@ -303,8 +302,7 @@ SMODS.Joker {
     loc_txt = {
         name = 'Designer Joker',
         text = {
-            "Scored {C:attention}Wild Cards{} give {C:money}$#1#{}",
-            "when scored"
+            "Scored {C:attention}Wild Cards{} give {C:money}$#1#{}"
         }
     },
     config = { extra = { dollars = 1 } },
@@ -342,10 +340,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'TTS',
         text = {
-            "Each scored card spells its rank name: grants",
-            "{C:chips}+#1#{} Chips and {C:mult}+#2#{} Mult per letter in English.",
-            "If played hand has {C:attention}#3# or more letters{} {C:inactive}(#4#){},",
-            "receive a {C:money}$#5#{} {C:attention}Donation{}!"
+            "Scored cards give {C:chips}+#1#{} Chips and {C:mult}+#2#{} Mult",
+            "per letter in their English rank name.",
+            "Earn {C:money}$#5#{} if hand has {C:attention}#3#+ letters{} {C:inactive}(#4#){}"
         }
     },
     config = { extra = { chips_per_letter = 4, mult_per_letter = 1, letters_target = 20, donation = 5 } },

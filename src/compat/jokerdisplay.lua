@@ -224,20 +224,27 @@ jd_def["j_Crackedlatro_merchant_joker"] = {
 
 jd_def["j_Crackedlatro_lover_joker"] = {
     text = {
-        { text = "Soulmates (X3 / +$6)", colour = G.C.HEARTS }
+        { text = "Soulmates: " },
+        { ref_table = "card.joker_display_values", ref_value = "soulmates", colour = G.C.HEARTS }
     },
     reminder_text = {
-        { text = "(Draws Partner | +10M Hearts)" }
-    }
+        { text = "(Draws Partner | X3, +$6, +10C)" }
+    },
+    calc_function = function(card)
+        local sm1, sm2 = get_or_pick_soulmates()
+        local s1 = format_soulmate_card_name(sm1)
+        local s2 = format_soulmate_card_name(sm2)
+        card.joker_display_values.soulmates = s1 .. " & " .. s2
+    end
 }
 
 jd_def["j_Crackedlatro_blacksmith_joker"] = {
     text = {
-        { ref_table = "card.ability.extra", ref_value = "temp" },
-        { text = "°C Forge", colour = G.C.ORANGE }
+        { ref_table = "card.ability.extra", ref_value = "temp", colour = G.C.ORANGE },
+        { text = "/300 Heat", colour = G.C.ORANGE }
     },
     reminder_text = {
-        { text = "(100°C: Steel Forge | +X/10°C)" }
+        { text = "(Silver Seal / Steel at 300)" }
     }
 }
 
@@ -586,9 +593,7 @@ jd_def["j_Crackedlatro_infostealer_joker"] = {
     },
     text_config = { colour = G.C.WHITE },
     reminder_text = {
-        { text = "($" },
-        { ref_table = "card.ability.extra", ref_value = "cost" },
-        { text = " for +X1)" }
+        { text = "(-$10 on shop exit)" }
     }
 }
 

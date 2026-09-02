@@ -15,10 +15,10 @@ SMODS.Joker {
     loc_txt = {
         name = 'Shareholder Joker',
         text = {
-            "Stock price fluctuates each Blind {C:inactive}(Current: {C:money}$#1#{C:inactive}){}",
-            "Gives {C:mult}+#2#{} Mult {C:inactive}(2x Price){}. Pays {C:money}$#1#{} at round end.",
-            "Defeating Blind in {C:attention}1 hand{} triggers a {C:green}Bull Market{} {C:inactive}($12-$18){},",
-            "while using your last hand triggers a {C:red}Bear Market{} {C:inactive}($2-$5){}"
+            "Stock price changes each round {C:inactive}(Current: {C:money}$#1#{C:inactive}){}.",
+            "Gives {C:mult}+#2#{} Mult and pays {C:money}$#1#{} at round end.",
+            "Defeating Blind in {C:attention}1 hand{} triggers Bull Market,",
+            "using all hands triggers Bear Market"
         }
     },
     unlock = {
@@ -105,10 +105,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Builder Joker',
         text = {
-            "If scoring cards are in {C:attention}strictly ascending order{} of rank,",
-            "construct a {C:attention}Stable Pyramid{}: {X:mult,C:white}X#1#{} Mult per card scored!",
-            "Scoring {C:attention}4 or more cards{} in order permanently adds {C:chips}+#2#{} Chips",
-            "to the highest card {C:inactive}(Otherwise: +10 Chips){}"
+            "If scoring cards are in {C:attention}ascending rank order{}:",
+            "gives {X:mult,C:white}X#1#{} Mult per card scored.",
+            "{C:attention}4+ cards{} in order adds permanent {C:chips}+#2#{} Chips to highest card"
         }
     },
     unlock = {
@@ -188,10 +187,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Banquet',
         text = {
-            "Cards held in hand when scoring {C:attention}dine at the banquet{}:",
-            "each permanently gains {C:chips}+#1#{} Chips to its base value.",
-            "If you have {C:attention}#2# or more cards{} held in hand, gives {X:mult,C:white}X#3#{} Mult.",
-            "When {C:attention}sold{}, grants {C:money}$#4#{} and creates a random {C:dark_edition}Negative{} Food Joker"
+            "Cards held in hand gain permanent {C:chips}+#1#{} Chips each score.",
+            "{X:mult,C:white}X#3#{} Mult if holding {C:attention}#2#+ cards{}.",
+            "When sold, earn {C:money}$#4#{} and create a {C:dark_edition}Negative{} Food Joker"
         }
     },
     config = { extra = { perma_chips = 2, hand_threshold = 7, xmult = 2.5, sell_cash = 15 } },
@@ -259,9 +257,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Appraiser',
         text = {
-            "Earn {C:money}$#1#{} at end of round for each card",
-            "with an {C:dark_edition}Edition{} in your {C:attention}full deck{}",
-            "{C:inactive}(Foil, Holographic, or Polychrome){}"
+            "Earn {C:money}$#1#{} at end of round for each",
+            "card with an {C:dark_edition}Edition{} in your deck"
         }
     },
     config = { extra = { dollars_per_edition = 1 } },
@@ -308,10 +305,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Runway',
         text = {
-            "The {C:attention}center card{} of the played hand is in the {C:attention}Spotlight{}:",
-            "it gains {X:mult,C:white}+X#1#{} Mult for each unique trait",
-            "{C:inactive}(Enhancement, Edition, Seal){} across all other played cards.",
-            "Defeating the Blind permanently bequeaths one trait to the model"
+            "Center card of played hand gains {X:mult,C:white}+X#1#{} Mult",
+            "for each unique trait on other played cards.",
+            "Defeating Blind permanently transfers one trait to it"
         }
     },
     unlock = {
@@ -419,10 +415,10 @@ SMODS.Joker {
     loc_txt = {
         name = 'Slot Machine',
         text = {
-            "Spins 3 visual reels each hand: {C:attention}[ 🍒 | 🍋 | 🔔 | 7️⃣ ]{}",
-            "{C:attention}2 Match{}: {C:money}+$#1#{} & {C:mult}+#2#{} Mult | {C:attention}3 Match{}: {C:money}+$#3#{} & {X:mult,C:white}X#4#{} Mult",
-            "{C:attention}Triple 7️⃣{}: {C:dark_edition}JACKPOT!{} {C:money}+$#5#{}, {X:mult,C:white}X#6#{} Mult & Spectral Card!",
-            "{C:attention}Lucky Cards{} force the 1st reel to stop on {C:attention}7️⃣{}"
+            "Spins 3 reels on each hand played.",
+            "{C:attention}Pair match{}: {C:money}+$#1#{} and {C:mult}+#2#{} Mult.",
+            "{C:attention}Three of a kind{}: {C:money}+$#3#{} and {X:mult,C:white}X#4#{} Mult.",
+            "{C:attention}Triple 7 Jackpot{}: {C:money}+$#5#{}, {X:mult,C:white}X#6#{} Mult, and a Spectral card"
         }
     },
     unlock = {
@@ -445,7 +441,7 @@ SMODS.Joker {
     end,
     calculate = function(self, card, context)
         if context.before and not context.blueprint and context.scoring_hand then
-            local symbols = { '🍒', '🍋', '🔔', '7' }
+            local symbols = { 'Cherry', 'Lemon', 'Bell', '7' }
             local has_lucky = false
             for _, sc in ipairs(context.scoring_hand) do
                 if sc.ability and (sc.ability.name == 'Lucky Card' or sc.ability.effect == 'Lucky Card') then
@@ -523,9 +519,8 @@ SMODS.Joker {
     loc_txt = {
         name = 'Duel of Value',
         text = {
-            "{X:mult,C:white}X#1#{} Mult if played hand is a {C:attention}Two Pair{}",
-            "scored with exactly {C:attention}2 even{} and {C:attention}2 odd{} cards",
-            "{C:inactive}(Art by kars_on_mars){}"
+            "{X:mult,C:white}X#1#{} Mult if played {C:attention}Two Pair{}",
+            "contains exactly 2 even and 2 odd cards"
         },
         unlock = {
             "Reach {C:attention}Ante 8{} holding both",
@@ -897,8 +892,7 @@ SMODS.Joker {
         name = 'Seal of Approval',
         text = {
             "If played hand contains only {C:attention}1 card{},",
-            "applies a random {C:attention}Seal{} to it",
-            "{C:inactive}(Gold, Blue, Red, Purple, Green, Silver, White){}"
+            "adds a random {C:attention}Seal{} to it"
         }
     },
     config = {},
@@ -952,9 +946,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Paint Puddle',
         text = {
-            "Scored {C:attention}#1#{} cards give {C:mult}+#2#{} Mult.",
-            "Scored {C:attention}Wild Cards{} give {C:mult}+#3#{} Mult instead",
-            "{C:inactive}(Suit changes each round, never repeats consecutively){}"
+            "Scored {C:attention}#1#{} give {C:mult}+#2#{} Mult.",
+            "Scored {C:attention}Wild Cards{} give {C:mult}+#3#{} Mult instead.",
+            "{C:inactive}(Suit changes each round){}"
         }
     },
     config = { extra = { mult_suit = 25, mult_wild = 50, suit = 'Hearts' } },

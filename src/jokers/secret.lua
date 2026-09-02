@@ -68,7 +68,7 @@ SMODS.Joker {
         text = {
             "Gives {X:mult,C:white}X1{} Mult for every",
             "{C:chips}#1# Chips{} in final hand chips",
-            "{C:inactive}(\"Son, Brochacho 😭\")"
+            "{C:inactive}(\"Son, Brochacho\")"
         }
     },
     config = { extra = { chips_per_xmult = 20 } },
@@ -842,7 +842,10 @@ SMODS.Joker {
     loc_txt = {
         name = 'Yairo',
         text = {
-            "67!!!!"
+            "Scored {C:attention}6s{} and {C:attention}7s{} give {X:mult,C:white}X#1#{} Mult and {X:chips,C:white}X#2#{} Chips.",
+            "If played hand contains a {C:attention}6{} and an {C:attention}Ace{},",
+            "gives {X:mult,C:white}X#3#{} Mult and {X:chips,C:white}X#4#{} Chips",
+            "{C:inactive}(\"67!!!!\")"
         }
     },
     config = { extra = { xmult = 3, xchips = 1.5, secret_xmult = 4, secret_xchips = 2 } },
@@ -863,7 +866,8 @@ SMODS.Joker {
         end
     end,
     loc_vars = function(self, info_queue, card)
-        return { vars = {} }
+        local ex = (card and card.ability and card.ability.extra) or self.config.extra
+        return { vars = { ex.xmult or 3, ex.xchips or 1.5, ex.secret_xmult or 4, ex.secret_xchips or 2 } }
     end,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play then

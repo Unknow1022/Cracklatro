@@ -144,7 +144,7 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **Caveman Deck (Baraja Cavernícola)**: Empieza únicamente con A, 2, 3, 4, 6, 8 de cada palo en tu baraja; todas las demás cartas iniciales son Cartas de Piedra. Empiezas con -1 Mano.
 * **Strategist Deck (Baraja Estratega)**: Empieza con una baraja reducida de 24 cartas (Ases, Reyes, Reinas, Jotas, 10s y 9s). Inicia con el vale Magic Trick, $0, -1 mano, -2 descartes y las ciegas escalan X1.2.
 * **Overseer Deck (Baraja Supervisora)**: Crea una carta Espectral aleatoria al final de cada ronda (excepto Rot y Soul). Las etiquetas siempre se duplican. Los precios de los Jokers son X1.5. Empiezas con $2, -1 mano y -1 descarte.
-* **Friendly Deck (Baraja Amistosa)**: Genera **2 Jokers aleatorios con edición Negativa** al iniciar la partida (únicamente al comienzo de la run). Inicia con **-1 Descarte**.
+* **Friendly Deck (Baraja Amistosa)**: Genera **2 Jokers aleatorios con edición Negativa y condición de Eternos** al iniciar la partida (no puede generar Legendarios ni Secretos). Inicia con **-1 Espacio de Joker** y **-1 Descarte**.
 
 ---
 

@@ -179,19 +179,48 @@ SMODS.Back {
     loc_txt = {
         name = 'Friendly Deck',
         text = {
-            "Start run with {C:attention}2 random Negative Jokers{},",
+            "Start run with {C:attention}2 random Negative Eternal Jokers{},",
+            "{C:inactive}(Except Legendary or Secret){},",
+            "{C:red}-1{} Joker slot,",
             "{C:red}-1{} Discard"
         }
     },
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
+                if G.jokers and G.jokers.config then
+                    G.jokers.config.card_limit = math.max(1, G.jokers.config.card_limit - 1)
+                end
+                if G.GAME and G.GAME.starting_params and G.GAME.starting_params.joker_slots then
+                    G.GAME.starting_params.joker_slots = math.max(1, G.GAME.starting_params.joker_slots - 1)
+                end
+
                 G.GAME.round_resets.discards = math.max(0, G.GAME.round_resets.discards - 1)
                 ease_discard(-1)
 
                 play_sound('foil1')
                 for i = 1, 2 do
-                    local new_joker = create_card('Joker', G.jokers, nil, nil, nil, nil, nil, 'friendly_deck')
+                    local new_joker = nil
+                    for attempt = 1, 50 do
+                        local candidate = create_card('Joker', G.jokers, false, nil, nil, false, nil, 'friendly_deck')
+                        local c_rarity = (candidate.config and candidate.config.center and candidate.config.center.rarity) or (candidate.ability and candidate.ability.rarity)
+                        local is_legendary = (c_rarity == 4 or c_rarity == 'Legendary' or (candidate.config and candidate.config.center and candidate.config.center.legendary))
+                        local is_secret = (type(is_secret_card) == 'function' and is_secret_card(candidate)) or candidate.is_secret or (candidate.config and candidate.config.center and candidate.config.center.is_secret)
+                        if not is_legendary and not is_secret then
+                            new_joker = candidate
+                            break
+                        else
+                            if candidate.area then
+                                candidate.area:remove_card(candidate)
+                            end
+                            candidate:remove()
+                        end
+                    end
+                    if not new_joker then
+                        new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_deck')
+                    end
+                    new_joker:set_eternal(true)
+                    if new_joker.ability then new_joker.ability.eternal = true end
                     new_joker:set_edition({ negative = true }, true)
                     new_joker:add_to_deck()
                     G.jokers:emplace(new_joker)

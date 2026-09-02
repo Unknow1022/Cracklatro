@@ -30,14 +30,18 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 
 ---
 
-### 🎭 Jokers Estándar (24 Jokers)
+### 🎭 Jokers Estándar (35 Jokers)
 
-#### Comunes (3)
+#### Comunes (7)
 * **Masterful Joker**: +25 Multi si la mano jugada contiene un Poker (*Four of a Kind*) o Repóker (*Five of a Kind*).
 * **Outstanding Joker**: +250 Fichas, +50 Multi y $5 si la mano jugada contiene un Poker o Repóker.
 * **Blueberry**: +1 Mano al seleccionar Ciega. Se autodestruye tras 3 rondas.
+* **DJ Joker**: Al jugarse una sola carta, la convierte en una carta mejorada aleatoria (*Suerte, Metal, Oro o Vidrio*).
+* **Injured Joker (Joker Lesionado)**: Tras jugar 3 Escaleras, se autodestruye y genera a *Sr. Huesos* (*Mr. Bones*).
+* **Designer Joker (Joker Diseñador)**: Las cartas versátiles (*Wild Cards*) otorgan **+$1** al ser puntuadas.
+* **TTS**: Los Ases generan **+20 Multi** y **+10 Fichas** al puntuar, y otorgan **+$2** si se mantienen en mano al final de la ronda.
 
-#### Poco Comunes (9)
+#### Poco Comunes (13)
 * **Shareholder Joker**: Gana $5 ($6 en Ciega Grande, $8 en Ciega Jefe) al derrotar la Ciega en solo 1 mano.
 * **Builder Joker**: Gana permanentemente +X0.1 Multi si la mano jugada contiene un Trío, Poker o Repóker.
 * **Banquet**: Al venderse, crea un Ice Cream, Popcorn y Ramen (si hay espacio).
@@ -48,10 +52,14 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
   * 1 en 40: Joker Poco Común | 1 en 65: Joker Raro
   * 1 en 125: Joker Raro Negativo | 1 en 200: Blueprint Eterno Negativo | 1 en 777: Carta Espectral The Soul Negativa
 * **Duel of Value**: X3 Multi si la mano jugada es Doble Pareja puntuada con exactamente 2 cartas pares y 2 cartas impares.
-* **Falta de Lectura**: X5 Multi si la mano jugada no activa ningún otro Joker.
+* **Reading Deficiency (Falta de Lectura)**: X5 Multi si la mano jugada no activa ningún otro Joker.
 * **Chameleon Joker**: Copia la habilidad del Joker a su izquierda si la mano jugada contiene al menos una carta del rango requerido (el rango cambia cada ronda).
+* **Motorized Joker (Joker Motorizado)**: Inicia con **+20 Multi**. Cada vez que una carta se reactiva (*retrigger*), gana **+20 Multi** adicional.
+* **Hired Joker (Joker Contratado)**: 1 en 3 probabilidades por cada mano jugada de generar una carta de Trabajo (*Job Card*) aleatoria.
+* **Seal of Approval (Sello de Aprobación)**: Al jugarse solo 1 carta en la mano, le otorga un sello aleatorio (*Dorado, Azul, Rojo, Púrpura, Verde Oscuro, Plata, Blanco*).
+* **Paint Puddle (Charco de Pintura)**: Selecciona un palo aleatorio por ronda; las cartas de ese palo otorgan **+25 Multi** (+50 Multi si la carta es Versátil / *Wild Card*).
 
-#### Raros (10)
+#### Raros (13)
 * **Doctor Jo.**: Cuando otro Joker compatible es destruido, Doctor Jo. se autodestruye para crear una copia exacta del mismo sin debuffs ni pegatinas negativas (elimina Perecedero, Alquiler, etc.).
 * **Symmetrical Joker**: X4 Multi si la mano jugada es un Poker o Repóker donde todas las cartas puntuadas comparten el mismo palo.
 * **Balance**: Crea 2 cartas Espectrales si la mano jugada es un Poker con exactamente 4 cartas del mismo palo.
@@ -62,6 +70,9 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Miner**: Los Diamantes puntuados otorgan X1.5 Multi y +10 Fichas. 1 en 7 de probabilidad al final de la ronda de derrumbarse y transformarse en Rough Gem.
 * **Joke Joker?**: No hace nada aparente... pero en secreto, si posees el Vale Blank, lo transforma inmediatamente en Antimatter (+1 espacio de Joker).
 * **Perfectionism**: Al derrotar una Ciega Grande o Ciega Jefe, aplica Policromo a un Joker aleatorio (1 en 5 de probabilidad de otorgar Negativo en su lugar).
+* **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Comodín Invisible* (*Invisible Joker*).
+* **Infostealer Joker**: Siempre es **Eterno** (*Eternal*). Posee interacción activa ("Usar" para drenar $1): por cada $20 absorbidos, gana permanentemente **+X2 Multi**.
+* **Supersaturated Joker (Joker Sobresaturado)**: Al puntuar, coloca una mejora faltante aleatoria (*Sello, Mejora o Edición*). Si la carta ya cuenta con Sello, Mejora y Edición simultáneamente, otorga **+$10**.
 
 ---
 
@@ -86,7 +97,7 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 
 ---
 
-### 🌌 Consumibles Espectrales (6), Sellos y Mejoras
+### 🌌 Consumibles Espectrales (8), Sellos y Mejoras
 
 #### Espectrales
 * **Hierarchy**: Destruye toda la mano actual, crea 3 Reyes de Acero con Sello Rojo, -1 Mano.
@@ -95,17 +106,21 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **Catastrophic**: +4 niveles a tu mano más jugada, crea 3 Planetas Negativos de tu mano más jugada, -1 nivel a todas las demás manos.
 * **Intensity**: Destruye 5 cartas seleccionadas, crea 1 Carta Silvestre Policromada con Sello Rojo de rango y palo aleatorios.
 * **La Muchachada**: Crea un Joker Secreto aleatorio entre los 13 existentes (exclusivo de paquetes espectrales y etiqueta Discord Tag).
+* **Refuerzo**: Añade un **Sello de Plata** a 1 carta seleccionada.
+* **Supernova**: Añade un **Sello Blanco** a 1 carta seleccionada.
 
 #### Mejoras y Sellos
 * **Diamond Card (Carta de Diamante)**: Otorga X1.5 Multi al reactivarse; otorga $5 si se mantiene en mano al finalizar la ronda.
 * **Investment Card (Carta de Inversión)**: Gana un 10% de interés sobre tu dinero actual (máx. $6) al tenerla en mano al final de la ronda.
 * **Lead Card (Carta de Plomo)**: Otorga +10 Fichas. Se transmuta permanentemente en Carta de Oro si se puntúa en una mano que gana la ronda.
 * **Jeweled Card (Carta Engarzada)**: Otorga X1.1 Multi y $1 al puntuar si el palo es Diamantes o Corazones.
-* **Dark Green Seal (Sello Verde Oscuro)**: 1 en 10 de probabilidad de reactivar 3 veces, 1 en 5 de reactivar 2 veces, o 1 en 2 de reactivar 1 vez (no acumulativo).
+* **Dark Green Seal (Sello Verde Oscuro - Rework)**: Otorga **X1.5 Multi** al ser puntuada. 1 en 4 de probabilidad de transformarse permanentemente en Carta de Piedra al terminar de puntuarse la mano.
+* **White Seal (Sello Blanco)**: Genera una carta de Planeta aleatoria al ser jugada y puntuada (1 vez por ronda).
+* **Silver Seal (Sello de Plata)**: Otorga **+15 Fichas** extra al puntuar (1 en 2 de dar +25, y 1 en 5 de transmutarse permanentemente a Carta de Oro).
 
 ---
 
-### 👁️ Ciegas Jefe (Boss Blinds - 8)
+### 👁️ Ciegas Jefe (Boss Blinds - 11)
 
 * **The Pole (El Poste)**: Las cartas con Edición (Foil, Holo, Poly) pierden $10 al ser puntuadas.
 * **The Rod (La Vara)**: Si tu puntuación triplica el objetivo de la ciega, el objetivo de la siguiente ronda se incrementa en X1.5.
@@ -115,14 +130,18 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **The Triangle (El Triángulo)**: Las manos con un número par de cartas no puntúan.
 * **The Cube (El Cubo)**: Reduce las Fichas y el Multi a la mitad si el número resultante es par en el cálculo final.
 * **The Void (El Vacío - Showdown / Ciega Final Ante 8)**: Incrementa el requisito de fichas en X1.25 tras cada mano jugada que no derrote la ciega ($8 de recompensa).
+* **The Guitar (La Guitarra)**: Las manos jugadas de 5 cartas quedan silenciadas y no puntúan.
+* **The Phone (El Teléfono)**: Solo la 1ª carta puntúa y activa Jokers; las demás cartas no puntúan ni activan Jokers.
+* **The Pincer (La Pinza - Showdown / Ciega Final Ante 8)**: Todos los Jokers están deshabilitados hasta que se destruye una carta durante el combate (excepto Jokers destructores de cartas).
 
 ---
 
-### 🎴 Barajas Personalizadas (Decks - 3)
+### 🎴 Barajas Personalizadas (Decks - 4)
 
 * **Caveman Deck (Baraja Cavernícola)**: Empieza únicamente con A, 2, 3, 4, 6, 8 de cada palo en tu baraja; todas las demás cartas iniciales son Cartas de Piedra. Empiezas con -1 Mano.
 * **Strategist Deck (Baraja Estratega)**: Empieza con una baraja reducida de 24 cartas (Ases, Reyes, Reinas, Jotas, 10s y 9s). Inicia con el vale Magic Trick, $0, -1 mano, -2 descartes y las ciegas escalan X1.2.
 * **Overseer Deck (Baraja Supervisora)**: Crea una carta Espectral aleatoria al final de cada ronda (excepto Rot y Soul). Las etiquetas siempre se duplican. Los precios de los Jokers son X1.5. Empiezas con $2, -1 mano y -1 descarte.
+* **Friendly Deck (Baraja Amistosa)**: Genera **2 Jokers aleatorios con edición Negativa** al inicio de cada ronda. Inicia con **-1 Descarte**.
 
 ---
 
@@ -133,9 +152,11 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 
 ---
 
-### 🏷️ Etiquetas (Tags - 1)
+### 🏷️ Etiquetas (Tags - 3)
 
 * **Discord Tag**: 1 en 5 de probabilidad de crear la carta espectral "La Muchachada" (si hay espacio disponible).
+* **Witchcraft Tag (Tag de Brujería)**: Otorga un **Mega Paquete Espectral** gratis.
+* **Sale Tag (Tag de Oferta)**: Todos los artículos y rerolls de la siguiente tienda tienen un **50% de descuento**.
 
 ---
 

@@ -1,6 +1,6 @@
 -- Spectral Cards
 
--- Hierarchy
+-- 1. Hierarchy
 SMODS.Atlas {
     key = "c_hierarchy",
     path = "c_hierarchy.png",
@@ -33,8 +33,8 @@ SMODS.Consumable {
             trigger = 'after',
             delay = 0.4,
             func = function()
-                play_sound('tarot1')
-                card:juice_up(0.3, 0.5)
+                play_sound('tarot2')
+                card:juice_up(0.4, 0.6)
                 return true
             end
         }))
@@ -58,6 +58,7 @@ SMODS.Consumable {
             delay = 0.7,
             func = function()
                 local cards = {}
+                play_sound('tarot1')
                 for i = 1, 3 do
                     local suits = {'Hearts', 'Diamonds', 'Spades', 'Clubs'}
                     local chosen_suit = pseudorandom_element(suits, 'hierarchy_suit')
@@ -68,8 +69,10 @@ SMODS.Consumable {
                         center = G.P_CENTERS.m_steel
                     }, G.hand, nil, i ~= 1, {G.C.SECONDARY_SET.Spectral})
                     cards[i]:set_seal('Red', nil, true)
+                    cards[i]:juice_up(0.4, 0.4)
                 end
                 playing_card_joker_effects(cards)
+                card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Hierarchy Created!', colour = G.C.SECONDARY_SET.Spectral })
                 return true
             end
         }))
@@ -77,7 +80,7 @@ SMODS.Consumable {
     end
 }
 
--- Order
+-- 2. Order
 SMODS.Atlas {
     key = "c_order",
     path = "c_order.png",
@@ -103,16 +106,30 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 local seal_key = (G.P_SEALS and G.P_SEALS['Crackedlatro_dark_green'] and 'Crackedlatro_dark_green') or 'dark_green'
-                target:set_seal(seal_key, true)
+                target:set_seal(seal_key, nil, true)
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Dark Green Seal!', colour = HEX('1b4d2e') })
+                if G.hand then G.hand:unhighlight_all() end
                 return true
             end
         }))
     end
 }
 
--- Rot
+-- 3. Rot
 SMODS.Atlas {
     key = "c_rot",
     path = "c_rot.png",
@@ -140,7 +157,11 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         ease_discard(-1)
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
+                play_sound('tarot2')
+                card:juice_up(0.4, 0.6)
                 for i = #G.jokers.cards, 1, -1 do
                     local j = G.jokers.cards[i]
                     if j.ability then
@@ -148,19 +169,29 @@ SMODS.Consumable {
                     end
                     j:start_dissolve()
                 end
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.7,
+            func = function()
+                play_sound('foil1')
                 for i = 1, 2 do
                     local new_joker = create_card('Joker', G.jokers, nil, 1, nil, nil, nil, 'rot')
                     new_joker:set_eternal(true)
                     new_joker:add_to_deck()
                     G.jokers:emplace(new_joker)
+                    new_joker:juice_up(0.5, 0.5)
                 end
+                card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Rot Harvest!', colour = G.C.RED })
                 return true
             end
         }))
     end
 }
 
--- Catastrophic
+-- 4. Catastrophic
 SMODS.Atlas {
     key = "c_catastrophic",
     path = "c_catastrophic.png",
@@ -246,6 +277,8 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local most_played = get_most_played_hands()
 
+        play_sound('tarot2')
+        card:juice_up(0.4, 0.6)
         update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname = most_played, level = G.GAME.hands[most_played].level + 4})
         level_up_hand(card, most_played, false, 4)
 
@@ -257,20 +290,25 @@ SMODS.Consumable {
 
         local planet_key = hand_to_planet[most_played] or 'c_pluto'
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.4,
             func = function()
+                play_sound('tarot1')
                 for i = 1, 3 do
                     local p_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, planet_key, 'catastrophic')
                     p_card:set_edition({negative = true}, true)
                     p_card:add_to_deck()
                     G.consumeables:emplace(p_card)
+                    p_card:juice_up(0.3, 0.3)
                 end
+                card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Catastrophic!', colour = G.C.DARK_EDITION })
                 return true
             end
         }))
     end
 }
 
--- Intensity
+-- 5. Intensity
 SMODS.Atlas {
     key = "c_intensity",
     path = "c_intensity.png",
@@ -304,8 +342,8 @@ SMODS.Consumable {
             trigger = 'after',
             delay = 0.4,
             func = function()
-                play_sound('tarot1')
-                card:juice_up(0.3, 0.5)
+                play_sound('tarot2')
+                card:juice_up(0.4, 0.6)
                 return true
             end
         }))
@@ -334,6 +372,7 @@ SMODS.Consumable {
                 local chosen_rank = pseudorandom_element(ranks, 'intensity_rank')
                 local suit_prefix = string.sub(chosen_suit, 1, 1)
 
+                play_sound('polychrome1')
                 local new_card = create_playing_card({
                     front = G.P_CARDS[suit_prefix .. '_' .. chosen_rank],
                     center = G.P_CENTERS.m_wild
@@ -341,14 +380,16 @@ SMODS.Consumable {
 
                 new_card:set_edition('e_polychrome', true)
                 new_card:set_seal('Red', nil, true)
+                new_card:juice_up(0.6, 0.6)
                 playing_card_joker_effects({new_card})
+                card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Intense Genesis!', colour = G.C.SECONDARY_SET.Spectral })
                 return true
             end
         }))
     end
 }
 
--- La Muchachada
+-- 6. La Muchachada
 SMODS.Atlas {
     key = "c_la_muchachada",
     path = "la_muchachada_joker.png",
@@ -378,6 +419,17 @@ SMODS.Consumable {
     end,
     use = function(self, card, area, copier)
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot2')
+                card:juice_up(0.5, 0.8)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.4,
             func = function()
                 local secret_keys = {
                     'j_Crackedlatro_esteban', 'j_Crackedlatro_thiago', 'j_Crackedlatro_paula', 'j_Crackedlatro_black_hole_joker',
@@ -391,12 +443,115 @@ SMODS.Consumable {
                     end
                 end
                 local chosen_key = (#valid_secret_keys > 0) and pseudorandom_element(valid_secret_keys, 'la_muchachada_secret') or pseudorandom_element(secret_keys, 'la_muchachada_secret')
+                play_sound('foil1')
                 local new_joker = create_card('Joker', G.jokers, nil, nil, nil, nil, chosen_key, 'la_muchachada')
                 new_joker:add_to_deck()
                 G.jokers:emplace(new_joker)
+                new_joker:juice_up(0.8, 0.8)
                 card_eval_status_text(card, 'extra', nil, nil, nil, { message = "LLEGO UN MIEMBRO DE LA MUCHACHADA!!", colour = G.C.DARK_EDITION })
                 return true
             end
         }))
     end
 }
+
+-- 7. Refuerzo
+SMODS.Atlas {
+    key = "c_refuerzo",
+    path = "c_refuerzo.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Consumable {
+    key = 'refuerzo',
+    set = 'Spectral',
+    atlas = 'c_refuerzo',
+    pos = { x = 0, y = 0 },
+    loc_txt = {
+        name = 'Refuerzo',
+        text = {
+            "Add a {C:chips}Silver Seal{}",
+            "to {C:attention}1 selected card{}"
+        }
+    },
+    can_use = function(self, card)
+        return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
+    end,
+    use = function(self, card, area, copier)
+        local target = G.hand.highlighted[1]
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                local seal_key = (G.P_SEALS and G.P_SEALS['Crackedlatro_silver'] and 'Crackedlatro_silver') or 'silver'
+                play_sound('gold_seal')
+                target:set_seal(seal_key, nil, true)
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Silver Seal!', colour = HEX('bdc3c7') })
+                if G.hand then G.hand:unhighlight_all() end
+                return true
+            end
+        }))
+    end
+}
+
+-- 8. Supernova
+SMODS.Atlas {
+    key = "c_supernova",
+    path = "c_supernova.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Consumable {
+    key = 'supernova',
+    set = 'Spectral',
+    atlas = 'c_supernova',
+    pos = { x = 0, y = 0 },
+    loc_txt = {
+        name = 'Supernova',
+        text = {
+            "Add a {C:planet}White Seal{}",
+            "to {C:attention}1 selected card{}"
+        }
+    },
+    can_use = function(self, card)
+        return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
+    end,
+    use = function(self, card, area, copier)
+        local target = G.hand.highlighted[1]
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                local seal_key = (G.P_SEALS and G.P_SEALS['Crackedlatro_white'] and 'Crackedlatro_white') or 'white'
+                play_sound('tarot2')
+                target:set_seal(seal_key, nil, true)
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'White Seal!', colour = G.C.WHITE })
+                if G.hand then G.hand:unhighlight_all() end
+                return true
+            end
+        }))
+    end
+}
+

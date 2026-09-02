@@ -497,3 +497,123 @@ jd_def["j_Crackedlatro_yairo"] = {
         { text = "(6s / 7s)" }
     }
 }
+
+-- New Common Jokers
+jd_def["j_Crackedlatro_dj_joker"] = {
+    text = {
+        { text = "Remix Card", colour = G.C.SECONDARY_SET.Enhanced }
+    },
+    reminder_text = {
+        { text = "(1 Card Played)" }
+    }
+}
+
+jd_def["j_Crackedlatro_lesionado_joker"] = {
+    text = {
+        { text = "Mr. Bones", colour = G.C.RED }
+    },
+    reminder_text = {
+        { text = "(" },
+        { ref_table = "card.ability.extra", ref_value = "straights_left" },
+        { text = " Straights)" }
+    }
+}
+
+jd_def["j_Crackedlatro_disenador_joker"] = {
+    text = {
+        { text = "+$" },
+        { ref_table = "card.ability.extra", ref_value = "dollars" }
+    },
+    text_config = { colour = G.C.MONEY },
+    reminder_text = {
+        { text = "(Wild Cards)" }
+    }
+}
+
+jd_def["j_Crackedlatro_tts_joker"] = {
+    text = {
+        { text = "+", colour = G.C.MULT },
+        { ref_table = "card.ability.extra", ref_value = "mult", colour = G.C.MULT },
+        { text = " +", colour = G.C.CHIPS },
+        { ref_table = "card.ability.extra", ref_value = "chips", colour = G.C.CHIPS }
+    },
+    reminder_text = {
+        { text = "(Aces, +$2 in Hand)" }
+    }
+}
+
+-- New Uncommon Jokers
+jd_def["j_Crackedlatro_motorizado_joker"] = {
+    text = {
+        { text = "+" },
+        { ref_table = "card.ability.extra", ref_value = "mult" }
+    },
+    text_config = { colour = G.C.MULT },
+    reminder_text = {
+        { text = "(+20 on Retrigger)" }
+    }
+}
+
+jd_def["j_Crackedlatro_contratado_joker"] = {
+    text = {
+        { text = "Job Card", colour = HEX('5c1e11') }
+    },
+    reminder_text = {
+        { text = "(1 in 3/Hand)" }
+    }
+}
+
+jd_def["j_Crackedlatro_sello_aprobacion_joker"] = {
+    text = {
+        { text = "Random Seal", colour = G.C.GOLD }
+    },
+    reminder_text = {
+        { text = "(1 Card Played)" }
+    }
+}
+
+jd_def["j_Crackedlatro_charco_pintura_joker"] = {
+    text = {
+        { text = "+25 / +50", colour = G.C.MULT }
+    },
+    reminder_text = {
+        { text = "(" },
+        { ref_table = "card.ability.extra", ref_value = "suit", colour = G.C.ATTENTION },
+        { text = " / Wild)" }
+    }
+}
+
+-- New Rare Jokers
+jd_def["j_Crackedlatro_parca_joker"] = {
+    text = {
+        { text = "Invisible Joker", colour = G.C.PURPLE }
+    },
+    reminder_text = {
+        { text = "(On Joker Sold)" }
+    }
+}
+
+jd_def["j_Crackedlatro_infostealer_joker"] = {
+    text = {
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.ability.extra", ref_value = "xmult" }
+            }
+        }
+    },
+    text_config = { colour = G.C.WHITE },
+    reminder_text = {
+        { text = "($1 Drain)" }
+    }
+}
+
+jd_def["j_Crackedlatro_sobresaturado_joker"] = {
+    text = {
+        { text = "Enh/Seal/Ed", colour = G.C.SECONDARY_SET.Enhanced }
+    },
+    reminder_text = {
+        { text = "(Or +$10)" }
+    }
+}
+

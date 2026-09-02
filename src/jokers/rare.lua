@@ -607,3 +607,211 @@ SMODS.Joker {
         end
     end
 }
+
+-- Reaper Joker (Joker Parca)
+SMODS.Atlas {
+    key = "parca_joker",
+    path = "parca_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'parca_joker',
+    atlas = 'parca_joker',
+    loc_txt = {
+        name = 'Reaper Joker',
+        text = {
+            "When another {C:attention}Joker{} is sold,",
+            "creates an {C:attention}Invisible Joker{}",
+            "{C:inactive}(Must have room){}"
+        }
+    },
+    config = {},
+    rarity = 3,
+    pos = { x = 0, y = 0 },
+    cost = 8,
+    blueprint_compat = false,
+    calculate = function(self, card, context)
+        if context.selling_card and context.card and context.card.ability and context.card.ability.set == 'Joker' and context.card ~= card and not context.blueprint then
+            if G.jokers and #G.jokers.cards < G.jokers.config.card_limit then
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.3,
+                    func = function()
+                        play_sound('tarot2')
+                        local invisible = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_invisible', 'parca')
+                        invisible:add_to_deck()
+                        G.jokers:emplace(invisible)
+                        invisible:juice_up(0.6, 0.6)
+                        card:juice_up(0.4, 0.5)
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Spirited Away!', colour = G.C.PURPLE })
+                        return true
+                    end
+                }))
+            end
+        end
+    end
+}
+
+-- Infostealer Joker (Always Eternal)
+SMODS.Atlas {
+    key = "infostealer_joker",
+    path = "infostealer_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'infostealer_joker',
+    atlas = 'infostealer_joker',
+    loc_txt = {
+        name = 'Infostealer Joker',
+        text = {
+            "{C:eternal}Always Eternal{}.",
+            "Click {C:attention}Use{} to feed it {C:money}$1{}.",
+            "Gains {X:mult,C:white}+X#3#{} Mult for every",
+            "{C:money}$#4#{} fed to it {C:inactive}(#2#/#4# fed){}",
+            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
+        }
+    },
+    config = { extra = { xmult = 1.0, dollars_drained = 0, threshold = 20, xmult_gain = 2.0 } },
+    rarity = 3,
+    pos = { x = 0, y = 0 },
+    cost = 8,
+    blueprint_compat = true,
+    loc_vars = function(self, info_queue, card)
+        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 1.0
+        local drained = (card and card.ability and card.ability.extra and card.ability.extra.dollars_drained) or 0
+        local current_fed = drained % 20
+        local gain = (card and card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 2.0
+        local threshold = (card and card.ability and card.ability.extra and card.ability.extra.threshold) or 20
+        return { vars = { xmult, current_fed, gain, threshold } }
+    end,
+    add_to_deck = function(self, card, from_debuff)
+        card:set_eternal(true)
+        if card.ability then card.ability.eternal = true end
+    end,
+    can_use = function(self, card)
+        return G.GAME and G.GAME.dollars and G.GAME.dollars >= 1
+    end,
+    use = function(self, card, area, copier)
+        ease_dollars(-1)
+        card.ability.extra.dollars_drained = (card.ability.extra.dollars_drained or 0) + 1
+        local current_progress = card.ability.extra.dollars_drained % card.ability.extra.threshold
+        play_sound('tarot1')
+        card:juice_up(0.4, 0.4)
+
+        if current_progress == 0 then
+            card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + card.ability.extra.xmult_gain
+            play_sound('foil1')
+            card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. card.ability.extra.xmult_gain .. ' XMult!', colour = G.C.XMULT })
+        else
+            card_eval_status_text(card, 'extra', nil, nil, nil, { message = '-$1 (' .. current_progress .. '/' .. card.ability.extra.threshold .. ')', colour = G.C.MONEY })
+        end
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main and card.ability.extra.xmult > 1 then
+            return {
+                Xmult = card.ability.extra.xmult
+            }
+        end
+    end
+}
+
+-- Supersaturated Joker (Joker Sobresaturado)
+SMODS.Atlas {
+    key = "sobresaturado_joker",
+    path = "sobresaturado_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'sobresaturado_joker',
+    atlas = 'sobresaturado_joker',
+    loc_txt = {
+        name = 'Supersaturated Joker',
+        text = {
+            "Each scored card randomly gains a missing",
+            "{C:attention}Enhancement{}, {C:attention}Seal{}, or {C:dark_edition}Edition{}.",
+            "If a card cannot receive any more improvements,",
+            "it earns {C:money}+$10{} instead"
+        }
+    },
+    config = {},
+    rarity = 3,
+    pos = { x = 0, y = 0 },
+    cost = 8,
+    calculate = function(self, card, context)
+        if context.individual and context.cardarea == G.play then
+            local pcard = context.other_card
+            local has_enh = (pcard.config and pcard.config.center and pcard.config.center ~= G.P_CENTERS.c_base) or (pcard.ability and pcard.ability.effect and pcard.ability.effect ~= 'Base')
+            local has_seal = (pcard.seal ~= nil)
+            local has_edition = (pcard.edition ~= nil)
+
+            if has_enh and has_seal and has_edition then
+                ease_dollars(10)
+                return {
+                    dollars = 10,
+                    message = '+$10 Saturated!',
+                    colour = G.C.MONEY,
+                    card = card
+                }
+            else
+                local missing = {}
+                if not has_enh then table.insert(missing, 'enhancement') end
+                if not has_seal then table.insert(missing, 'seal') end
+                if not has_edition then table.insert(missing, 'edition') end
+
+                if #missing > 0 then
+                    local chosen_type = pseudorandom_element(missing, pseudoseed('sobresaturado_type'))
+                    if chosen_type == 'enhancement' then
+                        local enhs = { G.P_CENTERS.m_bonus, G.P_CENTERS.m_mult, G.P_CENTERS.m_wild, G.P_CENTERS.m_glass, G.P_CENTERS.m_steel, G.P_CENTERS.m_stone, G.P_CENTERS.m_gold, G.P_CENTERS.m_lucky }
+                        local chosen_enh = pseudorandom_element(enhs, pseudoseed('sobresaturado_enh'))
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.2,
+                            func = function()
+                                play_sound('tarot1')
+                                pcard:set_ability(chosen_enh)
+                                pcard:juice_up(0.4, 0.4)
+                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Enhanced!', colour = G.C.SECONDARY_SET.Enhanced })
+                                return true
+                            end
+                        }))
+                    elseif chosen_type == 'seal' then
+                        local seals = { 'Gold', 'Blue', 'Red', 'Purple', 'Crackedlatro_dark_green', 'Crackedlatro_silver', 'Crackedlatro_white' }
+                        local chosen_seal = pseudorandom_element(seals, pseudoseed('sobresaturado_seal'))
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.2,
+                            func = function()
+                                play_sound('gold_seal')
+                                pcard:set_seal(chosen_seal, nil, true)
+                                pcard:juice_up(0.4, 0.4)
+                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Sealed!', colour = G.C.GOLD })
+                                return true
+                            end
+                        }))
+                    elseif chosen_type == 'edition' then
+                        local eds = { 'e_foil', 'e_holo', 'e_polychrome' }
+                        local chosen_ed = pseudorandom_element(eds, pseudoseed('sobresaturado_ed'))
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.2,
+                            func = function()
+                                play_sound('polychrome1')
+                                pcard:set_edition(chosen_ed, true)
+                                pcard:juice_up(0.4, 0.4)
+                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Polished!', colour = G.C.DARK_EDITION })
+                                return true
+                            end
+                        }))
+                    end
+                end
+            end
+        end
+    end
+}
+

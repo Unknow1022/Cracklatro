@@ -163,3 +163,54 @@ SMODS.Back {
         end
     end
 }
+
+-- 4. Friendly Deck (Baraja Amistosa)
+SMODS.Atlas {
+    key = "b_friendly",
+    path = "b_friendly.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Back {
+    key = 'friendly',
+    atlas = 'b_friendly',
+    pos = { x = 0, y = 0 },
+    loc_txt = {
+        name = 'Friendly Deck',
+        text = {
+            "Creates {C:attention}2 random Negative Jokers{}",
+            "at the start of each round,",
+            "{C:red}-1{} Discard"
+        }
+    },
+    apply = function(self)
+        G.E_MANAGER:add_event(Event({
+            func = function()
+                G.GAME.round_resets.discards = math.max(0, G.GAME.round_resets.discards - 1)
+                ease_discard(-1)
+                return true
+            end
+        }))
+    end,
+    calculate = function(self, back, context)
+        if context.setting_blind and not context.blueprint then
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.3,
+                func = function()
+                    play_sound('foil1')
+                    for i = 1, 2 do
+                        local new_joker = create_card('Joker', G.jokers, nil, nil, nil, nil, nil, 'friendly_deck')
+                        new_joker:set_edition({ negative = true }, true)
+                        new_joker:add_to_deck()
+                        G.jokers:emplace(new_joker)
+                        new_joker:juice_up(0.5, 0.5)
+                    end
+                    return true
+                end
+            }))
+        end
+    end
+}
+

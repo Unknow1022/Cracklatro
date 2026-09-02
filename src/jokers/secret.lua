@@ -1,4 +1,4 @@
--- Secret Jokers (Rareza Secreta)
+-- Secret Jokers (Secret Rarity)
 
 -- Esteban
 SMODS.Atlas {
@@ -29,11 +29,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -68,7 +68,7 @@ SMODS.Joker {
         text = {
             "Gives {X:mult,C:white}X1{} Mult for every",
             "{C:chips}#1# Chips{} in final hand chips",
-            "{C:inactive}(\"Son, Hijillo, Brochacho 😭\")"
+            "{C:inactive}(\"Son, Brochacho 😭\")"
         }
     },
     config = { extra = { chips_per_xmult = 20 } },
@@ -81,11 +81,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -125,7 +125,7 @@ SMODS.Joker {
             "Jokers and gains {X:mult,C:white}+X1{} Mult",
             "for each Joker destroyed",
             "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult){}",
-            "{C:inactive}(\"*Ñam Ñam ñam* NOO MAMA ESPERA NO ESTOY COMIENDO\")"
+            "{C:inactive}(\"*Nom Nom Nom* NO MOM WAIT I'M NOT EATING\")"
         }
     },
     config = { extra = { xmult = 1.0 } },
@@ -138,11 +138,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -190,7 +190,7 @@ SMODS.Joker {
                         end
                     }))
                     return {
-                        message = '*Ñam Ñam ñam*',
+                        message = '*Nom Nom Nom*',
                         colour = G.C.XMULT
                     }
                 end
@@ -233,11 +233,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -284,7 +284,7 @@ SMODS.Joker {
             "and {X:mult,C:white}X#2#{} Mult.",
             "{C:green}#3# in #4#{} chance to {C:attention}Project{} and create",
             "a {C:dark_edition}Negative{} {C:attention}Bloodstone{}",
-            "{C:inactive}(\"Ahhh me proyecto\")"
+            "{C:inactive}(\"I project myself\")"
         }
     },
     config = { extra = { mult = 10, xmult = 1.5, odds = 10 } },
@@ -297,11 +297,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -359,7 +359,7 @@ SMODS.Joker {
         text = {
             "When a hand is {C:attention}discarded{},",
             "levels up the discarded {C:attention}poker hand{}",
-            "{C:inactive}(\"*Se pone a farmear aura*\")"
+            "{C:inactive}(\"*Starts farming aura*\")"
         }
     },
     config = {},
@@ -372,11 +372,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     calculate = function(self, card, context)
@@ -432,7 +432,7 @@ SMODS.Joker {
             "Scored {C:spades}Spades{} and {C:hearts}Hearts{} cards",
             "give {X:mult,C:white}X#1#{} Mult.",
             "Earn {C:money}$#2#{} for {C:attention}each scored card{}.",
-            "{C:inactive}(\"Pe Causa\")"
+            "{C:inactive}(\"Homie\")"
         }
     },
     config = { extra = { xmult = 2, dollars = 5 } },
@@ -445,11 +445,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -473,7 +473,7 @@ SMODS.Joker {
                     trigger = 'after',
                     delay = 0.3,
                     func = function()
-                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '¡Mejores amigos!', colour = HEX('ff69b4') })
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Best Friends!', colour = HEX('ff69b4') })
                         card:juice_up(0.8, 0.8)
                         return true
                     end
@@ -521,7 +521,7 @@ SMODS.Joker {
             "Gives {X:mult,C:white}+X#1#{} Mult for each",
             "{C:attention}Wild Card{} in your full deck",
             "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult)",
-            "{C:inactive}(\"Un dibujo para ti! :3\")"
+            "{C:inactive}(\"A drawing for you! :3\")"
         }
     },
     config = { extra = { xmult_gain = 0.25 } },
@@ -534,11 +534,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -598,7 +598,7 @@ SMODS.Joker {
         text = {
             "On {C:attention}first hand{} of round,",
             "elevates final {C:mult}Mult{} to the power of {X:mult,C:white}^#1#{}",
-            "{C:inactive}(\"Pero que envian al chat\")"
+            "{C:inactive}(\"What is the chat sending?\")"
         }
     },
     config = { extra = { power = 2 } },
@@ -611,11 +611,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -671,11 +671,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     calculate = function(self, card, context)
@@ -725,7 +725,7 @@ SMODS.Joker {
             "Gives {X:mult,C:white}X#1#{} Mult for each",
             "remaining {C:attention}discard{} you currently have",
             "{C:inactive}(Currently {X:mult,C:white}X#2#{C:inactive} Mult){}",
-            "{C:inactive}(\"No es necesario descartar, todas las cartas son utiles\")"
+            "{C:inactive}(\"No need to discard, every card is useful\")"
         }
     },
     config = { extra = { xmult_per_discard = 2 } },
@@ -738,11 +738,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -782,7 +782,7 @@ SMODS.Joker {
             "Scored cards give {X:mult,C:white}X#1#{} Mult,",
             "but {C:attention}subtracts 3/4{} of final {C:chips}Chips{}",
             "at the end of scoring",
-            "{C:inactive}(\"Todo tiene un precio...\")"
+            "{C:inactive}(\"Everything has a price...\")"
         }
     },
     config = { extra = { xmult = 4 } },
@@ -795,11 +795,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -844,8 +844,8 @@ SMODS.Joker {
         text = {
             "Scored {C:attention}6s{} and {C:attention}7s{} give",
             "{X:mult,C:white}X#1#{} Mult and {X:chips,C:white}X#2#{} Chips.",
-            "{C:inactive}(Habilidad secreta: Si juegas un 6 y un As...){}",
-            "{C:inactive}(\"El 6 y el 7 tienen el poder...\")"
+            "{C:inactive}(Secret ability: If you play a 6 and an Ace...){}",
+            "{C:inactive}(\"The 6 and the 7 have the power...\")"
         }
     },
     config = { extra = { xmult = 3, xchips = 1.5, secret_xmult = 4, secret_xchips = 2 } },
@@ -858,11 +858,11 @@ SMODS.Joker {
         return false, { allow_duplicates = false }
     end,
     set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
     end,
     set_badges = function(self, card, badges)
         if badges and #badges > 0 then
-            badges[1] = create_badge('Secreto', HEX('000000'), G.C.WHITE, 1.2)
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
         end
     end,
     loc_vars = function(self, info_queue, card)
@@ -900,7 +900,7 @@ SMODS.Joker {
                 return {
                     Xmult = (card.ability and card.ability.extra and card.ability.extra.secret_xmult) or 4,
                     x_chips = (card.ability and card.ability.extra and card.ability.extra.secret_xchips) or 2,
-                    message = '¡6 y As Secreto!',
+                    message = 'Secret 6 & Ace!',
                     colour = G.C.DARK_EDITION,
                     card = card
                 }
@@ -908,3 +908,4 @@ SMODS.Joker {
         end
     end
 }
+

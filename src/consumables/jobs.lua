@@ -82,10 +82,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 local center = get_diamond_enhancement_center()
                 target:set_ability(center)
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Diamond Card!', colour = HEX('1b4d2e') })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -123,10 +135,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
                 target.ability.gardener_job = true
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Gardener Hired!', colour = HEX('27ae60') })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -163,10 +187,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('gold_seal')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 local center = get_investment_enhancement_center()
                 target:set_ability(center)
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Investment Card!', colour = G.C.MONEY })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -205,6 +241,17 @@ SMODS.Consumable {
         local donor = G.hand.highlighted[1]
         local recipient = G.hand.highlighted[2]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot2')
+                card:juice_up(0.4, 0.6)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.3,
             func = function()
                 local donor_bonus = (donor.ability and donor.ability.perma_bonus) or 0
                 recipient.ability = recipient.ability or {}
@@ -215,15 +262,17 @@ SMODS.Consumable {
                 end
 
                 if donor.seal then
-                    recipient:set_seal(donor.seal, true)
+                    recipient:set_seal(donor.seal, nil, true)
                 end
 
                 if donor.edition then
                     recipient:set_edition(donor.edition, true)
                 end
 
+                play_sound('tarot1')
                 donor:start_dissolve()
-                recipient:juice_up()
+                recipient:juice_up(0.6, 0.6)
+                card_eval_status_text(recipient, 'extra', nil, nil, nil, { message = 'Transplanted!', colour = G.C.RED })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -260,10 +309,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 local center = get_lead_enhancement_center()
                 target:set_ability(center)
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Lead Card!', colour = G.C.GREY })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -320,8 +381,8 @@ SMODS.Consumable {
             trigger = 'after',
             delay = 0.2,
             func = function()
-                play_sound('tarot1')
-                if card then card:juice_up(0.3, 0.5) end
+                play_sound('tarot2')
+                if card then card:juice_up(0.4, 0.6) end
                 target.destroyed = true
                 target:start_dissolve(nil, true)
                 return true
@@ -332,15 +393,16 @@ SMODS.Consumable {
         for i = 1, 2 do
             G.E_MANAGER:add_event(Event({
                 trigger = 'after',
-                delay = 0.15,
+                delay = 0.25,
                 func = function()
+                    play_sound('tarot1')
                     local chosen_enh = pseudorandom_element(enhancements, pseudoseed('butcher_enh_' .. i))
                     local current_rank_str = (i == 1) and rank_1_str or rank_2_str
                     local new_card = create_playing_card({
                         front = G.P_CARDS[suit_prefix .. '_' .. current_rank_str] or G.P_CARDS['S_2'],
                         center = chosen_enh
                     }, G.hand, nil, i ~= 1, {G.C.SECONDARY_SET.Enhanced})
-                    new_card:juice_up()
+                    new_card:juice_up(0.4, 0.4)
                     return true
                 end
             }))
@@ -379,10 +441,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
                 target.ability.detective_job = true
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Detective Hired!', colour = HEX('2980b9') })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -420,10 +494,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
                 target.ability.chef_job = true
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Chef Hired!', colour = HEX('e67e22') })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -462,10 +548,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
                 target.ability.archaeologist_job = true
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Archaeologist Hired!', colour = HEX('d35400') })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end
@@ -502,10 +600,22 @@ SMODS.Consumable {
     use = function(self, card, area, copier)
         local target = G.hand.highlighted[1]
         G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
             func = function()
                 local center = get_jeweled_enhancement_center()
                 target:set_ability(center)
-                target:juice_up()
+                target:juice_up(0.5, 0.5)
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Jeweled Card!', colour = G.C.MULT })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end

@@ -514,7 +514,7 @@ SMODS.Joker {
     atlas = 'falta_de_lectura_joker',
     unlocked = false,
     loc_txt = {
-        name = 'Falta de Lectura',
+        name = 'Reading Deficiency',
         text = {
             "{X:mult,C:white}X#1#{} Mult if played hand",
             "activates {C:attention}no other Jokers{}"
@@ -570,7 +570,7 @@ SMODS.Joker {
                 check_for_unlock({ type = 'no_jokers_activated' })
                 return {
                     Xmult = card.ability.extra.xmult,
-                    message = 'Lee porfavor',
+                    message = 'Please Read!',
                     colour = G.C.XMULT
                 }
             end
@@ -680,6 +680,214 @@ SMODS.Joker {
                         return ret
                     end
                 end
+            end
+        end
+    end
+}
+
+-- Motorized Joker (Joker Motorizado)
+SMODS.Atlas {
+    key = "motorizado_joker",
+    path = "motorizado_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'motorizado_joker',
+    atlas = 'motorizado_joker',
+    loc_txt = {
+        name = 'Motorized Joker',
+        text = {
+            "Gains {C:mult}+#2#{} Mult whenever",
+            "a card is {C:attention}retriggered{}",
+            "{C:inactive}(Currently {C:mult}+#1#{C:inactive} Mult)"
+        }
+    },
+    config = { extra = { mult = 20, mult_gain = 20 } },
+    rarity = 2,
+    pos = { x = 0, y = 0 },
+    cost = 6,
+    loc_vars = function(self, info_queue, card)
+        local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or 20
+        local mult_gain = (card and card.ability and card.ability.extra and card.ability.extra.mult_gain) or 20
+        return { vars = { mult, mult_gain } }
+    end,
+    calculate = function(self, card, context)
+        if context.repetition and not context.blueprint then
+            card.ability.extra.mult = card.ability.extra.mult + card.ability.extra.mult_gain
+            card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. card.ability.extra.mult_gain .. ' Mult!', colour = G.C.MULT })
+        end
+
+        if context.joker_main and card.ability.extra.mult > 0 then
+            return {
+                mult = card.ability.extra.mult
+            }
+        end
+    end
+}
+
+-- Hired Joker (Joker Contratado)
+SMODS.Atlas {
+    key = "contratado_joker",
+    path = "contratado_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'contratado_joker',
+    atlas = 'contratado_joker',
+    loc_txt = {
+        name = 'Hired Joker',
+        text = {
+            "{C:green}#1# in #2#{} chance per played hand",
+            "to create a random {C:attention}Job Card{}",
+            "{C:inactive}(Must have room){}"
+        }
+    },
+    config = { extra = { odds = 3 } },
+    rarity = 2,
+    pos = { x = 0, y = 0 },
+    cost = 6,
+    loc_vars = function(self, info_queue, card)
+        return { vars = { (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
+    end,
+    calculate = function(self, card, context)
+        if context.before and not context.blueprint then
+            if pseudorandom('contratado') < (G.GAME and G.GAME.probabilities.normal or 1) / card.ability.extra.odds then
+                if G.consumeables and #G.consumeables.cards < G.consumeables.config.card_limit then
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'after',
+                        delay = 0.3,
+                        func = function()
+                            play_sound('tarot1')
+                            local job_keys = {
+                                'c_Crackedlatro_minero_job', 'c_Crackedlatro_gardener_job', 'c_Crackedlatro_banker_job',
+                                'c_Crackedlatro_surgeon_job', 'c_Crackedlatro_alchemist_job', 'c_Crackedlatro_butcher_job',
+                                'c_Crackedlatro_detective_job', 'c_Crackedlatro_chef_job', 'c_Crackedlatro_archaeologist_job',
+                                'c_Crackedlatro_jeweler_job'
+                            }
+                            local chosen_job = pseudorandom_element(job_keys, pseudoseed('contratado_spawn'))
+                            local new_card = create_card('Job', G.consumeables, nil, nil, nil, nil, chosen_job, 'contratado')
+                            new_card:add_to_deck()
+                            G.consumeables:emplace(new_card)
+                            new_card:juice_up(0.4, 0.4)
+                            card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Job Offered!', colour = HEX('5c1e11') })
+                            return true
+                        end
+                    }))
+                end
+            end
+        end
+    end
+}
+
+-- Seal of Approval (Sello de Aprobación)
+SMODS.Atlas {
+    key = "sello_aprobacion_joker",
+    path = "sello_aprobacion_joker.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Joker {
+    key = 'sello_aprobacion_joker',
+    atlas = 'sello_aprobacion_joker',
+    loc_txt = {
+        name = 'Seal of Approval',
+        text = {
+            "If played hand contains only {C:attention}1 card{},",
+            "applies a random {C:attention}Seal{} to it",
+            "{C:inactive}(Gold, Blue, Red, Purple, Green, Silver, White){}"
+        }
+    },
+    config = {},
+    rarity = 2,
+    pos = { x = 0, y = 0 },
+    cost = 7,
+    calculate = function(self, card, context)
+        if context.before and not context.blueprint then
+            local play_count = (context.full_hand and #context.full_hand) or (context.scoring_hand and #context.scoring_hand) or (G.play and G.play.cards and #G.play.cards) or 0
+            if play_count == 1 and context.scoring_hand and #context.scoring_hand == 1 then
+                local target_card = context.scoring_hand[1]
+                local seals = { 'Gold', 'Blue', 'Red', 'Purple', 'Crackedlatro_dark_green', 'Crackedlatro_silver', 'Crackedlatro_white' }
+                local chosen_seal = pseudorandom_element(seals, pseudoseed('sello_aprobacion'))
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.2,
+                    func = function()
+                        play_sound('gold_seal')
+                        target_card:set_seal(chosen_seal, nil, true)
+                        target_card:juice_up(0.5, 0.5)
+                        card:juice_up(0.4, 0.5)
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Approved!', colour = G.C.GOLD })
+                        return true
+                    end
+                }))
+            end
+        end
+    end
+}
+
+-- Paint Puddle (Charco de Pintura)
+SMODS.Atlas {
+    key = "charco_pintura_joker",
+    path = "charco_pintura_joker.png",
+    px = 71,
+    py = 95
+}
+
+local function ensure_charco_suit(card)
+    card.ability = card.ability or {}
+    card.ability.extra = card.ability.extra or {}
+    if not card.ability.extra.suit then
+        local suits = {'Hearts', 'Diamonds', 'Spades', 'Clubs'}
+        card.ability.extra.suit = pseudorandom_element(suits, 'charco_init_suit') or 'Hearts'
+    end
+end
+
+SMODS.Joker {
+    key = 'charco_pintura_joker',
+    atlas = 'charco_pintura_joker',
+    loc_txt = {
+        name = 'Paint Puddle',
+        text = {
+            "Scored {C:attention}#1#{} cards give {C:mult}+#2#{} Mult.",
+            "Scored {C:attention}Wild Cards{} give {C:mult}+#3#{} Mult instead",
+            "{C:inactive}(Suit changes every round){}"
+        }
+    },
+    config = { extra = { mult_suit = 25, mult_wild = 50, suit = 'Hearts' } },
+    rarity = 2,
+    pos = { x = 0, y = 0 },
+    cost = 6,
+    loc_vars = function(self, info_queue, card)
+        ensure_charco_suit(card)
+        local suit = card.ability.extra.suit or 'Hearts'
+        local mult_suit = card.ability.extra.mult_suit or 25
+        local mult_wild = card.ability.extra.mult_wild or 50
+        return { vars = { suit, mult_suit, mult_wild } }
+    end,
+    calculate = function(self, card, context)
+        ensure_charco_suit(card)
+
+        if context.setting_blind and not context.blueprint then
+            local suits = {'Hearts', 'Diamonds', 'Spades', 'Clubs'}
+            card.ability.extra.suit = pseudorandom_element(suits, 'charco_round_suit')
+        end
+
+        if context.individual and context.cardarea == G.play then
+            if is_wild_card(context.other_card) then
+                return {
+                    mult = card.ability.extra.mult_wild,
+                    card = card
+                }
+            elseif context.other_card:is_suit(card.ability.extra.suit) then
+                return {
+                    mult = card.ability.extra.mult_suit,
+                    card = card
+                }
             end
         end
     end

@@ -1,5 +1,143 @@
 -- Boss Blinds
 
+G.CRACKEDLATRO_BLIND_THEMES = {
+    ['pole'] = {
+        name = 'The Pole',
+        boss_colour = HEX('7f8c8d'),
+        new_colour = HEX('2c3e50'),
+        special_colour = HEX('95a5a6'),
+        tertiary_colour = HEX('1a252f'),
+        contrast = 2
+    },
+    ['stick'] = {
+        name = 'The Rod',
+        boss_colour = HEX('1e8449'),
+        new_colour = HEX('145a32'),
+        special_colour = HEX('27ae60'),
+        tertiary_colour = HEX('0b3b1f'),
+        contrast = 2
+    },
+    ['wizard'] = {
+        name = 'The Magician',
+        boss_colour = HEX('8e44ad'),
+        new_colour = HEX('4a156e'),
+        special_colour = HEX('9b59b6'),
+        tertiary_colour = HEX('240838'),
+        contrast = 2.5
+    },
+    ['mountain'] = {
+        name = 'The Mountain',
+        boss_colour = HEX('16a085'),
+        new_colour = HEX('0e6655'),
+        special_colour = HEX('1abc9c'),
+        tertiary_colour = HEX('07382f'),
+        contrast = 2
+    },
+    ['door'] = {
+        name = 'The Door',
+        boss_colour = HEX('e84393'),
+        new_colour = HEX('6c1d45'),
+        special_colour = HEX('fd79a8'),
+        tertiary_colour = HEX('3b0e25'),
+        contrast = 2.5
+    },
+    ['triangle'] = {
+        name = 'The Triangle',
+        boss_colour = HEX('2980b9'),
+        new_colour = HEX('1b4f72'),
+        special_colour = HEX('3498db'),
+        tertiary_colour = HEX('0e283b'),
+        contrast = 2
+    },
+    ['cube'] = {
+        name = 'The Cube',
+        boss_colour = HEX('00d2d3'),
+        new_colour = HEX('0f4c75'),
+        special_colour = HEX('54a0ff'),
+        tertiary_colour = HEX('08273d'),
+        contrast = 2.5
+    },
+    ['void'] = {
+        name = 'The Void',
+        boss_colour = HEX('5e2491'),
+        new_colour = HEX('150426'),
+        special_colour = HEX('7d3c98'),
+        tertiary_colour = HEX('090112'),
+        contrast = 3
+    },
+    ['guitar'] = {
+        name = 'The Guitar',
+        boss_colour = HEX('e67e22'),
+        new_colour = HEX('6e2f0a'),
+        special_colour = HEX('f39c12'),
+        tertiary_colour = HEX('3a1704'),
+        contrast = 2.5
+    },
+    ['phone'] = {
+        name = 'The Phone',
+        boss_colour = HEX('3498db'),
+        new_colour = HEX('1a3a6b'),
+        special_colour = HEX('5dade2'),
+        tertiary_colour = HEX('0c1d36'),
+        contrast = 2
+    },
+    ['pinza'] = {
+        name = 'The Pincer',
+        boss_colour = HEX('e74c3c'),
+        new_colour = HEX('5c1111'),
+        special_colour = HEX('ff6b6b'),
+        tertiary_colour = HEX('2e0707'),
+        contrast = 3
+    }
+}
+
+function ease_custom_blind_background(blind)
+    if not blind then return end
+    local key = (blind.config and blind.config.center and blind.config.center.key) or blind.config.center_key or blind.name or ''
+    key = string.gsub(key, '^bl_Crackedlatro_', '')
+    key = string.gsub(key, '^b_Crackedlatro_', '')
+    key = string.gsub(key, '^bl_', '')
+    key = string.gsub(key, '^b_', '')
+
+    local theme = G.CRACKEDLATRO_BLIND_THEMES[key] or G.CRACKEDLATRO_BLIND_THEMES[blind.name]
+    if not theme then
+        for k, v in pairs(G.CRACKEDLATRO_BLIND_THEMES) do
+            if string.find(key, k) or (blind.name and string.find(blind.name, v.name)) then
+                theme = v
+                break
+            end
+        end
+    end
+
+    if theme then
+        G.GAME.blind_color = theme.special_colour or theme.boss_colour
+        G.ARGS.blind_colour = G.GAME.blind_color
+        if G.C and G.C.DYN_UI then
+            G.C.DYN_UI.BOSS_MAIN = theme.boss_colour
+            ease_colour(G.C.DYN_UI.MAIN, theme.special_colour)
+            ease_colour(G.C.DYN_UI.DARK, theme.tertiary_colour)
+        end
+        ease_background_colour{
+            new_colour = theme.new_colour,
+            special_colour = theme.special_colour,
+            tertiary_colour = theme.tertiary_colour,
+            contrast = theme.contrast or 2
+        }
+    end
+end
+
+local function sync_cracklatro_blind_colours()
+    if not G.C or not G.C.BLIND or not G.CRACKEDLATRO_BLIND_THEMES then return end
+    for key, data in pairs(G.CRACKEDLATRO_BLIND_THEMES) do
+        G.C.BLIND[key] = data.boss_colour
+        G.C.BLIND['b_Crackedlatro_' .. key] = data.boss_colour
+        G.C.BLIND['bl_Crackedlatro_' .. key] = data.boss_colour
+        if data.name then
+            G.C.BLIND[data.name] = data.boss_colour
+        end
+    end
+end
+
 -- 1. The Pole
 SMODS.Atlas {
     key = "b_pole",
@@ -23,6 +161,9 @@ SMODS.Blind {
             "lose $10 when scored"
         }
     },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play and context.other_card and context.other_card.edition then
             ease_dollars(-10)
@@ -49,7 +190,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('145a32'),
+    boss_colour = HEX('1e8449'),
     loc_txt = {
         name = 'The Rod',
         text = {
@@ -57,6 +198,9 @@ SMODS.Blind {
             "next round target is X1.5"
         }
     },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
     defeat = function(self)
         if G.GAME.chips and G.GAME.blind and G.GAME.chips >= G.GAME.blind.chips * 3 then
             G.GAME.stick_penalty = 1.5
@@ -87,6 +231,9 @@ SMODS.Blind {
             "and reduces final Mult to 1/3"
         }
     },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
     calculate = function(self, card, context)
         if context.before then
             G.GAME.wizard_triggered = nil
@@ -118,14 +265,17 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('0e6655'),
+    boss_colour = HEX('16a085'),
     loc_txt = {
         name = 'The Mountain',
         text = {
             "Using consumables disables",
             "scoring on the next hand"
         }
-    }
+    },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end
 }
 
 -- 5. The Door
@@ -151,6 +301,9 @@ SMODS.Blind {
             "of cards do not score"
         }
     },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
     modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
         local odd_hand_names = {
             ['High Card'] = true,
@@ -185,7 +338,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('1b4f72'),
+    boss_colour = HEX('2980b9'),
     loc_txt = {
         name = 'The Triangle',
         text = {
@@ -193,6 +346,9 @@ SMODS.Blind {
             "of cards do not score"
         }
     },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
     modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
         local even_hand_names = {
             ['Pair'] = true,
@@ -221,7 +377,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 1, max = 10 },
-    boss_colour = HEX('3498db'),
+    boss_colour = HEX('00d2d3'),
     loc_txt = {
         name = 'The Cube',
         text = {
@@ -229,6 +385,9 @@ SMODS.Blind {
             "if the number is even in final scoring"
         }
     },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
     calculate = function(self, card, context)
         if context.before then
             G.GAME.cube_triggered = nil
@@ -244,7 +403,7 @@ SMODS.Blind {
                     x_chips = mod_chips,
                     Xmult = mod_mult,
                     message = 'Cube Halved!',
-                    colour = HEX('3498db')
+                    colour = HEX('00d2d3')
                 }
             end
         end
@@ -267,7 +426,7 @@ SMODS.Blind {
     mult = 2,
     boss = { min = 8, max = 10, showdown = true },
     showdown = true,
-    boss_colour = HEX('1a052e'),
+    boss_colour = HEX('5e2491'),
     loc_txt = {
         name = 'The Void',
         text = {
@@ -276,6 +435,9 @@ SMODS.Blind {
             "that does not defeat the blind"
         }
     },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
     calculate = function(self, card, context)
         if context.after and not context.blueprint and not context.individual and not context.repetition then
             if G.GAME and G.GAME.blind and G.GAME.chips < G.GAME.blind.chips then
@@ -283,15 +445,172 @@ SMODS.Blind {
                 G.GAME.blind.chip_text = number_format(G.GAME.blind.chips)
                 return {
                     message = 'X1.25 Target!',
-                    colour = HEX('8e44ad')
+                    colour = HEX('7d3c98')
                 }
             end
         end
     end
 }
 
+-- 9. The Guitar (La Guitarra)
+SMODS.Atlas {
+    key = "b_guitar",
+    path = "b_guitar.png",
+    px = 34,
+    py = 34
+}
+
+SMODS.Blind {
+    key = 'guitar',
+    atlas = 'b_guitar',
+    pos = { x = 0, y = 0 },
+    dollars = 5,
+    mult = 2,
+    boss = { min = 3, max = 10 },
+    boss_colour = HEX('e67e22'),
+    loc_txt = {
+        name = 'The Guitar',
+        text = {
+            "Hands containing 5 cards",
+            "do not score"
+        }
+    },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
+    modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
+        if #cards == 5 then
+            return 0, 0, true
+        end
+        return mult, hand_chips, false
+    end,
+    calculate = function(self, card, context)
+        if context.before and context.full_hand and #context.full_hand == 5 then
+            return {
+                message = 'Guitar Muted!',
+                colour = HEX('e67e22')
+            }
+        end
+    end
+}
+
+-- 10. The Phone (El Teléfono)
+SMODS.Atlas {
+    key = "b_phone",
+    path = "b_phone.png",
+    px = 34,
+    py = 34
+}
+
+SMODS.Blind {
+    key = 'phone',
+    atlas = 'b_phone',
+    pos = { x = 0, y = 0 },
+    dollars = 5,
+    mult = 2,
+    boss = { min = 3, max = 10 },
+    boss_colour = HEX('3498db'),
+    loc_txt = {
+        name = 'The Phone',
+        text = {
+            "Only the 1st scoring card scores",
+            "and triggers Jokers"
+        }
+    },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
+    calculate = function(self, card, context)
+        if context.before and context.scoring_hand and #context.scoring_hand > 1 then
+            for i = 2, #context.scoring_hand do
+                context.scoring_hand[i].debuff = true
+                context.scoring_hand[i].debuffed_by_phone = true
+            end
+            return {
+                message = '1st Card Only!',
+                colour = HEX('3498db')
+            }
+        end
+        if context.after and context.scoring_hand then
+            for i = 2, #context.scoring_hand do
+                if context.scoring_hand[i].debuffed_by_phone then
+                    context.scoring_hand[i].debuff = false
+                    context.scoring_hand[i].debuffed_by_phone = nil
+                end
+            end
+        end
+    end
+}
+
+-- 11. The Pincer (La Pinza - Showdown Boss)
+SMODS.Atlas {
+    key = "b_pinza",
+    path = "b_pinza.png",
+    px = 34,
+    py = 34
+}
+
+SMODS.Blind {
+    key = 'pinza',
+    atlas = 'b_pinza',
+    pos = { x = 0, y = 0 },
+    dollars = 8,
+    mult = 2,
+    boss = { min = 8, max = 10, showdown = true },
+    showdown = true,
+    boss_colour = HEX('e74c3c'),
+    loc_txt = {
+        name = 'The Pincer',
+        text = {
+            "All Jokers are disabled until a playing",
+            "card is destroyed (except card-destroying Jokers)"
+        }
+    },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
+    set_blind = function(self, reset, silent)
+        G.GAME.pinza_card_destroyed = nil
+        ease_custom_blind_background(self)
+        if G.jokers and G.jokers.cards then
+            for _, j in ipairs(G.jokers.cards) do
+                local key = (j.config and j.config.center and j.config.center.key) or j.config.center_key or (j.ability and j.ability.name) or ''
+                local destroys_cards = {
+                    ['j_trading'] = true,
+                    ['j_sixth_sense'] = true,
+                    ['j_Crackedlatro_paula'] = true,
+                    ['paula'] = true,
+                    ['j_paula'] = true,
+                    ['c_Crackedlatro_butcher_job'] = true,
+                    ['j_c_butcher'] = true
+                }
+                if not destroys_cards[key] then
+                    j:set_debuff(true)
+                end
+            end
+        end
+    end,
+    debuff_card = function(self, card, from_blind)
+        if card.area == G.jokers and not G.GAME.pinza_card_destroyed then
+            local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+            local destroys_cards = {
+                ['j_trading'] = true,
+                ['j_sixth_sense'] = true,
+                ['j_Crackedlatro_paula'] = true,
+                ['paula'] = true,
+                ['j_paula'] = true,
+                ['c_Crackedlatro_butcher_job'] = true,
+                ['j_c_butcher'] = true
+            }
+            if destroys_cards[key] then return false end
+            return true
+        end
+        return false
+    end
+}
+
 local function sync_blind_atlases()
-    local blind_atlases = {'b_pole', 'b_stick', 'b_wizard', 'b_mountain', 'b_door', 'b_triangle', 'b_cube', 'b_void'}
+    local blind_atlases = {'b_pole', 'b_stick', 'b_wizard', 'b_mountain', 'b_door', 'b_triangle', 'b_cube', 'b_void', 'b_guitar', 'b_phone', 'b_pinza'}
     for _, key in ipairs(blind_atlases) do
         local atlas_obj = (SMODS and SMODS.Atlases and SMODS.Atlases[key]) or (G.ASSET_ATLAS and G.ASSET_ATLAS[key]) or (G.ANIMATION_ATLAS and G.ANIMATION_ATLAS[key])
         if atlas_obj then
@@ -299,6 +618,7 @@ local function sync_blind_atlases()
             if G.ANIMATION_ATLAS and not G.ANIMATION_ATLAS[key] then G.ANIMATION_ATLAS[key] = atlas_obj end
         end
     end
+    sync_cracklatro_blind_colours()
 end
 
 sync_blind_atlases()
@@ -308,3 +628,5 @@ G.E_MANAGER:add_event(Event({
         return true
     end
 }))
+
+

@@ -53,7 +53,7 @@ function get_jeweled_enhancement_center()
     return G.P_CENTERS.m_lucky
 end
 
--- Seal: Dark Green Seal
+-- Seal 1: Dark Green Seal (Reworked)
 SMODS.Atlas {
     key = "s_dark_green",
     path = "s_dark_green.png",
@@ -70,37 +70,137 @@ SMODS.Seal {
         name = 'Dark Green Seal',
         label = 'Dark Green Seal',
         text = {
-            "{C:green}#1# in 10{} chance to retrigger {C:attention}3 times{},",
-            "{C:green}#1# in 5{} chance to retrigger {C:attention}2 times{},",
-            "or {C:green}#1# in 2{} chance to retrigger {C:attention}1 time{}",
-            "{C:inactive}(Non-cumulative){}"
+            "Gives {X:mult,C:white}X1.5{} Mult when scored.",
+            "{C:green}#1# in 4{} chance to permanently turn",
+            "into a {C:attention}Stone Card{} at end of scoring"
         }
     },
     loc_vars = function(self, info_queue, card)
         return { vars = { (G.GAME and G.GAME.probabilities.normal or 1) } }
     end,
     calculate = function(self, card, context)
-        if context.repetition and context.cardarea == G.play then
-            local norm = (G.GAME and G.GAME.probabilities.normal or 1)
-            if pseudorandom('dark_green_3') < (norm / 10) then
-                return {
-                    message = 'x3 Retrigger!',
-                    repetitions = 3,
-                    card = card
-                }
-            elseif pseudorandom('dark_green_2') < (norm / 5) then
-                return {
-                    message = 'x2 Retrigger!',
-                    repetitions = 2,
-                    card = card
-                }
-            elseif pseudorandom('dark_green_1') < (norm / 2) then
-                return {
-                    message = 'x1 Retrigger!',
-                    repetitions = 1,
-                    card = card
-                }
+        if (context.main_scoring or context.individual) and context.cardarea == G.play then
+            local prob = (G.GAME and G.GAME.probabilities.normal or 1)
+            if pseudorandom('dark_green_stone') < (prob / 4) then
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.3,
+                    func = function()
+                        play_sound('tarot1')
+                        card:set_ability(G.P_CENTERS.m_stone)
+                        card:juice_up(0.5, 0.5)
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Petrified!', colour = G.C.GREY })
+                        return true
+                    end
+                }))
             end
+            return {
+                x_mult = 1.5
+            }
+        end
+    end
+}
+
+-- Seal 2: White Seal
+SMODS.Atlas {
+    key = "s_white",
+    path = "s_white.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Seal {
+    key = 'white',
+    atlas = 's_white',
+    pos = { x = 0, y = 0 },
+    badge_colour = HEX('ffffff'),
+    loc_txt = {
+        name = 'White Seal',
+        label = 'White Seal',
+        text = {
+            "Creates a random {C:planet}Planet card{}",
+            "when this card is played and scored",
+            "{C:inactive}(Once per round, must have room){}"
+        }
+    },
+    calculate = function(self, card, context)
+        if (context.main_scoring or context.individual) and context.cardarea == G.play then
+            if not card.ability.white_seal_triggered then
+                card.ability.white_seal_triggered = true
+                if G.consumeables and #G.consumeables.cards < G.consumeables.config.card_limit then
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'after',
+                        delay = 0.2,
+                        func = function()
+                            play_sound('tarot1')
+                            card:juice_up(0.3, 0.5)
+                            local planet_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, nil, 'white_seal')
+                            planet_card:add_to_deck()
+                            G.consumeables:emplace(planet_card)
+                            card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Planet Card!', colour = G.C.SECONDARY_SET.Planet })
+                            return true
+                        end
+                    }))
+                end
+            end
+        end
+        if context.end_of_round and card.ability then
+            card.ability.white_seal_triggered = nil
+        end
+    end
+}
+
+-- Seal 3: Silver Seal
+SMODS.Atlas {
+    key = "s_silver",
+    path = "s_silver.png",
+    px = 71,
+    py = 95
+}
+
+SMODS.Seal {
+    key = 'silver',
+    atlas = 's_silver',
+    pos = { x = 0, y = 0 },
+    badge_colour = HEX('bdc3c7'),
+    loc_txt = {
+        name = 'Silver Seal',
+        label = 'Silver Seal',
+        text = {
+            "{C:chips}+#1#{} extra Chips when scored,",
+            "{C:green}#2# in 2{} chance to give {C:chips}+#3#{} Chips instead,",
+            "{C:green}#2# in 5{} chance to turn permanently",
+            "into a {C:gold}Gold Card{} at end of scoring"
+        }
+    },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { 15, (G.GAME and G.GAME.probabilities.normal or 1), 25 } }
+    end,
+    calculate = function(self, card, context)
+        if (context.main_scoring or context.individual) and context.cardarea == G.play then
+            local prob = (G.GAME and G.GAME.probabilities.normal or 1)
+            local chips_to_give = 15
+            if pseudorandom('silver_chips') < (prob / 2) then
+                chips_to_give = 25
+            end
+            
+            if pseudorandom('silver_gold') < (prob / 5) then
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.3,
+                    func = function()
+                        play_sound('gold_seal')
+                        card:set_ability(G.P_CENTERS.m_gold)
+                        card:juice_up(0.5, 0.5)
+                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Transmuted to Gold!', colour = G.C.GOLD })
+                        return true
+                    end
+                }))
+            end
+
+            return {
+                chips = chips_to_give
+            }
         end
     end
 }

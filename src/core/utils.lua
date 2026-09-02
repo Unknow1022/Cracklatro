@@ -359,13 +359,17 @@ function Card:eval_card(context)
     return ret
 end
 
--- Blind hook for Detective Job & Stick Penalty
+-- Blind hook for Detective Job, Stick Penalty & Custom Boss Backgrounds
 local set_blind_ref = Blind.set_blind
 function Blind:set_blind(blind, reset, silent)
     local ret = set_blind_ref(self, blind, reset, silent)
     if G.GAME and G.GAME.stick_penalty then
         self.chips = math.floor(self.chips * G.GAME.stick_penalty)
         G.GAME.stick_penalty = nil
+    end
+
+    if self.boss and not self.disabled and ease_custom_blind_background then
+        ease_custom_blind_background(self)
     end
 
     G.E_MANAGER:add_event(Event({
@@ -398,6 +402,39 @@ function Blind:set_blind(blind, reset, silent)
     }))
     return ret
 end
+
+-- Blind disable hook to reset background
+if Blind.disable then
+    local blind_disable_ref = Blind.disable
+    function Blind:disable()
+        local ret = blind_disable_ref(self)
+        if self.boss and G.C and G.C.DYN_UI then
+            ease_colour(G.C.DYN_UI.MAIN, G.C.SET.Blind)
+            ease_colour(G.C.DYN_UI.DARK, G.C.BLACK)
+            if ease_background_colour then
+                ease_background_colour{new_colour = G.C.BACKGROUND.D, special_colour = G.C.BACKGROUND.L, contrast = 1}
+            end
+        end
+        return ret
+    end
+end
+
+-- Blind defeat hook to reset background
+if Blind.defeat then
+    local blind_defeat_ref = Blind.defeat
+    function Blind:defeat(silent)
+        local ret = blind_defeat_ref(self, silent)
+        if self.boss and G.C and G.C.DYN_UI then
+            ease_colour(G.C.DYN_UI.MAIN, G.C.SET.Blind)
+            ease_colour(G.C.DYN_UI.DARK, G.C.BLACK)
+            if ease_background_colour then
+                ease_background_colour{new_colour = G.C.BACKGROUND.D, special_colour = G.C.BACKGROUND.L, contrast = 1}
+            end
+        end
+        return ret
+    end
+end
+
 
 -- Shop dollar tracking hook for Merchant
 local game_update_ref = Game.update
@@ -640,5 +677,57 @@ function Card:start_dissolve(dissolve_colours, silent, dissolve_time_fac, no_sou
             end
         end
     end
+
+    -- Pinza Showdown card destruction check
+    if (self.playing_card or (self.ability and (self.ability.set == 'Enhanced' or self.ability.set == 'Default')) or self.base) then
+        if G.GAME and G.GAME.blind and (G.GAME.blind.name == 'pinza' or G.GAME.blind.key == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'The Pincer') then
+            if not G.GAME.pinza_card_destroyed then
+                G.GAME.pinza_card_destroyed = true
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.2,
+                    func = function()
+                        if G.jokers and G.jokers.cards then
+                            for _, j in ipairs(G.jokers.cards) do
+                                j:set_debuff(false)
+                                j.debuff = false
+                            end
+                        end
+                        play_sound('tarot2')
+                        return true
+                    end
+                }))
+            end
+        end
+    end
+
     return card_start_dissolve_ref(self, dissolve_colours, silent, dissolve_time_fac, no_sound)
 end
+
+-- Shatter hook for Glass cards breaking
+if Card.shatter then
+    local card_shatter_ref = Card.shatter
+    function Card:shatter()
+        if G.GAME and G.GAME.blind and (G.GAME.blind.name == 'pinza' or G.GAME.blind.key == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'The Pincer') then
+            if not G.GAME.pinza_card_destroyed then
+                G.GAME.pinza_card_destroyed = true
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.2,
+                    func = function()
+                        if G.jokers and G.jokers.cards then
+                            for _, j in ipairs(G.jokers.cards) do
+                                j:set_debuff(false)
+                                j.debuff = false
+                            end
+                        end
+                        play_sound('tarot2')
+                        return true
+                    end
+                }))
+            end
+        end
+        return card_shatter_ref(self)
+    end
+end
+

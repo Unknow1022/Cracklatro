@@ -63,7 +63,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Motorized Joker (Joker Motorizado)**: Inicia con **+20 Multi**. Cada vez que una carta se reactiva (*retrigger*), gana **+20 Multi** adicional.
 * **Hired Joker (Joker Contratado)**: 1 en 3 probabilidades por cada mano jugada de generar una carta de Trabajo (*Job Card*) aleatoria.
 * **Seal of Approval (Sello de Aprobación)**: Al jugarse solo 1 carta en la mano, le otorga un sello aleatorio (*Dorado, Azul, Rojo, Púrpura, Verde Oscuro, Plata, Blanco*).
-* **Paint Puddle (Charco de Pintura)**: Selecciona un palo aleatorio por ronda; las cartas de ese palo otorgan **+25 Multi** (+50 Multi si la carta es Versátil / *Wild Card*).
+* **Paint Puddle (Charco de Pintura)**: Selecciona un palo aleatorio por ronda (nunca repite el mismo palo dos veces consecutivas); las cartas de ese palo otorgan **+25 Multi** (+50 Multi si la carta es Versátil / *Wild Card*).
 
 #### Raros (13)
 * **Doctor Jo.**: Cuando otro Joker compatible es destruido, Doctor Jo. se autodestruye para crear una copia exacta del mismo sin debuffs ni pegatinas negativas (elimina Perecedero, Alquiler, etc.).
@@ -76,7 +76,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Miner**: Los Diamantes puntuados otorgan X1.5 Multi y +10 Fichas. 1 en 7 de probabilidad al final de la ronda de derrumbarse y transformarse en Rough Gem.
 * **Joke Joker?**: No hace nada aparente... pero en secreto, si posees el Vale Blank, lo transforma inmediatamente en Antimatter (+1 espacio de Joker).
 * **Perfectionism**: Al derrotar una Ciega Grande o Ciega Jefe, aplica Policromo a un Joker aleatorio (1 en 5 de probabilidad de otorgar Negativo en su lugar).
-* **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Comodín Invisible* (*Invisible Joker*).
+* **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Comodín Invisible* (*Invisible Joker*) (**1 vez por ronda**).
 * **Infostealer Joker**: Siempre es **Eterno** (*Eternal*). Posee interacción activa ("Usar" para drenar $1): por cada $20 absorbidos, gana permanentemente **+X2 Multi**.
 * **Supersaturated Joker (Joker Sobresaturado)**: Al puntuar, coloca una mejora faltante aleatoria (*Sello, Mejora o Edición*). Si la carta ya cuenta con Sello, Mejora y Edición simultáneamente, otorga **+$10**.
 
@@ -147,7 +147,7 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **Caveman Deck (Baraja Cavernícola)**: Empieza únicamente con A, 2, 3, 4, 6, 8 de cada palo en tu baraja; todas las demás cartas iniciales son Cartas de Piedra. Empiezas con -1 Mano.
 * **Strategist Deck (Baraja Estratega)**: Empieza con una baraja reducida de 24 cartas (Ases, Reyes, Reinas, Jotas, 10s y 9s). Inicia con el vale Magic Trick, $0, -1 mano, -2 descartes y las ciegas escalan X1.2.
 * **Overseer Deck (Baraja Supervisora)**: Crea una carta Espectral aleatoria al final de cada ronda (excepto Rot y Soul). Las etiquetas siempre se duplican. Los precios de los Jokers son X1.5. Empiezas con $2, -1 mano y -1 descarte.
-* **Friendly Deck (Baraja Amistosa)**: Genera **2 Jokers aleatorios con edición Negativa** al inicio de cada ronda. Inicia con **-1 Descarte**.
+* **Friendly Deck (Baraja Amistosa)**: Genera **2 Jokers aleatorios con edición Negativa** al iniciar la partida (únicamente al comienzo de la run). Inicia con **-1 Descarte**.
 
 ---
 

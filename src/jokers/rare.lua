@@ -624,32 +624,47 @@ SMODS.Joker {
         text = {
             "When another {C:attention}Joker{} is sold,",
             "creates an {C:attention}Invisible Joker{}",
+            "{C:inactive}(Once per round, #1#){}",
             "{C:inactive}(Must have room){}"
         }
     },
-    config = {},
+    config = { extra = { used = false } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     blueprint_compat = false,
+    loc_vars = function(self, info_queue, card)
+        local used = (card and card.ability and card.ability.extra and card.ability.extra.used) or false
+        local status_text = used and "Used this round" or "Available"
+        return { vars = { status_text } }
+    end,
     calculate = function(self, card, context)
         if context.selling_card and context.card and context.card.ability and context.card.ability.set == 'Joker' and context.card ~= card and not context.blueprint then
-            if G.jokers and #G.jokers.cards < G.jokers.config.card_limit then
-                G.E_MANAGER:add_event(Event({
-                    trigger = 'after',
-                    delay = 0.3,
-                    func = function()
-                        play_sound('tarot2')
-                        local invisible = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_invisible', 'parca')
-                        invisible:add_to_deck()
-                        G.jokers:emplace(invisible)
-                        invisible:juice_up(0.6, 0.6)
-                        card:juice_up(0.4, 0.5)
-                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Spirited Away!', colour = G.C.PURPLE })
-                        return true
-                    end
-                }))
+            card.ability.extra = card.ability.extra or {}
+            if not card.ability.extra.used then
+                if G.jokers and #G.jokers.cards < G.jokers.config.card_limit then
+                    card.ability.extra.used = true
+                    G.E_MANAGER:add_event(Event({
+                        trigger = 'after',
+                        delay = 0.3,
+                        func = function()
+                            play_sound('tarot2')
+                            local invisible = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_invisible', 'parca')
+                            invisible:add_to_deck()
+                            G.jokers:emplace(invisible)
+                            invisible:juice_up(0.6, 0.6)
+                            card:juice_up(0.4, 0.5)
+                            card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Spirited Away!', colour = G.C.PURPLE })
+                            return true
+                        end
+                    }))
+                end
             end
+        end
+
+        if (context.end_of_round or context.setting_blind) and not context.individual and not context.repetition and not context.blueprint then
+            card.ability.extra = card.ability.extra or {}
+            card.ability.extra.used = false
         end
     end
 }

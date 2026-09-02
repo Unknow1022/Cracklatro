@@ -855,7 +855,7 @@ SMODS.Joker {
         text = {
             "Scored {C:attention}#1#{} cards give {C:mult}+#2#{} Mult.",
             "Scored {C:attention}Wild Cards{} give {C:mult}+#3#{} Mult instead",
-            "{C:inactive}(Suit changes every round){}"
+            "{C:inactive}(Suit changes each round, never repeats consecutively){}"
         }
     },
     config = { extra = { mult_suit = 25, mult_wild = 50, suit = 'Hearts' } },
@@ -873,8 +873,17 @@ SMODS.Joker {
         ensure_charco_suit(card)
 
         if context.setting_blind and not context.blueprint then
+            local current_suit = card.ability.extra.suit
+            local available_suits = {}
             local suits = {'Hearts', 'Diamonds', 'Spades', 'Clubs'}
-            card.ability.extra.suit = pseudorandom_element(suits, 'charco_round_suit')
+            for _, s in ipairs(suits) do
+                if s ~= current_suit then
+                    table.insert(available_suits, s)
+                end
+            end
+            card.ability.extra.suit = pseudorandom_element(available_suits, pseudoseed('charco_round_suit'))
+            card_eval_status_text(card, 'extra', nil, nil, nil, { message = card.ability.extra.suit .. '!', colour = G.C.ATTENTION })
+            card:juice_up(0.3, 0.3)
         end
 
         if context.individual and context.cardarea == G.play then

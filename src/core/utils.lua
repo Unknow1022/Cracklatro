@@ -731,3 +731,99 @@ if Card.shatter then
     end
 end
 
+-- Custom USE Button Hook for Infostealer Joker
+function is_infostealer_card(card)
+    if not card then return false end
+    local k = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+    k = string.lower(tostring(k))
+    return string.find(k, 'infostealer') ~= nil
+end
+
+G.FUNCS.can_use_infostealer = function(e)
+    local card = e.config.ref_table
+    local can_use = false
+    if card and card.area == G.jokers and (G.GAME.dollars or 0) >= 1 then
+        if G.STATE ~= G.STATES.HAND_PLAYED and G.STATE ~= G.STATES.DRAW_TO_HAND then
+            can_use = true
+        end
+    end
+
+    if can_use then
+        e.config.colour = G.C.GOLD
+        e.config.button = 'use_infostealer'
+    else
+        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+        e.config.button = nil
+    end
+end
+
+G.FUNCS.use_infostealer = function(e)
+    local card = e.config.ref_table
+    if not card or card.area ~= G.jokers then return end
+    if (G.GAME.dollars or 0) < 1 then return end
+
+    ease_dollars(-1)
+    card.ability.extra = card.ability.extra or {}
+    card.ability.extra.dollars_drained = (card.ability.extra.dollars_drained or 0) + 1
+    local threshold = card.ability.extra.threshold or 20
+    local gain = card.ability.extra.xmult_gain or 2.0
+    local current_progress = card.ability.extra.dollars_drained % threshold
+
+    play_sound('tarot1')
+    card:juice_up(0.4, 0.4)
+
+    if current_progress == 0 then
+        card.ability.extra.xmult = (card.ability.extra.xmult or 1.0) + gain
+        play_sound('foil1')
+        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '+' .. gain .. ' XMult!', colour = G.C.XMULT })
+    else
+        card_eval_status_text(card, 'extra', nil, nil, nil, { message = '-$1 (' .. current_progress .. '/' .. threshold .. ')', colour = G.C.MONEY })
+    end
+end
+
+if G.UIDEF and G.UIDEF.use_and_sell_buttons then
+    local use_and_sell_buttons_ref = G.UIDEF.use_and_sell_buttons
+    function G.UIDEF.use_and_sell_buttons(card)
+        local retval = use_and_sell_buttons_ref(card)
+        if is_infostealer_card(card) and card.area == G.jokers then
+            local feed_btn = {
+                n = G.UIT.R,
+                config = { align = "cl" },
+                nodes = {
+                    {
+                        n = G.UIT.C,
+                        config = {
+                            align = "cr",
+                            padding = 0.05,
+                            r = 0.08,
+                            hover = true,
+                            colour = G.C.GOLD,
+                            button = 'use_infostealer',
+                            shadow = true,
+                            func = 'can_use_infostealer',
+                            ref_table = card
+                        },
+                        nodes = {
+                            { n = G.UIT.B, config = { w = 0.1, h = 0.6 } },
+                            {
+                                n = G.UIT.T,
+                                config = {
+                                    text = "USE $1",
+                                    scale = 0.45,
+                                    colour = G.C.UI.TEXT_LIGHT,
+                                    shadow = true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if retval and retval.nodes and retval.nodes[1] and retval.nodes[1].nodes then
+                table.insert(retval.nodes[1].nodes, 1, feed_btn)
+            end
+        end
+        return retval
+    end
+end
+
+

@@ -589,7 +589,7 @@ jd_def["j_Crackedlatro_parca_joker"] = {
         { text = "Invisible Joker", colour = G.C.PURPLE }
     },
     reminder_text = {
-        { text = "(On Joker Sold)" }
+        { text = "(1/round on sell)" }
     }
 }
 

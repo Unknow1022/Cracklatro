@@ -641,10 +641,10 @@ SMODS.Blind {
     loc_txt = {
         name = 'The Doppelgänger',
         text = {
-            "Copies a random Joker inverted:",
+            "Reflects a random Joker inverted:",
             "{C:attention}#1#{}",
             "{C:red}Subtracts{} its Mult & Chips,",
-            "{C:red}divides{} by its XMult"
+            "{C:red}divides{} by its XMult each time it activates"
         }
     },
     ease_background_colour = function(self)
@@ -652,11 +652,12 @@ SMODS.Blind {
     end,
     set_blind = function(self, reset, silent)
         ease_custom_blind_background(self)
+        if G.jokers and G.jokers.cards then
+            for _, j in ipairs(G.jokers.cards) do
+                j.doppelganger_reflected = nil
+            end
+        end
         G.GAME.doppelganger_target = nil
-        G.GAME.doppelganger_hand_mult = 0
-        G.GAME.doppelganger_hand_chips = 0
-        G.GAME.doppelganger_hand_xmult = 1
-        G.GAME.doppelganger_hand_xchips = 1
         G.GAME.doppelganger_target_name = nil
 
         local eligible = {}
@@ -674,20 +675,30 @@ SMODS.Blind {
         end
 
         if #eligible > 0 then
-            local chosen = pseudorandom_element(eligible, pseudoseed('doppelganger_target'))
+            local ante = (G.GAME.round_resets and G.GAME.round_resets.ante) or 1
+            local r_num = (G.GAME.round) or 1
+            local pick_idx = pseudorandom('doppel_pick_' .. ante .. '_' .. r_num, 1, #eligible)
+            local chosen = eligible[pick_idx]
             G.GAME.doppelganger_target = chosen
+            chosen.doppelganger_reflected = true
             local jname = (chosen.ability and chosen.ability.name) or (chosen.config and chosen.config.center and chosen.config.center.name) or 'Joker'
             G.GAME.doppelganger_target_name = jname
+
+            self.loc_debuff_text = "Reflecting: " .. jname .. " (Inverted)"
+            if G.GAME.blind then
+                G.GAME.blind.loc_debuff_text = self.loc_debuff_text
+            end
+
             G.E_MANAGER:add_event(Event({
                 trigger = 'after',
-                delay = 0.4,
+                delay = 0.5,
                 func = function()
                     if chosen and not chosen.removed then
                         chosen:juice_up(0.8, 0.8)
                         attention_text({
-                            text = 'Reflected: ' .. tostring(jname),
-                            scale = 0.65,
-                            hold = 2.0,
+                            text = 'Doppelgänger: ' .. tostring(jname) .. '!',
+                            scale = 0.7,
+                            hold = 2.5,
                             colour = HEX('aeb6bf'),
                             align = 'cm',
                             offset = { x = 0, y = -1.2 }
@@ -696,6 +707,11 @@ SMODS.Blind {
                     return true
                 end
             }))
+        else
+            self.loc_debuff_text = "No Jokers to reflect"
+            if G.GAME.blind then
+                G.GAME.blind.loc_debuff_text = self.loc_debuff_text
+            end
         end
     end,
     calculate = function(self, card, context)
@@ -703,17 +719,21 @@ SMODS.Blind {
         if not context then return end
 
         if context.before then
-            G.GAME.doppelganger_triggered = nil
-            G.GAME.doppelganger_hand_mult = 0
-            G.GAME.doppelganger_hand_chips = 0
-            G.GAME.doppelganger_hand_xmult = 1
-            G.GAME.doppelganger_hand_xchips = 1
-
             if not G.GAME.doppelganger_target or G.GAME.doppelganger_target.removed or (G.GAME.doppelganger_target.area and G.GAME.doppelganger_target.area ~= G.jokers) then
                 if G.jokers and G.jokers.cards and #G.jokers.cards > 0 then
-                    G.GAME.doppelganger_target = pseudorandom_element(G.jokers.cards, pseudoseed('doppelganger_retarget'))
-                    if G.GAME.doppelganger_target then
-                        G.GAME.doppelganger_target_name = (G.GAME.doppelganger_target.ability and G.GAME.doppelganger_target.ability.name) or 'Joker'
+                    local ante = (G.GAME.round_resets and G.GAME.round_resets.ante) or 1
+                    local r_num = (G.GAME.round) or 1
+                    local pick_idx = pseudorandom('doppel_repick_' .. ante .. '_' .. r_num, 1, #G.jokers.cards)
+                    local chosen = G.jokers.cards[pick_idx]
+                    G.GAME.doppelganger_target = chosen
+                    if chosen then
+                        chosen.doppelganger_reflected = true
+                        local jname = (chosen.ability and chosen.ability.name) or (chosen.config and chosen.config.center and chosen.config.center.name) or 'Joker'
+                        G.GAME.doppelganger_target_name = jname
+                        self.loc_debuff_text = "Reflecting: " .. jname .. " (Inverted)"
+                        if G.GAME.blind then
+                            G.GAME.blind.loc_debuff_text = self.loc_debuff_text
+                        end
                     end
                 else
                     G.GAME.doppelganger_target = nil
@@ -721,64 +741,25 @@ SMODS.Blind {
                 end
             end
         end
-
-        if context.final_scoring_step and not G.GAME.doppelganger_triggered then
-            G.GAME.doppelganger_triggered = true
-            local sub_mult = G.GAME.doppelganger_hand_mult or 0
-            local sub_chips = G.GAME.doppelganger_hand_chips or 0
-            local div_xmult = G.GAME.doppelganger_hand_xmult or 1
-            local div_xchips = G.GAME.doppelganger_hand_xchips or 1
-
-            local has_mult = sub_mult > 0
-            local has_chips = sub_chips > 0
-            local has_xmult = div_xmult > 1.0001
-            local has_xchips = div_xchips > 1.0001
-
-            if has_mult or has_chips or has_xmult or has_xchips then
-                local ret = {
-                    colour = HEX('aeb6bf')
-                }
-                local msg_parts = {}
-                if has_chips then
-                    ret.chips = -sub_chips
-                    table.insert(msg_parts, '-' .. tostring(sub_chips) .. ' Chips')
-                end
-                if has_mult then
-                    ret.mult = -sub_mult
-                    table.insert(msg_parts, '-' .. tostring(sub_mult) .. ' Mult')
-                end
-                if has_xchips then
-                    ret.x_chips = 1 / div_xchips
-                    table.insert(msg_parts, '/' .. string.format('%.2g', div_xchips) .. ' Chips')
-                end
-                if has_xmult then
-                    ret.Xmult = 1 / div_xmult
-                    table.insert(msg_parts, '/' .. string.format('%.2g', div_xmult) .. ' Mult')
-                end
-
-                ret.message = 'Doppelgänger (' .. table.concat(msg_parts, ', ') .. ')'
-                if G.GAME.doppelganger_target and not G.GAME.doppelganger_target.removed then
-                    G.GAME.doppelganger_target:juice_up(0.5, 0.5)
-                end
-                return ret
-            end
-        end
     end,
     defeat = function(self)
+        if G.jokers and G.jokers.cards then
+            for _, j in ipairs(G.jokers.cards) do
+                j.doppelganger_reflected = nil
+            end
+        end
         G.GAME.doppelganger_target = nil
-        G.GAME.doppelganger_hand_mult = 0
-        G.GAME.doppelganger_hand_chips = 0
-        G.GAME.doppelganger_hand_xmult = 1
-        G.GAME.doppelganger_hand_xchips = 1
         G.GAME.doppelganger_target_name = nil
         reset_cracklatro_boss_ui()
     end,
     disable = function(self)
+        if G.jokers and G.jokers.cards then
+            for _, j in ipairs(G.jokers.cards) do
+                j.doppelganger_reflected = nil
+            end
+        end
         G.GAME.doppelganger_target = nil
-        G.GAME.doppelganger_hand_mult = 0
-        G.GAME.doppelganger_hand_chips = 0
-        G.GAME.doppelganger_hand_xmult = 1
-        G.GAME.doppelganger_hand_xchips = 1
+        G.GAME.doppelganger_target_name = nil
         reset_cracklatro_boss_ui()
     end
 }

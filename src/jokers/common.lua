@@ -23,6 +23,7 @@ SMODS.Joker {
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local count = 0
@@ -105,6 +106,7 @@ SMODS.Joker {
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         return { vars = {} }
     end,
@@ -189,6 +191,7 @@ SMODS.Joker {
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 4,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         local r = (card and card.ability and card.ability.extra and card.ability.extra.rounds_left) or 3
         return { vars = { r, (r == 1 and '' or 's') } }
@@ -250,6 +253,7 @@ SMODS.Joker {
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         local used = (card and card.ability and card.ability.extra and card.ability.extra.used) or false
         local status_text = used and "Used this round" or "Available"
@@ -309,6 +313,7 @@ SMODS.Joker {
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 4,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         return { vars = { (card and card.ability and card.ability.extra and card.ability.extra.dollars) or 1 } }
     end,
@@ -350,6 +355,7 @@ SMODS.Joker {
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local progress = (card and card.ability and card.ability.extra and card.ability.extra.letters_progress) or 0

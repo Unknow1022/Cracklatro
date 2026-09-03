@@ -25,6 +25,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -77,6 +78,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -134,6 +136,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -229,6 +232,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -293,6 +297,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -368,6 +373,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -441,6 +447,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -530,6 +537,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -607,6 +615,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -667,6 +676,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = false,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -734,6 +744,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -791,6 +802,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,
@@ -854,6 +866,7 @@ SMODS.Joker {
     pos = { x = 0, y = 0 },
     soul_pos = { x = 1, y = 0 },
     cost = 20,
+    blueprint_compat = true,
     in_pool = function(self, args)
         return false, { allow_duplicates = false }
     end,

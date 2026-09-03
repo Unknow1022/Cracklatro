@@ -91,6 +91,30 @@ function get_card_job_info(card)
     return nil
 end
 
+function is_joker_copiable(card)
+    if not card then return false end
+    if card.debuff then return false end
+
+    local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+    key = tostring(key)
+    local name = (card.ability and card.ability.name) or (card.config and card.config.center and card.config.center.name) or ''
+    name = tostring(name)
+
+    if name == 'Blueprint' or name == 'Brainstorm' or name == 'Chameleon' or 
+       string.find(key, 'chameleon_joker') or string.find(key, 'blueprint') or string.find(key, 'brainstorm') then
+        return false
+    end
+
+    if card.config and card.config.center and card.config.center.blueprint_compat == false then
+        return false
+    end
+    if card.ability and card.ability.blueprint_compat == false then
+        return false
+    end
+
+    return true
+end
+
 -- UIBox ability table hook
 local card_generate_UIBox_ref = Card.generate_UIBox_ability_table
 function Card:generate_UIBox_ability_table(...)
@@ -139,6 +163,56 @@ function Card:generate_UIBox_ability_table(...)
             }
         }
         table.insert(res.main, { job_ui_box })
+    end
+
+    -- Chameleon compatibility display (just like Blueprint / Plano)
+    local is_chameleon = (self.ability and self.ability.name == 'Chameleon') or (self.config and self.config.center and self.config.center.key == 'j_Crackedlatro_chameleon_joker')
+    if is_chameleon and res and res.main then
+        local left_joker = nil
+        if G.jokers and G.jokers.cards then
+            for idx, j in ipairs(G.jokers.cards) do
+                if j == self and idx > 1 then
+                    left_joker = G.jokers.cards[idx - 1]
+                    break
+                end
+            end
+        end
+        local is_compat = left_joker and is_joker_copiable(left_joker)
+        local target_name = left_joker and ((left_joker.ability and left_joker.ability.name) or (left_joker.config and left_joker.config.center and left_joker.config.center.name)) or "None"
+        local badge_text = is_compat and ((localize and localize('k_compatible')) or "Compatible") or ((localize and localize('k_incompatible')) or "Incompatible")
+
+        local chameleon_ui_box = {
+            n = G.UIT.R,
+            config = { align = "cm", colour = G.C.CLEAR, padding = 0.04 },
+            nodes = {
+                {
+                    n = G.UIT.R,
+                    config = { align = "cm", colour = is_compat and G.C.GREEN or G.C.RED, r = 0.08, padding = 0.05, minw = 2.4, emboss = 0.04 },
+                    nodes = {
+                        { n = G.UIT.T, config = { text = " " .. badge_text .. " (" .. target_name .. ") ", colour = G.C.WHITE, scale = 0.3 } }
+                    }
+                }
+            }
+        }
+        table.insert(res.main, { chameleon_ui_box })
+    end
+
+    -- Doppelgänger reflected target indicator
+    if self.doppelganger_reflected and res and res.main then
+        local doppel_ui_box = {
+            n = G.UIT.R,
+            config = { align = "cm", colour = G.C.CLEAR, padding = 0.04 },
+            nodes = {
+                {
+                    n = G.UIT.R,
+                    config = { align = "cm", colour = HEX('1c2833'), r = 0.08, padding = 0.06, minw = 2.6, emboss = 0.04 },
+                    nodes = {
+                        { n = G.UIT.T, config = { text = "Reflejado por El Doppelgänger", colour = HEX('aeb6bf'), scale = 0.3 } }
+                    }
+                }
+            }
+        }
+        table.insert(res.main, { doppel_ui_box })
     end
 
     return res
@@ -685,9 +759,14 @@ function create_card(type, area, legendary, _rarity, skip_materialize, soulable,
     return card
 end
 
--- Falta de Lectura activation tracker hook
+-- Falta de Lectura activation tracker & Doppelgänger real-time per-activation counter hook
 local calculate_joker_ref = Card.calculate_joker
 function Card:calculate_joker(context)
+    -- Block incompatible Jokers from being copied by Blueprint, Brainstorm, or Chameleon
+    if context and context.blueprint and not is_joker_copiable(self) then
+        return nil
+    end
+
     local ret = calculate_joker_ref(self, context)
     if ret and type(ret) == 'table' and next(ret) and not self.debuff and context and not context.falta_de_lectura_check then
         local key = (self.config and self.config.center and self.config.center.key) or self.config.center_key or (self.ability and self.ability.name)
@@ -701,32 +780,71 @@ function Card:calculate_joker(context)
         end
     end
 
-    -- Doppelgänger Showdown Blind bonus tracking hook
-    if G.GAME and G.GAME.blind and not G.GAME.blind.disabled and G.GAME.doppelganger_target and self == G.GAME.doppelganger_target and ret and type(ret) == 'table' and not self.debuff then
-        if ret.mult and type(ret.mult) == 'number' and ret.mult > 0 then
-            G.GAME.doppelganger_hand_mult = (G.GAME.doppelganger_hand_mult or 0) + ret.mult
-        end
-        if ret.chips and type(ret.chips) == 'number' and ret.chips > 0 then
-            G.GAME.doppelganger_hand_chips = (G.GAME.doppelganger_hand_chips or 0) + ret.chips
-        end
-        if ret.chip_mod and type(ret.chip_mod) == 'number' and ret.chip_mod > 0 then
-            G.GAME.doppelganger_hand_chips = (G.GAME.doppelganger_hand_chips or 0) + ret.chip_mod
-        end
-        local xm = (ret.Xmult and type(ret.Xmult) == 'number' and ret.Xmult) or (ret.x_mult and type(ret.x_mult) == 'number' and ret.x_mult)
-        if xm and xm > 1 then
-            G.GAME.doppelganger_hand_xmult = (G.GAME.doppelganger_hand_xmult or 1) * xm
-        end
-        if ret.x_chips and type(ret.x_chips) == 'number' and ret.x_chips > 1 then
-            G.GAME.doppelganger_hand_xchips = (G.GAME.doppelganger_hand_xchips or 1) * ret.x_chips
-        end
-        if ret.h_mult and type(ret.h_mult) == 'number' and ret.h_mult > 0 then
-            G.GAME.doppelganger_hand_mult = (G.GAME.doppelganger_hand_mult or 0) + ret.h_mult
-        end
-        if ret.h_chips and type(ret.h_chips) == 'number' and ret.h_chips > 0 then
-            G.GAME.doppelganger_hand_chips = (G.GAME.doppelganger_hand_chips or 0) + ret.h_chips
-        end
-        if ret.h_x_mult and type(ret.h_x_mult) == 'number' and ret.h_x_mult > 1 then
-            G.GAME.doppelganger_hand_xmult = (G.GAME.doppelganger_hand_xmult or 1) * ret.h_x_mult
+    -- Doppelgänger real-time per-activation counter hook (triggers EACH time the chosen Joker activates during hand scoring)
+    local is_doppel_active = G.GAME and G.GAME.blind and not G.GAME.blind.disabled and 
+        (G.GAME.blind.name == 'doppelganger' or G.GAME.blind.name == 'The Doppelgänger' or G.GAME.blind.key == 'b_Crackedlatro_doppelganger' or G.GAME.blind.key == 'doppelganger' or (G.GAME.blind.config and G.GAME.blind.config.blind and (G.GAME.blind.config.blind.key == 'doppelganger' or G.GAME.blind.config.blind.key == 'b_Crackedlatro_doppelganger')))
+
+    if is_doppel_active and G.GAME.doppelganger_target and self == G.GAME.doppelganger_target and ret and type(ret) == 'table' and not self.debuff and context then
+        -- Strictly DO NOT activate on end_of_round, shop, or blind setting! Only during hand scoring!
+        if not context.end_of_round and not context.ending_shop and not context.starting_shop and not context.setting_blind then
+            local sub_mult = (ret.mult and type(ret.mult) == 'number' and ret.mult > 0 and ret.mult) or 0
+            if ret.h_mult and type(ret.h_mult) == 'number' and ret.h_mult > 0 then sub_mult = sub_mult + ret.h_mult end
+
+            local sub_chips = (ret.chips and type(ret.chips) == 'number' and ret.chips > 0 and ret.chips) or 0
+            if ret.chip_mod and type(ret.chip_mod) == 'number' and ret.chip_mod > 0 then sub_chips = sub_chips + ret.chip_mod end
+            if ret.h_chips and type(ret.h_chips) == 'number' and ret.h_chips > 0 then sub_chips = sub_chips + ret.h_chips end
+
+            local div_xmult = (ret.Xmult and type(ret.Xmult) == 'number' and ret.Xmult > 1 and ret.Xmult) or 
+                              (ret.x_mult and type(ret.x_mult) == 'number' and ret.x_mult > 1 and ret.x_mult) or 
+                              (ret.h_x_mult and type(ret.h_x_mult) == 'number' and ret.h_x_mult > 1 and ret.h_x_mult) or 1
+
+            local div_xchips = (ret.x_chips and type(ret.x_chips) == 'number' and ret.x_chips > 1 and ret.x_chips) or 1
+
+            local has_penalty = (sub_mult > 0) or (sub_chips > 0) or (div_xmult > 1.0001) or (div_xchips > 1.0001)
+
+            if has_penalty then
+                local msg_parts = {}
+                if sub_chips > 0 then table.insert(msg_parts, '-' .. tostring(sub_chips) .. ' Chips') end
+                if sub_mult > 0 then table.insert(msg_parts, '-' .. tostring(sub_mult) .. ' Mult') end
+                if div_xchips > 1.0001 then table.insert(msg_parts, '/' .. string.format('%.2g', div_xchips) .. ' Chips') end
+                if div_xmult > 1.0001 then table.insert(msg_parts, '/' .. string.format('%.2g', div_xmult) .. ' Mult') end
+                local message_str = table.concat(msg_parts, ', ')
+
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.2,
+                    func = function()
+                        if G.GAME and G.GAME.blind then
+                            G.GAME.blind:juice_up(0.6, 0.6)
+                        end
+                        self:juice_up(0.4, 0.4)
+                        play_sound('blind_chips', 0.8, 0.7)
+
+                        if sub_chips > 0 and hand_chips then
+                            hand_chips = mod_chips(hand_chips - sub_chips)
+                            update_hand_text({delay = 0}, {chips = hand_chips})
+                        end
+                        if sub_mult > 0 and mult then
+                            mult = mod_mult(mult - sub_mult)
+                            update_hand_text({delay = 0}, {mult = mult})
+                        end
+                        if div_xchips > 1.0001 and hand_chips then
+                            hand_chips = mod_chips(hand_chips / div_xchips)
+                            update_hand_text({delay = 0}, {chips = hand_chips})
+                        end
+                        if div_xmult > 1.0001 and mult then
+                            mult = mod_mult(mult / div_xmult)
+                            update_hand_text({delay = 0}, {mult = mult})
+                        end
+
+                        card_eval_status_text(G.GAME.blind or self, 'extra', nil, nil, nil, {
+                            message = 'Doppelgänger (' .. message_str .. ')',
+                            colour = HEX('aeb6bf')
+                        })
+                        return true
+                    end
+                }))
+            end
         end
     end
 

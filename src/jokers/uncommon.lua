@@ -118,6 +118,7 @@ SMODS.Joker {
     config = { extra = { xmult_per_card = 0.5, bonus_chips = 20 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
+    blueprint_compat = true,
     cost = 6,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
@@ -265,6 +266,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         return { vars = { (card and card.ability and card.ability.extra and card.ability.extra.dollars_per_edition) or 1 } }
     end,
@@ -318,6 +320,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         return { vars = { ex.xmult_per_trait or 0.5 } }
@@ -430,6 +433,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         return { vars = { ex.pair_cash, ex.pair_mult, ex.triple_cash, ex.triple_xmult, ex.jackpot_cash, ex.jackpot_xmult } }
@@ -531,6 +535,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.xmult } }
     end,
@@ -602,6 +607,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.xmult } }
     end,
@@ -710,6 +716,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         ensure_chameleon_rank(card)
         return { vars = { card.ability.extra.required_rank or 'Ace' } }
@@ -745,7 +752,7 @@ SMODS.Joker {
 
             if my_idx and my_idx > 1 then
                 local left_joker = G.jokers.cards[my_idx - 1]
-                if left_joker and left_joker ~= card then
+                if left_joker and left_joker ~= card and is_joker_copiable(left_joker) then
                     context.blueprint = (context.blueprint or 0) + 1
                     context.blueprint_card = card
                     local ret = left_joker:calculate_joker(context)
@@ -782,6 +789,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or 20
         local mult_gain = (card and card.ability and card.ability.extra and card.ability.extra.mult_gain) or 20
@@ -844,6 +852,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         return { vars = { (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
     end,
@@ -899,6 +908,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 7,
+    blueprint_compat = false,
     calculate = function(self, card, context)
         if context.before and not context.blueprint then
             local play_count = (context.full_hand and #context.full_hand) or (context.scoring_hand and #context.scoring_hand) or (G.play and G.play.cards and #G.play.cards) or 0
@@ -955,6 +965,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         ensure_charco_suit(card)
         local suit = card.ability.extra.suit or 'Hearts'
@@ -1019,6 +1030,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local chips = (card and card.ability and card.ability.extra and card.ability.extra.chips) or 125
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 1.5

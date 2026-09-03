@@ -114,6 +114,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.xmult } }
     end,
@@ -164,6 +165,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.cards_needed, card.ability.extra.spectral_count } }
     end,
@@ -236,6 +238,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 6,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.cost_per_shop } }
     end,
@@ -301,6 +304,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local sm1, sm2 = get_or_pick_soulmates()
@@ -409,6 +413,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         if info_queue then
@@ -503,6 +508,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local p = ex.has_four_leaf and "READY!" or tostring(ex.petals or 0)
@@ -570,6 +576,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local d = ex.depth or 0
@@ -668,6 +675,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = false,
     check_for_unlock = function(self, args)
         local count = (G.PROFILES and G.SETTINGS and G.SETTINGS.profile and G.PROFILES[G.SETTINGS.profile] and G.PROFILES[G.SETTINGS.profile].blank_vouchers_bought) or 0
         if count >= 2 then
@@ -721,6 +729,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         return { vars = { (G.GAME and G.GAME.probabilities.normal or 1), card.ability.extra.odds } }
     end,
@@ -948,6 +957,7 @@ SMODS.Joker {
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         local used = (card and card.ability and card.ability.extra and card.ability.extra.used) or false
         local status_text = used and "Used this round" or "Available"

@@ -123,7 +123,7 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 
 ---
 
-### 👁️ Ciegas Jefe (Boss Blinds - 11)
+### 👁️ Ciegas Jefe (Boss Blinds - 12)
 
 * **The Pole (El Poste)**: Las cartas con Edición (Foil, Holo, Poly) pierden $10 al ser puntuadas.
 * **The Rod (La Vara)**: Si tu puntuación triplica el objetivo de la ciega, el objetivo de la siguiente ronda se incrementa en X1.5.
@@ -136,6 +136,7 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **The Guitar (La Guitarra)**: Las manos jugadas de 5 cartas quedan silenciadas y no puntúan.
 * **The Phone (El Teléfono)**: Solo la 1ª carta puntúa y activa Jokers; las demás cartas no puntúan ni activan Jokers.
 * **The Pincer (La Pinza - Showdown / Ciega Final Ante 8)**: Todos los Jokers están deshabilitados hasta que se destruye una carta durante el combate (excepto Jokers destructores de cartas).
+* **The Doppelgänger (El Doppelgänger - Showdown / Ciega Final Ante 8)**: Al inicio de la ronda invoca un reflejo sombrío que copia un Joker aleatorio e invierte su habilidad en el cálculo final: resta su Multi y Fichas, y divide entre su XMulti.
 
 ---
 

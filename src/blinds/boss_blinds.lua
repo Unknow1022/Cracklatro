@@ -88,6 +88,14 @@ G.CRACKEDLATRO_BLIND_THEMES = {
         special_colour = HEX('b2bec3'),
         tertiary_colour = HEX('181d1e'),
         contrast = 3
+    },
+    ['doppelganger'] = {
+        name = 'The Doppelgänger',
+        boss_colour = HEX('1c2833'),
+        new_colour = HEX('0e141a'),
+        special_colour = HEX('aeb6bf'),
+        tertiary_colour = HEX('070a0d'),
+        contrast = 2.5
     }
 }
 
@@ -609,8 +617,174 @@ SMODS.Blind {
     end
 }
 
+-- 12. The Doppelgänger (El Doppelgänger - Showdown Boss)
+SMODS.Atlas {
+    key = "b_doppelganger",
+    path = "b_doppelganger.png",
+    px = 34,
+    py = 34
+}
+
+SMODS.Blind {
+    key = 'doppelganger',
+    atlas = 'b_doppelganger',
+    pos = { x = 0, y = 0 },
+    dollars = 8,
+    mult = 2,
+    boss = { min = 8, max = 10, showdown = true },
+    showdown = true,
+    boss_colour = HEX('1c2833'),
+    loc_vars = function(self)
+        local target_name = (G.GAME and G.GAME.doppelganger_target_name) or "Random Joker"
+        return { vars = { target_name } }
+    end,
+    loc_txt = {
+        name = 'The Doppelgänger',
+        text = {
+            "Copies a random Joker inverted:",
+            "{C:attention}#1#{}",
+            "{C:red}Subtracts{} its Mult & Chips,",
+            "{C:red}divides{} by its XMult"
+        }
+    },
+    ease_background_colour = function(self)
+        ease_custom_blind_background(self)
+    end,
+    set_blind = function(self, reset, silent)
+        ease_custom_blind_background(self)
+        G.GAME.doppelganger_target = nil
+        G.GAME.doppelganger_hand_mult = 0
+        G.GAME.doppelganger_hand_chips = 0
+        G.GAME.doppelganger_hand_xmult = 1
+        G.GAME.doppelganger_hand_xchips = 1
+        G.GAME.doppelganger_target_name = nil
+
+        local eligible = {}
+        if G.jokers and G.jokers.cards then
+            for _, j in ipairs(G.jokers.cards) do
+                if not j.debuff then
+                    table.insert(eligible, j)
+                end
+            end
+            if #eligible == 0 then
+                for _, j in ipairs(G.jokers.cards) do
+                    table.insert(eligible, j)
+                end
+            end
+        end
+
+        if #eligible > 0 then
+            local chosen = pseudorandom_element(eligible, pseudoseed('doppelganger_target'))
+            G.GAME.doppelganger_target = chosen
+            local jname = (chosen.ability and chosen.ability.name) or (chosen.config and chosen.config.center and chosen.config.center.name) or 'Joker'
+            G.GAME.doppelganger_target_name = jname
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.4,
+                func = function()
+                    if chosen and not chosen.removed then
+                        chosen:juice_up(0.8, 0.8)
+                        attention_text({
+                            text = 'Reflected: ' .. tostring(jname),
+                            scale = 0.65,
+                            hold = 2.0,
+                            colour = HEX('aeb6bf'),
+                            align = 'cm',
+                            offset = { x = 0, y = -1.2 }
+                        })
+                    end
+                    return true
+                end
+            }))
+        end
+    end,
+    calculate = function(self, card, context)
+        local context = context or card
+        if not context then return end
+
+        if context.before then
+            G.GAME.doppelganger_triggered = nil
+            G.GAME.doppelganger_hand_mult = 0
+            G.GAME.doppelganger_hand_chips = 0
+            G.GAME.doppelganger_hand_xmult = 1
+            G.GAME.doppelganger_hand_xchips = 1
+
+            if not G.GAME.doppelganger_target or G.GAME.doppelganger_target.removed or (G.GAME.doppelganger_target.area and G.GAME.doppelganger_target.area ~= G.jokers) then
+                if G.jokers and G.jokers.cards and #G.jokers.cards > 0 then
+                    G.GAME.doppelganger_target = pseudorandom_element(G.jokers.cards, pseudoseed('doppelganger_retarget'))
+                    if G.GAME.doppelganger_target then
+                        G.GAME.doppelganger_target_name = (G.GAME.doppelganger_target.ability and G.GAME.doppelganger_target.ability.name) or 'Joker'
+                    end
+                else
+                    G.GAME.doppelganger_target = nil
+                    G.GAME.doppelganger_target_name = "None"
+                end
+            end
+        end
+
+        if context.final_scoring_step and not G.GAME.doppelganger_triggered then
+            G.GAME.doppelganger_triggered = true
+            local sub_mult = G.GAME.doppelganger_hand_mult or 0
+            local sub_chips = G.GAME.doppelganger_hand_chips or 0
+            local div_xmult = G.GAME.doppelganger_hand_xmult or 1
+            local div_xchips = G.GAME.doppelganger_hand_xchips or 1
+
+            local has_mult = sub_mult > 0
+            local has_chips = sub_chips > 0
+            local has_xmult = div_xmult > 1.0001
+            local has_xchips = div_xchips > 1.0001
+
+            if has_mult or has_chips or has_xmult or has_xchips then
+                local ret = {
+                    colour = HEX('aeb6bf')
+                }
+                local msg_parts = {}
+                if has_chips then
+                    ret.chips = -sub_chips
+                    table.insert(msg_parts, '-' .. tostring(sub_chips) .. ' Chips')
+                end
+                if has_mult then
+                    ret.mult = -sub_mult
+                    table.insert(msg_parts, '-' .. tostring(sub_mult) .. ' Mult')
+                end
+                if has_xchips then
+                    ret.x_chips = 1 / div_xchips
+                    table.insert(msg_parts, '/' .. string.format('%.2g', div_xchips) .. ' Chips')
+                end
+                if has_xmult then
+                    ret.Xmult = 1 / div_xmult
+                    table.insert(msg_parts, '/' .. string.format('%.2g', div_xmult) .. ' Mult')
+                end
+
+                ret.message = 'Doppelgänger (' .. table.concat(msg_parts, ', ') .. ')'
+                if G.GAME.doppelganger_target and not G.GAME.doppelganger_target.removed then
+                    G.GAME.doppelganger_target:juice_up(0.5, 0.5)
+                end
+                return ret
+            end
+        end
+    end,
+    defeat = function(self)
+        G.GAME.doppelganger_target = nil
+        G.GAME.doppelganger_hand_mult = 0
+        G.GAME.doppelganger_hand_chips = 0
+        G.GAME.doppelganger_hand_xmult = 1
+        G.GAME.doppelganger_hand_xchips = 1
+        G.GAME.doppelganger_target_name = nil
+        reset_cracklatro_boss_ui()
+    end,
+    disable = function(self)
+        G.GAME.doppelganger_target = nil
+        G.GAME.doppelganger_hand_mult = 0
+        G.GAME.doppelganger_hand_chips = 0
+        G.GAME.doppelganger_hand_xmult = 1
+        G.GAME.doppelganger_hand_xchips = 1
+        reset_cracklatro_boss_ui()
+    end
+}
+
 local function sync_blind_atlases()
-    local blind_atlases = {'b_pole', 'b_stick', 'b_wizard', 'b_mountain', 'b_door', 'b_triangle', 'b_cube', 'b_void', 'b_guitar', 'b_phone', 'b_pinza'}
+    local blind_atlases = {'b_pole', 'b_stick', 'b_wizard', 'b_mountain', 'b_door', 'b_triangle', 'b_cube', 'b_void', 'b_guitar', 'b_phone', 'b_pinza', 'b_doppelganger'}
     for _, key in ipairs(blind_atlases) do
         local atlas_obj = (SMODS and SMODS.Atlases and SMODS.Atlases[key]) or (G.ASSET_ATLAS and G.ASSET_ATLAS[key]) or (G.ANIMATION_ATLAS and G.ANIMATION_ATLAS[key])
         if atlas_obj then

@@ -383,6 +383,12 @@ function reset_cracklatro_boss_ui()
     end
     if G.GAME then
         G.GAME.blind_color = nil
+        G.GAME.doppelganger_target = nil
+        G.GAME.doppelganger_hand_mult = 0
+        G.GAME.doppelganger_hand_chips = 0
+        G.GAME.doppelganger_hand_xmult = 1
+        G.GAME.doppelganger_hand_xchips = 1
+        G.GAME.doppelganger_target_name = nil
     end
     if G.ARGS then
         G.ARGS.blind_colour = nil
@@ -694,6 +700,36 @@ function Card:calculate_joker(context)
             end
         end
     end
+
+    -- Doppelgänger Showdown Blind bonus tracking hook
+    if G.GAME and G.GAME.blind and not G.GAME.blind.disabled and G.GAME.doppelganger_target and self == G.GAME.doppelganger_target and ret and type(ret) == 'table' and not self.debuff then
+        if ret.mult and type(ret.mult) == 'number' and ret.mult > 0 then
+            G.GAME.doppelganger_hand_mult = (G.GAME.doppelganger_hand_mult or 0) + ret.mult
+        end
+        if ret.chips and type(ret.chips) == 'number' and ret.chips > 0 then
+            G.GAME.doppelganger_hand_chips = (G.GAME.doppelganger_hand_chips or 0) + ret.chips
+        end
+        if ret.chip_mod and type(ret.chip_mod) == 'number' and ret.chip_mod > 0 then
+            G.GAME.doppelganger_hand_chips = (G.GAME.doppelganger_hand_chips or 0) + ret.chip_mod
+        end
+        local xm = (ret.Xmult and type(ret.Xmult) == 'number' and ret.Xmult) or (ret.x_mult and type(ret.x_mult) == 'number' and ret.x_mult)
+        if xm and xm > 1 then
+            G.GAME.doppelganger_hand_xmult = (G.GAME.doppelganger_hand_xmult or 1) * xm
+        end
+        if ret.x_chips and type(ret.x_chips) == 'number' and ret.x_chips > 1 then
+            G.GAME.doppelganger_hand_xchips = (G.GAME.doppelganger_hand_xchips or 1) * ret.x_chips
+        end
+        if ret.h_mult and type(ret.h_mult) == 'number' and ret.h_mult > 0 then
+            G.GAME.doppelganger_hand_mult = (G.GAME.doppelganger_hand_mult or 0) + ret.h_mult
+        end
+        if ret.h_chips and type(ret.h_chips) == 'number' and ret.h_chips > 0 then
+            G.GAME.doppelganger_hand_chips = (G.GAME.doppelganger_hand_chips or 0) + ret.h_chips
+        end
+        if ret.h_x_mult and type(ret.h_x_mult) == 'number' and ret.h_x_mult > 1 then
+            G.GAME.doppelganger_hand_xmult = (G.GAME.doppelganger_hand_xmult or 1) * ret.h_x_mult
+        end
+    end
+
     return ret
 end
 

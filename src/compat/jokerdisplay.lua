@@ -1062,7 +1062,7 @@ jd_def["j_Crackedlatro_gabi"] = {
     end
 }
 
--- Yairo (Real-time 6 & Ace secret combo detection)
+-- Yairo (Scored 6s & 7s)
 jd_def["j_Crackedlatro_yairo"] = {
     text = {
         { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.XMULT }
@@ -1072,25 +1072,21 @@ jd_def["j_Crackedlatro_yairo"] = {
     },
     calc_function = function(card)
         local highlighted = (G.hand and G.hand.highlighted) or {}
-        local has_six, has_ace = false, false
         local six_or_seven = 0
         for _, c in ipairs(highlighted) do
             local id = (c.get_id and c:get_id()) or (c.base and c.base.id)
             local val = c.base and c.base.value
-            if id == 6 or val == '6' then has_six = true; six_or_seven = six_or_seven + 1 end
-            if id == 7 or val == '7' then six_or_seven = six_or_seven + 1 end
-            if id == 14 or id == 1 or val == 'Ace' or val == '1' then has_ace = true end
+            if id == 6 or val == '6' or id == 7 or val == '7' then
+                six_or_seven = six_or_seven + 1
+            end
         end
 
-        if has_six and has_ace then
-            card.joker_display_values.text_val = "X4M X2C"
-            card.joker_display_values.rem = "(Secret Combo!)"
-        elseif six_or_seven > 0 then
+        if six_or_seven > 0 then
             card.joker_display_values.text_val = "X3M X1.5C"
             card.joker_display_values.rem = "(" .. six_or_seven .. " 6s/7s)"
         else
             card.joker_display_values.text_val = "X3M X1.5C"
-            card.joker_display_values.rem = "(6s, 7s | 6 & A)"
+            card.joker_display_values.rem = "(per 6 or 7 scored)"
         end
     end
 }

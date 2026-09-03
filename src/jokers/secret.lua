@@ -855,12 +855,10 @@ SMODS.Joker {
         name = 'Yairo',
         text = {
             "Scored {C:attention}6s{} and {C:attention}7s{} give {X:mult,C:white}X#1#{} Mult and {X:chips,C:white}X#2#{} Chips.",
-            "If played hand contains a {C:attention}6{} and an {C:attention}Ace{},",
-            "gives {X:mult,C:white}X#3#{} Mult and {X:chips,C:white}X#4#{} Chips",
             "{C:inactive}(\"67!!!!\")"
         }
     },
-    config = { extra = { xmult = 3, xchips = 1.5, secret_xmult = 4, secret_xchips = 2 } },
+    config = { extra = { xmult = 3, xchips = 1.5 } },
     rarity = 4,
     is_secret = true,
     pos = { x = 0, y = 0 },
@@ -880,7 +878,7 @@ SMODS.Joker {
     end,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        return { vars = { ex.xmult or 3, ex.xchips or 1.5, ex.secret_xmult or 4, ex.secret_xchips or 2 } }
+        return { vars = { ex.xmult or 3, ex.xchips or 1.5 } }
     end,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play then
@@ -890,30 +888,6 @@ SMODS.Joker {
                 return {
                     x_mult = (card.ability and card.ability.extra and card.ability.extra.xmult) or 3,
                     x_chips = (card.ability and card.ability.extra and card.ability.extra.xchips) or 1.5,
-                    card = card
-                }
-            end
-        end
-
-        if context.joker_main then
-            local has_six = false
-            local has_ace = false
-            local check_cards = context.scoring_hand or context.full_hand
-            if check_cards then
-                for _, c in ipairs(check_cards) do
-                    local id = (c.get_id and c:get_id()) or (c.base and c.base.id)
-                    local val = c.base and c.base.value
-                    if id == 6 or val == '6' then has_six = true end
-                    if id == 14 or id == 1 or val == 'Ace' or val == '1' then has_ace = true end
-                end
-            end
-
-            if has_six and has_ace then
-                return {
-                    Xmult = (card.ability and card.ability.extra and card.ability.extra.secret_xmult) or 4,
-                    x_chips = (card.ability and card.ability.extra and card.ability.extra.secret_xchips) or 2,
-                    message = 'Secret 6 & Ace!',
-                    colour = G.C.DARK_EDITION,
                     card = card
                 }
             end

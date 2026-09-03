@@ -32,7 +32,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **RayTracing**: Crea 2 cartas Espectrales Negativas aleatorias al final de la ronda (excepto La Muchachada). (*"Depradosini Negrini"*)
 * **Paco**: Otorga X2 Multi por cada descarte restante que tengas en la ronda. (*"No es necesario descartar, todas las cartas son utiles"*)
 * **Gabi**: Otorga X4 Multi por cada carta puntuada, pero resta 3/4 de las Fichas finales al terminar el cálculo. (*"Todo tiene un precio..."*)
-* **Yairo**: Las cartas 6 y 7 puntuadas otorgan X3 Multi y X1.5 Fichas. Si la mano jugada contiene un 6 y un As, otorga X4 Multi y X2 Fichas. (*"67!!!!"*)
+* **Yairo**: Las cartas 6 y 7 puntuadas otorgan X3 Multi y X1.5 Fichas. (*"67!!!!"*)
 
 ---
 

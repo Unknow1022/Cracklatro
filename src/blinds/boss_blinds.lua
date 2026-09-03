@@ -3,90 +3,90 @@
 G.CRACKEDLATRO_BLIND_THEMES = {
     ['pole'] = {
         name = 'The Pole',
-        boss_colour = HEX('7f8c8d'),
-        new_colour = HEX('2c3e50'),
-        special_colour = HEX('95a5a6'),
-        tertiary_colour = HEX('1a252f'),
+        boss_colour = HEX('868686'),
+        new_colour = HEX('2b2b2b'),
+        special_colour = HEX('a3a3a3'),
+        tertiary_colour = HEX('1a1a1a'),
         contrast = 2
     },
     ['stick'] = {
         name = 'The Rod',
-        boss_colour = HEX('1e8449'),
-        new_colour = HEX('145a32'),
-        special_colour = HEX('27ae60'),
-        tertiary_colour = HEX('0b3b1f'),
+        boss_colour = HEX('439a4f'),
+        new_colour = HEX('1a3e20'),
+        special_colour = HEX('71b27a'),
+        tertiary_colour = HEX('0e2312'),
         contrast = 2
     },
     ['wizard'] = {
         name = 'The Magician',
-        boss_colour = HEX('8e44ad'),
-        new_colour = HEX('4a156e'),
-        special_colour = HEX('9b59b6'),
-        tertiary_colour = HEX('240838'),
+        boss_colour = HEX('8a52b4'),
+        new_colour = HEX('3d165c'),
+        special_colour = HEX('ad75d7'),
+        tertiary_colour = HEX('200933'),
         contrast = 2.5
     },
     ['mountain'] = {
         name = 'The Mountain',
-        boss_colour = HEX('16a085'),
-        new_colour = HEX('0e6655'),
-        special_colour = HEX('1abc9c'),
-        tertiary_colour = HEX('07382f'),
+        boss_colour = HEX('5b94b3'),
+        new_colour = HEX('1a3c4f'),
+        special_colour = HEX('78b1d0'),
+        tertiary_colour = HEX('0f222d'),
         contrast = 2
     },
     ['door'] = {
         name = 'The Door',
-        boss_colour = HEX('e84393'),
-        new_colour = HEX('6c1d45'),
-        special_colour = HEX('fd79a8'),
-        tertiary_colour = HEX('3b0e25'),
+        boss_colour = HEX('ff1fdb'),
+        new_colour = HEX('610052'),
+        special_colour = HEX('ff55e4'),
+        tertiary_colour = HEX('300028'),
         contrast = 2.5
     },
     ['triangle'] = {
         name = 'The Triangle',
-        boss_colour = HEX('2980b9'),
-        new_colour = HEX('1b4f72'),
-        special_colour = HEX('3498db'),
-        tertiary_colour = HEX('0e283b'),
+        boss_colour = HEX('2e8a81'),
+        new_colour = HEX('0d3d37'),
+        special_colour = HEX('52aea5'),
+        tertiary_colour = HEX('05211e'),
         contrast = 2
     },
     ['cube'] = {
         name = 'The Cube',
-        boss_colour = HEX('00d2d3'),
-        new_colour = HEX('0f4c75'),
-        special_colour = HEX('54a0ff'),
-        tertiary_colour = HEX('08273d'),
+        boss_colour = HEX('5e8bd6'),
+        new_colour = HEX('18386e'),
+        special_colour = HEX('7ba8f3'),
+        tertiary_colour = HEX('0b1c3b'),
         contrast = 2.5
     },
     ['void'] = {
         name = 'The Void',
-        boss_colour = HEX('5e2491'),
-        new_colour = HEX('150426'),
-        special_colour = HEX('7d3c98'),
-        tertiary_colour = HEX('090112'),
+        boss_colour = HEX('150426'),
+        new_colour = HEX('090112'),
+        special_colour = HEX('b067b1'),
+        tertiary_colour = HEX('000000'),
         contrast = 3
     },
     ['guitar'] = {
         name = 'The Guitar',
-        boss_colour = HEX('e67e22'),
-        new_colour = HEX('6e2f0a'),
-        special_colour = HEX('f39c12'),
-        tertiary_colour = HEX('3a1704'),
+        boss_colour = HEX('ce515a'),
+        new_colour = HEX('541318'),
+        special_colour = HEX('ef727b'),
+        tertiary_colour = HEX('2b080b'),
         contrast = 2.5
     },
     ['phone'] = {
         name = 'The Phone',
-        boss_colour = HEX('3498db'),
-        new_colour = HEX('1a3a6b'),
-        special_colour = HEX('5dade2'),
-        tertiary_colour = HEX('0c1d36'),
+        boss_colour = HEX('00b281'),
+        new_colour = HEX('004230'),
+        special_colour = HEX('00e3a5'),
+        tertiary_colour = HEX('002118'),
         contrast = 2
     },
     ['pinza'] = {
         name = 'The Pincer',
-        boss_colour = HEX('e74c3c'),
-        new_colour = HEX('5c1111'),
-        special_colour = HEX('ff6b6b'),
-        tertiary_colour = HEX('2e0707'),
+        boss_colour = HEX('777777'),
+        new_colour = HEX('2d3436'),
+        special_colour = HEX('b2bec3'),
+        tertiary_colour = HEX('181d1e'),
         contrast = 3
     }
 }
@@ -153,7 +153,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('7f8c8d'),
+    boss_colour = HEX('868686'),
     loc_txt = {
         name = 'The Pole',
         text = {
@@ -190,7 +190,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('1e8449'),
+    boss_colour = HEX('439a4f'),
     loc_txt = {
         name = 'The Rod',
         text = {
@@ -223,7 +223,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('8e44ad'),
+    boss_colour = HEX('8a52b4'),
     loc_txt = {
         name = 'The Magician',
         text = {
@@ -244,7 +244,7 @@ SMODS.Blind {
                 x_chips = 0.5,
                 Xmult = 1 / 3,
                 message = '/2 Chips, /3 Mult!',
-                colour = HEX('8e44ad')
+                colour = HEX('8a52b4')
             }
         end
     end
@@ -265,7 +265,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('16a085'),
+    boss_colour = HEX('5b94b3'),
     loc_txt = {
         name = 'The Mountain',
         text = {
@@ -293,7 +293,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('e84393'),
+    boss_colour = HEX('ff1fdb'),
     loc_txt = {
         name = 'The Door',
         text = {
@@ -338,7 +338,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('2980b9'),
+    boss_colour = HEX('2e8a81'),
     loc_txt = {
         name = 'The Triangle',
         text = {
@@ -377,7 +377,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 1, max = 10 },
-    boss_colour = HEX('00d2d3'),
+    boss_colour = HEX('5e8bd6'),
     loc_txt = {
         name = 'The Cube',
         text = {
@@ -403,7 +403,7 @@ SMODS.Blind {
                     x_chips = mod_chips,
                     Xmult = mod_mult,
                     message = 'Cube Halved!',
-                    colour = HEX('00d2d3')
+                    colour = HEX('5e8bd6')
                 }
             end
         end
@@ -426,7 +426,7 @@ SMODS.Blind {
     mult = 2,
     boss = { min = 8, max = 10, showdown = true },
     showdown = true,
-    boss_colour = HEX('5e2491'),
+    boss_colour = HEX('150426'),
     loc_txt = {
         name = 'The Void',
         text = {
@@ -445,7 +445,7 @@ SMODS.Blind {
                 G.GAME.blind.chip_text = number_format(G.GAME.blind.chips)
                 return {
                     message = 'X1.25 Target!',
-                    colour = HEX('7d3c98')
+                    colour = HEX('b067b1')
                 }
             end
         end
@@ -467,7 +467,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('e67e22'),
+    boss_colour = HEX('ce515a'),
     loc_txt = {
         name = 'The Guitar',
         text = {
@@ -488,7 +488,7 @@ SMODS.Blind {
         if context.before and context.full_hand and #context.full_hand == 5 then
             return {
                 message = 'Guitar Muted!',
-                colour = HEX('e67e22')
+                colour = HEX('ce515a')
             }
         end
     end
@@ -509,7 +509,7 @@ SMODS.Blind {
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
-    boss_colour = HEX('3498db'),
+    boss_colour = HEX('00b281'),
     loc_txt = {
         name = 'The Phone',
         text = {
@@ -528,7 +528,7 @@ SMODS.Blind {
             end
             return {
                 message = '1st Card Only!',
-                colour = HEX('3498db')
+                colour = HEX('00b281')
             }
         end
         if context.after and context.scoring_hand then
@@ -558,7 +558,7 @@ SMODS.Blind {
     mult = 2,
     boss = { min = 8, max = 10, showdown = true },
     showdown = true,
-    boss_colour = HEX('e74c3c'),
+    boss_colour = HEX('777777'),
     loc_txt = {
         name = 'The Pincer',
         text = {

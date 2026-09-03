@@ -695,9 +695,9 @@ jd_def["j_Crackedlatro_miner_joker"] = {
         local d = (card.ability and card.ability.extra and card.ability.extra.depth) or 0
         if d < 50 then
             card.joker_display_values.depth_str = d .. "m (+25C)"
-        elseif d < 100 then
+        elseif d < 120 then
             card.joker_display_values.depth_str = d .. "m (+$2)"
-        elseif d < 200 then
+        elseif d < 300 then
             card.joker_display_values.depth_str = d .. "m (X1.35)"
         else
             card.joker_display_values.depth_str = d .. "m (Core: X1.5)"

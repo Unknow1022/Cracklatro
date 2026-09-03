@@ -120,44 +120,37 @@ SMODS.Seal {
         label = 'White Seal',
         text = {
             "Upgrades a random {C:attention}poker hand{}",
-            "by {C:attention}+1 level{} when scored",
-            "{C:inactive}(Once per round){}"
+            "by {C:attention}+1 level{} when scored"
         }
     },
     calculate = function(self, card, context)
         if (context.main_scoring or context.individual) and context.cardarea == G.play then
-            if not card.ability.white_seal_triggered then
-                card.ability.white_seal_triggered = true
-                local hands = {}
-                if G.GAME and G.GAME.hands then
-                    for k, v in pairs(G.GAME.hands) do
-                        if v.visible then
-                            table.insert(hands, k)
-                        end
-                    end
-                    if #hands == 0 then
-                        for k, v in pairs(G.GAME.hands) do
-                            table.insert(hands, k)
-                        end
+            local hands = {}
+            if G.GAME and G.GAME.hands then
+                for k, v in pairs(G.GAME.hands) do
+                    if v.visible then
+                        table.insert(hands, k)
                     end
                 end
-                local chosen_hand = pseudorandom_element(hands, pseudoseed('white_seal_hand')) or 'High Card'
-                G.E_MANAGER:add_event(Event({
-                    trigger = 'after',
-                    delay = 0.2,
-                    func = function()
-                        play_sound('tarot1')
-                        card:juice_up(0.3, 0.5)
-                        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname = chosen_hand, level = (G.GAME.hands[chosen_hand] and G.GAME.hands[chosen_hand].level or 1) + 1})
-                        level_up_hand(card, chosen_hand, false, 1)
-                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Level Up!', colour = G.C.SECONDARY_SET.Planet })
-                        return true
+                if #hands == 0 then
+                    for k, v in pairs(G.GAME.hands) do
+                        table.insert(hands, k)
                     end
-                }))
+                end
             end
-        end
-        if context.end_of_round and card.ability then
-            card.ability.white_seal_triggered = nil
+            local chosen_hand = pseudorandom_element(hands, pseudoseed('white_seal_hand')) or 'High Card'
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.2,
+                func = function()
+                    play_sound('tarot1')
+                    card:juice_up(0.3, 0.5)
+                    update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname = chosen_hand, level = (G.GAME.hands[chosen_hand] and G.GAME.hands[chosen_hand].level or 1) + 1})
+                    level_up_hand(card, chosen_hand, false, 1)
+                    card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Level Up!', colour = G.C.SECONDARY_SET.Planet })
+                    return true
+                end
+            }))
         end
     end
 }

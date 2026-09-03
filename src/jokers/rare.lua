@@ -423,11 +423,12 @@ SMODS.Joker {
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
-        if context.individual and context.cardarea == G.play and not context.blueprint then
+        if context.before and not context.blueprint and context.scoring_hand and #context.scoring_hand > 0 then
             local heat_gain = (card.ability and card.ability.extra and card.ability.extra.heat_per_card) or 5
-            card.ability.extra.temp = (card.ability.extra.temp or 0) + heat_gain
+            local total_gain = #context.scoring_hand * heat_gain
+            card.ability.extra.temp = (card.ability.extra.temp or 0) + total_gain
             return {
-                message = '+' .. heat_gain .. ' Heat!',
+                message = '+' .. total_gain .. ' Heat!',
                 colour = G.C.ORANGE,
                 card = card
             }
@@ -556,8 +557,8 @@ SMODS.Joker {
         name = 'Miner',
         text = {
             "Scored {C:diamonds}Diamonds{} dig deeper {C:inactive}(Current: #2#m){}:",
-            "0-50m: {C:chips}+25{} Chips | 50-100m: {C:money}+$2{} | 100-200m: {X:mult,C:white}X1.35{} Mult",
-            "200m+: {X:mult,C:white}X1.5{} Mult, retriggers, and extracts a Spectral card"
+            "0-50m: {C:chips}+25{} Chips | 50-120m: {C:money}+$2{} | 120-300m: {X:mult,C:white}X1.35{} Mult",
+            "300m+: {X:mult,C:white}X1.5{} Mult, retriggers, and extracts a Spectral card"
         }
     },
     unlock = {
@@ -565,20 +566,20 @@ SMODS.Joker {
         "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
         "in a single run"
     },
-    config = { extra = { depth = 0, depth_per_card = 15 } },
+    config = { extra = { depth = 0, depth_per_card = 5 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local d = ex.depth or 0
-        return { vars = { ex.depth_per_card or 15, d } }
+        return { vars = { ex.depth_per_card or 5, d } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
         -- Depth retrigger in Magma Core
         if context.repetition and context.cardarea == G.play then
-            if context.other_card:is_suit('Diamonds') and (card.ability.extra.depth or 0) >= 200 then
+            if context.other_card:is_suit('Diamonds') and (card.ability.extra.depth or 0) >= 300 then
                 return {
                     repetitions = 1,
                     card = card
@@ -589,37 +590,28 @@ SMODS.Joker {
         -- Individual stratum bonuses
         if context.individual and context.cardarea == G.play then
             if context.other_card:is_suit('Diamonds') then
-                if not context.blueprint then
-                    card.ability.extra.depth = (card.ability.extra.depth or 0) + (card.ability.extra.depth_per_card or 15)
+                if not context.blueprint and not context.repetition then
+                    card.ability.extra.depth = (card.ability.extra.depth or 0) + (card.ability.extra.depth_per_card or 5)
                 end
                 local d = card.ability.extra.depth or 0
                 if d < 50 then
                     return {
                         chips = 25,
-                        message = d .. 'm: Coal (+25 Chips)',
-                        colour = G.C.DARK_EDITION,
                         card = card
                     }
-                elseif d < 100 then
-                    ease_dollars(2)
+                elseif d < 120 then
                     return {
                         dollars = 2,
-                        message = d .. 'm: Gold (+$2)',
-                        colour = G.C.GOLD,
                         card = card
                     }
-                elseif d < 200 then
+                elseif d < 300 then
                     return {
                         x_mult = 1.35,
-                        message = d .. 'm: Diamond (X1.35)',
-                        colour = G.C.BLUE,
                         card = card
                     }
                 else
                     return {
                         x_mult = 1.5,
-                        message = d .. 'm: THE CORE! (X1.5)',
-                        colour = G.C.RED,
                         card = card
                     }
                 end
@@ -628,7 +620,7 @@ SMODS.Joker {
 
         -- Round end core extraction
         if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
-            if (card.ability.extra.depth or 0) >= 200 then
+            if (card.ability.extra.depth or 0) >= 300 then
                 if #G.consumeables.cards < G.consumeables.config.card_limit then
                     G.E_MANAGER:add_event(Event({
                         func = function()

@@ -70,7 +70,7 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Lover**: Vincula 2 cartas de tu baraja como **Almas Gemelas** (especificadas en su descripción). Tener a una en mano **roba a su pareja de la baraja** de inmediato. Si ambas puntúan juntas en la misma mano, otorgan **X3 Multi**, **+$6** y **+10 Fichas permanentes** a ambas. Los Corazones puntuados dan +10 Multi.
 * **Blacksmith**: Las cartas jugadas otorgan **+5 Heat** a la forja. A los **300 Heat**, golpea el yunque: **1 en 2** de probabilidad de aplicar un **Sello de Plata** o una **Carta de Acero (Metal)** a la carta puntuada más alta y enfría a 0 Heat.
 * **Lucky One**: Los Tréboles puntuados recolectan pétalos. Al juntar 4 pétalos, formas un **Trébol de 4 Hojas**: otorga **X2 Multi** y **garantiza al 100% de éxito la próxima probabilidad del juego** (Rueda de la Fortuna, Lucky Cards, Space Joker, etc.) consumiendo el trébol.
-* **Miner**: Los Diamantes descienden **+15m** en la mina: 0-50m (Carbón: **+25 Fichas**), 50-100m (Oro: **+$2**), 100-200m (Diamante: **+X1.35 Multi**), 200m+ (Núcleo Magmático: **+X1.5 Multi**, **reactivación** y extrae una carta Espectral al final de la ronda).
+* **Miner**: Los Diamantes descienden **+5m** en la mina: 0-50m (Carbón: **+25 Fichas**), 50-120m (Oro: **+$2**), 120-300m (Diamante: **+X1.35 Multi**), 300m+ (Núcleo Magmático: **+X1.5 Multi**, **reactivación** y extrae una carta Espectral al final de la ronda).
 * **Joke Joker?**: No hace nada aparente... pero en secreto, si posees el Vale Blank, lo transforma inmediatamente en Antimatter (+1 espacio de Joker).
 * **Perfectionism**: Al derrotar una Ciega Grande o Ciega Jefe, aplica Policromo a un Joker aleatorio (1 en 5 de probabilidad de otorgar Negativo en su lugar).
 * **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Comodín Invisible* (*Invisible Joker*) (**1 vez por ronda**).
@@ -118,7 +118,7 @@ Nuevo tipo de consumible temático que asigna oficios permanentes o mejoras excl
 * **Lead Card (Carta de Plomo)**: Otorga +10 Fichas. Se transmuta permanentemente en Carta de Oro si se puntúa en una mano que gana la ronda.
 * **Jeweled Card (Carta Engarzada / Carta de Joyería)**: Otorga X1.25 Multi y $2 al puntuar si el palo es Diamantes o Corazones.
 * **Dark Green Seal (Sello Verde Oscuro)**: Otorga **X2.5 Multi** al ser puntuada. 1 en 5 de probabilidad de romperse al ser jugada.
-* **White Seal (Sello Blanco)**: Sube el nivel de una mano de poker aleatoria en **+1 nivel** al puntuar (1 vez por ronda).
+* **White Seal (Sello Blanco)**: Sube el nivel de una mano de poker aleatoria en **+1 nivel** al puntuar.
 * **Silver Seal (Sello de Plata)**: 1 en 4 de probabilidad de convertir la carta en **Carta de Acero (Metal)** al ser jugada. Al estar en una **Carta de Acero (Metal)**, otorga **X2 Multi** al ser jugada y **X2.5 Multi** mientras se mantiene en la mano.
 
 ---

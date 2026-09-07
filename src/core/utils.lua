@@ -373,6 +373,73 @@ function Card:set_cost()
     if G.GAME and G.GAME.overseer_deck and self.ability and self.ability.set == 'Joker' then
         self.cost = math.max(1, math.floor(self.cost * 1.5))
     end
+    if G.GAME and G.GAME.sale_tag_active then
+        local is_shop_item = self.area and (self.area == G.shop_jokers or self.area == G.shop_booster or self.area == G.shop_vouchers)
+        if is_shop_item then
+            self.cost = math.max(1, math.floor(self.cost * 0.5))
+        end
+    end
+end
+
+-- Refresh cost for newly rerolled / emplaced shop cards
+local cardarea_emplace_ref = CardArea.emplace
+function CardArea:emplace(card, location, stay_flipped)
+    cardarea_emplace_ref(self, card, location, stay_flipped)
+    if G.GAME and G.GAME.sale_tag_active and (self == G.shop_jokers or self == G.shop_booster or self == G.shop_vouchers) then
+        if card and card.set_cost then
+            card:set_cost()
+        end
+    end
+end
+
+-- Revert Sale Tag effects when leaving the shop or resetting round
+local function reset_sale_tag_effects()
+    if G.GAME then
+        G.GAME.sale_tag_active = nil
+        if G.GAME.round_resets and G.GAME.round_resets.temp_reroll_cost then
+            G.GAME.round_resets.temp_reroll_cost = nil
+            if calculate_reroll_cost then
+                calculate_reroll_cost(true)
+            end
+        end
+        -- Heal any lingering corrupted discount_percent from earlier versions
+        if G.GAME.discount_percent and G.GAME.discount_percent > 0 then
+            local legitimate_discount = 0
+            if G.GAME.used_vouchers then
+                if G.GAME.used_vouchers.v_liquidation then
+                    legitimate_discount = 50
+                elseif G.GAME.used_vouchers.v_clearance_sale then
+                    legitimate_discount = 25
+                end
+            end
+            if G.jokers and G.jokers.cards then
+                for _, j in ipairs(G.jokers.cards) do
+                    if j.config and j.config.center and (j.config.center.key == 'j_crack_businessman' or j.config.center.name == 'Businessman') then
+                        legitimate_discount = legitimate_discount + 25
+                    end
+                end
+            end
+            if G.GAME.discount_percent > legitimate_discount then
+                G.GAME.discount_percent = legitimate_discount
+            end
+        end
+    end
+end
+
+if G.FUNCS then
+    local toggle_shop_ref = G.FUNCS.toggle_shop
+    G.FUNCS.toggle_shop = function(e)
+        reset_sale_tag_effects()
+        if toggle_shop_ref then return toggle_shop_ref(e) end
+    end
+end
+
+local reset_idol_card_ref = reset_idol_card
+function reset_idol_card()
+    reset_sale_tag_effects()
+    if reset_idol_card_ref then
+        return reset_idol_card_ref()
+    end
 end
 
 -- Silver Seal Hand XMult Hook (Steel card with Silver Seal gives X2.5 in hand)

@@ -110,11 +110,15 @@ SMODS.Tag {
         }
     },
     apply = function(self, tag, context)
-        if context.type == 'store_safety' or context.type == 'shop_final_pass' or context.type == 'shop_start' then
+        if (context.type == 'shop_final_pass' or context.type == 'shop_start') and not (G.GAME and G.GAME.sale_tag_active) then
+            G.GAME.sale_tag_active = true
             tag:yep('+', G.C.MONEY, function()
-                G.GAME.discount_percent = (G.GAME.discount_percent or 0) + 50
-                if G.GAME.current_round and G.GAME.current_round.reroll_cost then
-                    G.GAME.current_round.reroll_cost = math.max(1, math.floor(G.GAME.current_round.reroll_cost * 0.5))
+                local base_reroll = (G.GAME.round_resets and G.GAME.round_resets.reroll_cost) or 5
+                if G.GAME.round_resets then
+                    G.GAME.round_resets.temp_reroll_cost = math.max(1, math.floor(base_reroll * 0.5))
+                end
+                if calculate_reroll_cost then
+                    calculate_reroll_cost(true)
                 end
                 if G.shop_jokers and G.shop_jokers.cards then
                     for _, c in ipairs(G.shop_jokers.cards) do c:set_cost() end

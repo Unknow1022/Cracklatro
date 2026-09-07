@@ -586,9 +586,6 @@ SMODS.Blind {
                 local destroys_cards = {
                     ['j_trading'] = true,
                     ['j_sixth_sense'] = true,
-                    ['j_Crackedlatro_paula'] = true,
-                    ['paula'] = true,
-                    ['j_paula'] = true,
                     ['c_Crackedlatro_butcher_job'] = true,
                     ['j_c_butcher'] = true
                 }
@@ -604,9 +601,6 @@ SMODS.Blind {
             local destroys_cards = {
                 ['j_trading'] = true,
                 ['j_sixth_sense'] = true,
-                ['j_Crackedlatro_paula'] = true,
-                ['paula'] = true,
-                ['j_paula'] = true,
                 ['c_Crackedlatro_butcher_job'] = true,
                 ['j_c_butcher'] = true
             }

@@ -6,7 +6,7 @@ function is_secret_card(card)
     local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
     key = string.lower(tostring(key))
     local secret_names = {
-        'esteban', 'thiago', 'paula', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco', 'gabi', 'yairo'
+        'esteban', 'thiago', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco', 'yairo'
     }
     for _, name in ipairs(secret_names) do
         if string.find(key, name) then return true end

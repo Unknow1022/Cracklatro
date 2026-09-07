@@ -474,9 +474,9 @@ SMODS.Consumable {
             delay = 0.4,
             func = function()
                 local secret_keys = {
-                    'j_Crackedlatro_esteban', 'j_Crackedlatro_thiago', 'j_Crackedlatro_paula', 'j_Crackedlatro_black_hole_joker',
+                    'j_Crackedlatro_esteban', 'j_Crackedlatro_thiago', 'j_Crackedlatro_black_hole_joker',
                     'j_Crackedlatro_squele', 'j_Crackedlatro_bluxdir', 'j_Crackedlatro_charles', 'j_Crackedlatro_mochi',
-                    'j_Crackedlatro_helin', 'j_Crackedlatro_raytracing', 'j_Crackedlatro_paco', 'j_Crackedlatro_gabi', 'j_Crackedlatro_yairo'
+                    'j_Crackedlatro_helin', 'j_Crackedlatro_raytracing', 'j_Crackedlatro_paco', 'j_Crackedlatro_yairo'
                 }
                 local valid_secret_keys = {}
                 for _, k in ipairs(secret_keys) do

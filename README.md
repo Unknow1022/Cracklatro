@@ -16,12 +16,11 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 
 ## 🃏 Contenido del Mod
 
-### 🌟 Rareza Secreta (13 Jokers Secretos)
+### 🌟 Rareza Secreta (11 Jokers Secretos)
 *Poseen badge exclusivo negro `Secreto`, animación legendaria de 2 capas y únicamente pueden ser invocados mediante la carta espectral **La Muchachada**.*
 
 * **Esteban**: X2.5 Multi por cada carta puntuada de Picas o Tréboles. (*"*Ignores the kid*"*)
 * **Thiago**: Otorga X1 Multi por cada 20 Fichas obtenidas en el cálculo final de la mano. (*"Son, Hijillo, Brochacho"*)
-* **Paula**: Al inicio de la ronda, destruye los Jokers adyacentes y gana +X1 Multi permanente por cada Joker devorado. (*"*Ñam Ñam ñam* NOO MAMA ESPERA NO ESTOY COMIENDO"*)
 * **Black Hole**: Eleva las Fichas finales a la potencia de `^1.5` y el Multi final a la potencia de `^1.5`.
 * **Squele**: Los Corazones puntuados otorgan +10 Multi y X1.5 Multi. 1 en 10 de probabilidad de Proyectar y crear un Bloodstone Negativo. (*"Ahhh me proyecto"*)
 * **Bluxdir**: Al descartar una mano, sube de nivel la mano de poker descartada. (*"*Se pone a farmear aura*"*)
@@ -31,7 +30,6 @@ Una expansión masiva y completa para **Balatro** creada sobre el framework **St
 * **Helin**: En la primera mano de cada ronda, eleva el Multi final al cuadrado (`^2 Multi`). (*"Pero que envian al chat"*)
 * **RayTracing**: Crea 2 cartas Espectrales Negativas aleatorias al final de la ronda (excepto La Muchachada). (*"Depradosini Negrini"*)
 * **Paco**: Otorga X2 Multi por cada descarte restante que tengas en la ronda. (*"No es necesario descartar, todas las cartas son utiles"*)
-* **Gabi**: Otorga X4 Multi por cada carta puntuada, pero resta 3/4 de las Fichas finales al terminar el cálculo. (*"Todo tiene un precio..."*)
 * **Yairo**: Las cartas 6 y 7 puntuadas otorgan X3 Multi y X1.5 Fichas. (*"67!!!!"*)
 
 ---

@@ -837,41 +837,6 @@ jd_def["j_Crackedlatro_thiago"] = {
     end
 }
 
--- Paula (Adjacent eat preview)
-jd_def["j_Crackedlatro_paula"] = {
-    text = {
-        {
-            border_nodes = {
-                { text = "X" },
-                { ref_table = "card.ability.extra", ref_value = "xmult" }
-            }
-        }
-    },
-    text_config = { colour = G.C.WHITE },
-    reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
-    },
-    calc_function = function(card)
-        local my_pos = nil
-        if G.jokers and G.jokers.cards then
-            for i = 1, #G.jokers.cards do
-                if G.jokers.cards[i] == card then my_pos = i; break end
-            end
-        end
-        local eatable = 0
-        if my_pos and G.jokers and G.jokers.cards then
-            if my_pos > 1 then
-                local lj = G.jokers.cards[my_pos - 1]
-                if lj and not (lj.ability and lj.ability.eternal) then eatable = eatable + 1 end
-            end
-            if my_pos < #G.jokers.cards then
-                local rj = G.jokers.cards[my_pos + 1]
-                if rj and not (rj.ability and rj.ability.eternal) then eatable = eatable + 1 end
-            end
-        end
-        card.joker_display_values.rem = "(+" .. eatable .. " on Round Start)"
-    end
-}
 
 -- Black Hole
 jd_def["j_Crackedlatro_black_hole_joker"] = {
@@ -1044,23 +1009,6 @@ jd_def["j_Crackedlatro_paco"] = {
     end
 }
 
--- Gabi (Real-time scored cards XMult)
-jd_def["j_Crackedlatro_gabi"] = {
-    text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.XMULT }
-    },
-    reminder_text = {
-        { text = "(-75% Chips)" }
-    },
-    calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted > 0 then
-            card.joker_display_values.text_val = "X" .. (4 ^ #highlighted)
-        else
-            card.joker_display_values.text_val = "X4/card"
-        end
-    end
-}
 
 -- Yairo (Scored 6s & 7s)
 jd_def["j_Crackedlatro_yairo"] = {

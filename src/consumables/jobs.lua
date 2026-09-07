@@ -53,6 +53,217 @@ local function create_job_card_for_pack(key_append)
     return card_obj
 end
 
+-- Job Stickers Atlas & SMODS.Sticker Definitions
+SMODS.Atlas {
+    key = "job_stickers",
+    path = "job_stickers.png",
+    px = 71,
+    py = 95
+}
+
+local function clear_card_jobs(card)
+    if card and card.ability then
+        card.ability.gardener_job = nil
+        card.ability.detective_job = nil
+        card.ability.chef_job = nil
+        card.ability.archaeologist_job = nil
+    end
+end
+
+SMODS.Sticker {
+    key = "gardener_job",
+    atlas = "job_stickers",
+    pos = { x = 0, y = 0 },
+    badge_colour = HEX('27ae60'),
+    prefix_config = { key = false },
+    sets = { Default = true, Enhanced = true },
+    rate = 0,
+    needs_enable_flag = false,
+    loc_txt = {
+        name = 'Jardinero',
+        label = 'Jardinero',
+        text = {
+            "Al descartar esta carta, añade",
+            "{C:chips}+2{} Fichas base permanentes a",
+            "todas las cartas de su mismo palo"
+        }
+    },
+    calculate = function(self, card, context)
+        if context.discard and context.other_card == card then
+            local suit = card.base and card.base.suit
+            if suit and G.playing_cards then
+                for _, c in ipairs(G.playing_cards) do
+                    if c:is_suit(suit) or (c.base and c.base.suit == suit) then
+                        c.ability = c.ability or {}
+                        c.ability.perma_bonus = (c.ability.perma_bonus or 0) + 2
+                    end
+                end
+                if G.hand and G.hand.cards then
+                    for _, c in ipairs(G.hand.cards) do
+                        if c ~= card and (c:is_suit(suit) or (c.base and c.base.suit == suit)) then
+                            c:juice_up(0.3, 0.3)
+                        end
+                    end
+                end
+                play_sound('chips1')
+                local suit_name = (localize and localize(suit, 'suits_plural')) or suit
+                return {
+                    message = '+2 Fichas (' .. suit_name .. ')!',
+                    colour = G.C.CHIPS,
+                    card = card
+                }
+            end
+        end
+    end
+}
+
+SMODS.Sticker {
+    key = "detective_job",
+    atlas = "job_stickers",
+    pos = { x = 1, y = 0 },
+    badge_colour = HEX('2980b9'),
+    prefix_config = { key = false },
+    sets = { Default = true, Enhanced = true },
+    rate = 0,
+    needs_enable_flag = false,
+    loc_txt = {
+        name = 'Detective',
+        label = 'Detective',
+        text = {
+            "En la mano inicial de la ronda,",
+            "revela las próximas 3 cartas a robar",
+            "y les otorga {C:gold}Sello Dorado{} o {C:blue}Sello Azul{}"
+        }
+    },
+    calculate = function(self, card, context)
+        if context.first_hand_drawn and card.area == G.hand then
+            if G.deck and G.deck.cards and #G.deck.cards > 0 then
+                local count = math.min(3, #G.deck.cards)
+                local seals = { 'Gold', 'Blue' }
+                card_eval_status_text(card, 'extra', nil, nil, nil, { message = '¡Investigando Mazo!', colour = HEX('2980b9') })
+                for i = 1, count do
+                    local top_c = G.deck.cards[#G.deck.cards - (i - 1)]
+                    if top_c then
+                        local chosen_seal = pseudorandom_element(seals, pseudoseed('detective_seal'))
+                        top_c:set_seal(chosen_seal, true)
+                        top_c:juice_up(0.4, 0.4)
+                        local rank_str = (top_c.base and top_c.base.value) or 'Carta'
+                        local suit_str = (top_c.base and top_c.base.suit) or ''
+                        local seal_name = chosen_seal == 'Gold' and 'Dorado' or 'Azul'
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.3,
+                            func = function()
+                                play_sound('tarot1', 1 + 0.1 * i)
+                                card_eval_status_text(card, 'extra', nil, nil, nil, {
+                                    message = rank_str .. ' de ' .. suit_str .. ' (' .. seal_name .. ')',
+                                    colour = chosen_seal == 'Gold' and G.C.GOLD or G.C.BLUE
+                                })
+                                return true
+                            end
+                        }))
+                    end
+                end
+                return {
+                    message = '¡Pistas Descubiertas!',
+                    colour = HEX('2980b9'),
+                    card = card
+                }
+            end
+        end
+    end
+}
+
+SMODS.Sticker {
+    key = "chef_job",
+    atlas = "job_stickers",
+    pos = { x = 2, y = 0 },
+    badge_colour = HEX('e67e22'),
+    prefix_config = { key = false },
+    sets = { Default = true, Enhanced = true },
+    rate = 0,
+    needs_enable_flag = false,
+    loc_txt = {
+        name = 'Chef',
+        label = 'Chef',
+        text = {
+            "Al puntuar en figuras (J, Q, K),",
+            "transforma a las demás cartas",
+            "puntuadas en {C:mult}Cartas Multi{}"
+        }
+    },
+    calculate = function(self, card, context)
+        if (context.main_scoring or context.individual) and context.cardarea == G.play and card:is_face() then
+            local converted = 0
+            if context.scoring_hand then
+                for _, other_c in ipairs(context.scoring_hand) do
+                    if other_c ~= card and other_c.config and other_c.config.center ~= G.P_CENTERS.m_mult then
+                        other_c:set_ability(G.P_CENTERS.m_mult)
+                        other_c:juice_up(0.5, 0.5)
+                        converted = converted + 1
+                    end
+                end
+            end
+            if converted > 0 then
+                play_sound('tarot1')
+                return {
+                    message = '¡Sazonado!',
+                    colour = HEX('e67e22'),
+                    card = card
+                }
+            end
+        end
+    end
+}
+
+SMODS.Sticker {
+    key = "archaeologist_job",
+    atlas = "job_stickers",
+    pos = { x = 3, y = 0 },
+    badge_colour = HEX('d35400'),
+    prefix_config = { key = false },
+    sets = { Default = true, Enhanced = true },
+    rate = 0,
+    needs_enable_flag = false,
+    loc_txt = {
+        name = 'Arqueólogo',
+        label = 'Arqueólogo',
+        text = {
+            "Al puntuar en tu última mano,",
+            "rescata 1 carta descartada con",
+            "una edición ({C:dark_edition}Foil{}, {C:dark_edition}Holo{}, {C:dark_edition}Poly{})"
+        }
+    },
+    calculate = function(self, card, context)
+        if (context.main_scoring or context.individual) and context.cardarea == G.play then
+            if G.GAME and G.GAME.current_round and G.GAME.current_round.hands_left == 0 and not card.ability.archaeologist_triggered_this_hand then
+                card.ability.archaeologist_triggered_this_hand = true
+                if G.discard and G.discard.cards and #G.discard.cards > 0 then
+                    local rescued = pseudorandom_element(G.discard.cards, pseudoseed('archaeologist_rescue'))
+                    if rescued and G.hand then
+                        draw_card(G.discard, G.hand, 100, 'up', nil, rescued)
+                        local edition_choices = {
+                            { foil = true },
+                            { holo = true },
+                            { polychrome = true }
+                        }
+                        local chosen_ed = pseudorandom_element(edition_choices, pseudoseed('archaeologist_ed'))
+                        rescued:set_edition(chosen_ed, true)
+                        return {
+                            message = '¡Excavado!',
+                            colour = G.C.GOLD,
+                            card = card
+                        }
+                    end
+                end
+            end
+        end
+        if context.end_of_round then
+            card.ability.archaeologist_triggered_this_hand = nil
+        end
+    end
+}
+
 -- Job Consumable 1: The Miner
 SMODS.Atlas {
     key = "c_minero",
@@ -154,6 +365,7 @@ SMODS.Consumable {
             delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
+                clear_card_jobs(target)
                 target.ability.gardener_job = true
                 target:juice_up(0.5, 0.5)
                 card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Gardener Hired!', colour = HEX('27ae60') })
@@ -279,6 +491,14 @@ SMODS.Consumable {
 
                 if donor.edition then
                     recipient:set_edition(donor.edition, true)
+                end
+
+                for _, jk in ipairs({'gardener_job', 'detective_job', 'chef_job', 'archaeologist_job'}) do
+                    if donor.ability and donor.ability[jk] then
+                        clear_card_jobs(recipient)
+                        recipient.ability = recipient.ability or {}
+                        recipient.ability[jk] = true
+                    end
                 end
 
                 play_sound('tarot1')
@@ -496,6 +716,7 @@ SMODS.Consumable {
             delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
+                clear_card_jobs(target)
                 target.ability.detective_job = true
                 target:juice_up(0.5, 0.5)
                 card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Detective Hired!', colour = HEX('2980b9') })
@@ -555,6 +776,7 @@ SMODS.Consumable {
             delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
+                clear_card_jobs(target)
                 target.ability.chef_job = true
                 target:juice_up(0.5, 0.5)
                 card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Chef Hired!', colour = HEX('e67e22') })
@@ -617,6 +839,7 @@ SMODS.Consumable {
             delay = 0.2,
             func = function()
                 target.ability = target.ability or {}
+                clear_card_jobs(target)
                 target.ability.archaeologist_job = true
                 target:juice_up(0.5, 0.5)
                 card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Archaeologist Hired!', colour = HEX('d35400') })

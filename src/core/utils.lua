@@ -33,63 +33,6 @@ function is_wild_card(pcard)
     return false
 end
 
--- Job Stickers Atlas & Helpers
-SMODS.Atlas {
-    key = "job_stickers",
-    path = "job_stickers.png",
-    px = 71,
-    py = 95
-}
-
-function get_card_job_info(card)
-    if not card or not card.ability then return nil end
-    if card.ability.gardener_job then
-        return {
-            name = 'Jardinero',
-            idx = 0,
-            badge_colour = HEX('27ae60'),
-            text = {
-                "Al descartar esta carta, añade",
-                "+2 Fichas base permanentes a",
-                "todas las cartas de su mismo palo"
-            }
-        }
-    elseif card.ability.detective_job then
-        return {
-            name = 'Detective',
-            idx = 1,
-            badge_colour = HEX('2980b9'),
-            text = {
-                "En la mano inicial al iniciar ronda,",
-                "revela las próximas 3 cartas que robarás",
-                "y les otorga Sello Dorado o Sello Azul"
-            }
-        }
-    elseif card.ability.chef_job then
-        return {
-            name = 'Chef',
-            idx = 2,
-            badge_colour = HEX('e67e22'),
-            text = {
-                "Al puntuar en figuras (J, Q, K),",
-                "transforma a las demás cartas",
-                "puntuadas en Cartas Multi"
-            }
-        }
-    elseif card.ability.archaeologist_job then
-        return {
-            name = 'Arqueólogo',
-            idx = 3,
-            badge_colour = HEX('d35400'),
-            text = {
-                "Al puntuar en tu última mano,",
-                "rescata 1 carta descartada con",
-                "una edición (Foil, Holo, Poly)"
-            }
-        }
-    end
-    return nil
-end
 
 function is_joker_copiable(card)
     if not card then return false end
@@ -125,45 +68,6 @@ function Card:generate_UIBox_ability_table(...)
     end
     local res = card_generate_UIBox_ref(self, ...)
     G.GAME_IS_RENDERING_SECRET_CARD = false
-
-    local job = get_card_job_info(self)
-    if job and res and res.main then
-        local desc_nodes = {}
-        for _, line_text in ipairs(job.text) do
-            table.insert(desc_nodes, {
-                n = G.UIT.R,
-                config = { align = "cm" },
-                nodes = {
-                    { n = G.UIT.T, config = { text = line_text, colour = G.C.UI.TEXT_LIGHT, scale = 0.3 } }
-                }
-            })
-        end
-        local job_ui_box = {
-            n = G.UIT.R,
-            config = { align = "cm", colour = G.C.CLEAR, padding = 0.05 },
-            nodes = {
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", colour = HEX('1c2321'), r = 0.08, padding = 0.06, minw = 2.8, emboss = 0.04 },
-                    nodes = {
-                        {
-                            n = G.UIT.R,
-                            config = { align = "cm" },
-                            nodes = {
-                                { n = G.UIT.T, config = { text = "Oficio: " .. job.name, colour = job.badge_colour, scale = 0.33 } }
-                            }
-                        },
-                        {
-                            n = G.UIT.R,
-                            config = { align = "cm" },
-                            nodes = desc_nodes
-                        }
-                    }
-                }
-            }
-        }
-        table.insert(res.main, { job_ui_box })
-    end
 
     -- Chameleon compatibility display (just like Blueprint / Plano)
     local is_chameleon = (self.ability and self.ability.name == 'Chameleon') or (self.config and self.config.center and self.config.center.key == 'j_Crackedlatro_chameleon_joker')
@@ -216,33 +120,6 @@ function Card:generate_UIBox_ability_table(...)
     end
 
     return res
-end
-
--- Job Sticker sprite rendering in Card:draw
-local card_draw_ref = Card.draw
-function Card:draw(layer)
-    card_draw_ref(self, layer)
-    if (layer == 'card' or layer == 'both' or not layer) and self.ability and self.children and not self.highlighted_shadow then
-        local job = get_card_job_info(self)
-        local job_atlas = G.ASSET_ATLAS and (G.ASSET_ATLAS['Crackedlatro_job_stickers'] or G.ASSET_ATLAS['job_stickers'])
-        if job and job_atlas then
-            if not self.children.job_sticker then
-                self.children.job_sticker = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, job_atlas, { x = job.idx, y = 0 })
-                self.children.job_sticker.role.draw_major = self
-                self.children.job_sticker.states.hover = self.states.hover
-                self.children.job_sticker.states.click = self.states.click
-                self.children.job_sticker.states.drag = self.states.drag
-            else
-                self.children.job_sticker:set_sprite_pos({ x = job.idx, y = 0 })
-                self.children.job_sticker:draw_shader('dissolve', nil, nil, nil, self.children.center)
-            end
-        else
-            if self.children.job_sticker then
-                self.children.job_sticker:remove()
-                self.children.job_sticker = nil
-            end
-        end
-    end
 end
 
 if Card.generate_card_ui then
@@ -350,91 +227,19 @@ function Card:redeem(...)
     return card_redeem_ref(self, ...)
 end
 
-local card_eval_ref = Card.eval_card
-function Card:eval_card(context)
-    local ret = card_eval_ref(self, context)
-    if ret and ret.dollars and (ret.mult or ret.h_mult or ret.x_mult or ret.Xmult) then
-        if G.GAME then G.GAME.lucky_hit_both = true end
-        check_for_unlock({ type = 'lucky_both' })
-    end
-
-    -- Gardener Job: +2 base chips to suit on discard
-    if context and context.discard and self.ability and self.ability.gardener_job then
-        local suit = self.base and self.base.suit
-        if suit and G.playing_cards then
-            for _, c in ipairs(G.playing_cards) do
-                if c.base and c.base.suit == suit then
-                    c.ability = c.ability or {}
-                    c.ability.perma_bonus = (c.ability.perma_bonus or 0) + 2
-                end
-            end
-            ret = ret or {}
-            ret.message = '+2 Chips to ' .. suit .. '!'
-            ret.colour = G.C.CHIPS
-            ret.card = self
+if eval_card then
+    local eval_card_ref = eval_card
+    function eval_card(card, context)
+        local ret, post_trig = eval_card_ref(card, context)
+        if ret and ret.dollars and (ret.mult or ret.h_mult or ret.x_mult or ret.Xmult) then
+            if G.GAME then G.GAME.lucky_hit_both = true end
+            check_for_unlock({ type = 'lucky_both' })
         end
+        return ret, post_trig
     end
-
-    -- Chef Job: Face cards transform other scoring cards into Mult cards
-    if context and (context.main_scoring or context.individual) and context.cardarea == G.play and self.ability and self.ability.chef_job and self:is_face() then
-        if context.scoring_hand then
-            for _, other_c in ipairs(context.scoring_hand) do
-                if other_c ~= self and other_c.config and other_c.config.center ~= G.P_CENTERS.m_mult then
-                    other_c:set_ability(G.P_CENTERS.m_mult)
-                    other_c:juice_up()
-                end
-            end
-        end
-    end
-
-    -- Archaeologist Job: Last hand rescues 1 discarded card with edition
-    if context and (context.main_scoring or context.individual) and context.cardarea == G.play and self.ability and self.ability.archaeologist_job then
-        if G.GAME and G.GAME.current_round and G.GAME.current_round.hands_left == 0 and not self.ability.archaeologist_triggered_this_hand then
-            self.ability.archaeologist_triggered_this_hand = true
-            if G.discard and G.discard.cards and #G.discard.cards > 0 then
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        if G.discard and G.discard.cards and #G.discard.cards > 0 then
-                            local rescued = pseudorandom_element(G.discard.cards, 'archaeologist_rescue')
-                            if rescued and G.hand then
-                                draw_card(G.discard, G.hand, 100, 'up', nil, rescued)
-                                local editions = { 'e_foil', 'e_holo', 'e_polychrome' }
-                                local chosen_ed = pseudorandom_element(editions, 'archaeologist_ed')
-                                rescued:set_edition(chosen_ed, true)
-                            end
-                        end
-                        return true
-                    end
-                }))
-                ret = ret or {}
-                ret.message = 'Excavated!'
-                ret.colour = G.C.GOLD
-            end
-        end
-    end
-    if context and context.end_of_round and self.ability then
-        self.ability.archaeologist_triggered_this_hand = nil
-    end
-
-    -- Lead Card: Transmute to Gold on winning hand
-    local center_key = (self.config and self.config.center and self.config.center.key) or self.config.center_key or (self.ability and self.ability.name) or ''
-    center_key = tostring(center_key)
-    if string.find(center_key, 'lead') and context and (context.main_scoring or context.individual) and context.cardarea == G.play then
-        if G.GAME and G.GAME.blind and G.GAME.chips + (hand_chips or 0) >= G.GAME.blind.chips then
-            G.E_MANAGER:add_event(Event({
-                func = function()
-                    self:set_ability(G.P_CENTERS.m_gold)
-                    self:juice_up()
-                    return true
-                end
-            }))
-        end
-    end
-
-    return ret
 end
 
--- Blind hook for Detective Job, Stick Penalty & Custom Boss Backgrounds
+-- Blind hook for Stick Penalty & Custom Boss Backgrounds
 -- Helper to reset UI and background colors back to Balatro originals after Boss Blind
 function reset_cracklatro_boss_ui()
     if G.C and G.C.DYN_UI then
@@ -491,34 +296,6 @@ function Blind:set_blind(blind, reset, silent)
         reset_cracklatro_boss_ui()
     end
 
-    G.E_MANAGER:add_event(Event({
-        trigger = 'after',
-        delay = 1.0,
-        func = function()
-            if G.hand and G.hand.cards then
-                local has_detective = false
-                for _, c in ipairs(G.hand.cards) do
-                    if c and c.ability and c.ability.detective_job then
-                        has_detective = true
-                        c:juice_up()
-                        break
-                    end
-                end
-                if has_detective and G.deck and G.deck.cards and #G.deck.cards > 0 then
-                    local count = math.min(3, #G.deck.cards)
-                    local seals = { 'Gold', 'Blue' }
-                    for i = 1, count do
-                        local top_c = G.deck.cards[#G.deck.cards - (i - 1)]
-                        if top_c then
-                            local chosen_seal = pseudorandom_element(seals, 'detective_seal')
-                            top_c:set_seal(chosen_seal, true)
-                        end
-                    end
-                end
-            end
-            return true
-        end
-    }))
     return ret
 end
 

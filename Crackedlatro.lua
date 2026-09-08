@@ -32,3 +32,4 @@ local files = {
 for _, file in ipairs(files) do
     assert(SMODS.load_file(file))()
 end
+                                                        

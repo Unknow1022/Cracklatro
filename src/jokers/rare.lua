@@ -365,7 +365,6 @@ SMODS.Joker {
                 end
             end
             if #soulmates_scored >= 2 then
-                ease_dollars(card.ability.extra.dollars)
                 if not context.blueprint then
                     for _, sm in ipairs(soulmates_scored) do
                         sm.ability = sm.ability or {}
@@ -974,7 +973,6 @@ SMODS.Joker {
 
                 if has_enh and has_seal and has_edition then
                     card.ability.extra.used = true
-                    ease_dollars(10)
                     return {
                         dollars = 10,
                         message = '+$10 Saturated!',

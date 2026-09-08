@@ -18,14 +18,7 @@ local function format_short_card(c)
 end
 
 local function has_charles_and_mochi_jd()
-    if not (G.jokers and G.jokers.cards) then return false end
-    local has_charles, has_mochi = false, false
-    for _, j in ipairs(G.jokers.cards) do
-        local k = string.lower(tostring((j.config and j.config.center and j.config.center.key) or (j.ability and j.ability.name) or ''))
-        if string.find(k, 'charles') then has_charles = true end
-        if string.find(k, 'mochi') then has_mochi = true end
-    end
-    return has_charles and has_mochi
+    return (type(has_charles_and_mochi) == 'function' and has_charles_and_mochi()) or false
 end
 
 -- =========================================================================

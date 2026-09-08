@@ -145,17 +145,19 @@ SMODS.Back {
                 G.E_MANAGER:add_event(Event({
                     func = function()
                         local forbidden = { ['c_rot'] = true, ['c_soul'] = true, ['c_Crackedlatro_rot'] = true }
-                        for i = 1, 35 do
-                            local scard = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'overseer')
-                            local skey = (scard.config and scard.config.center and scard.config.center.key) or scard.ability.name
-                            if not forbidden[skey] and not forbidden[scard.config.center_key] then
-                                scard:add_to_deck()
-                                G.consumeables:emplace(scard)
-                                break
-                            else
-                                scard:remove()
+                        local valid_spectrals = {}
+                        if G.P_CENTER_POOLS and G.P_CENTER_POOLS['Spectral'] then
+                            for _, center in ipairs(G.P_CENTER_POOLS['Spectral']) do
+                                if not forbidden[center.key] and not string.find(center.key, 'rot', 1, true) and not string.find(center.key, 'soul', 1, true) then
+                                    table.insert(valid_spectrals, center.key)
+                                end
                             end
                         end
+                        local chosen_key = (#valid_spectrals > 0) and pseudorandom_element(valid_spectrals, pseudoseed('overseer')) or 'c_ankh'
+                        local scard = create_card('Spectral', G.consumeables, nil, nil, nil, nil, chosen_key, 'overseer')
+                        scard:add_to_deck()
+                        G.consumeables:emplace(scard)
+                        scard:juice_up(0.5, 0.5)
                         return true
                     end
                 }))
@@ -200,24 +202,13 @@ SMODS.Back {
 
                 play_sound('foil1')
                 for i = 1, 2 do
-                    local new_joker = nil
-                    for attempt = 1, 50 do
-                        local candidate = create_card('Joker', G.jokers, false, nil, nil, false, nil, 'friendly_deck')
-                        local c_rarity = (candidate.config and candidate.config.center and candidate.config.center.rarity) or (candidate.ability and candidate.ability.rarity)
-                        local is_legendary = (c_rarity == 4 or c_rarity == 'Legendary' or (candidate.config and candidate.config.center and candidate.config.center.legendary))
-                        local is_secret = (type(is_secret_card) == 'function' and is_secret_card(candidate)) or candidate.is_secret or (candidate.config and candidate.config.center and candidate.config.center.is_secret)
-                        if not is_legendary and not is_secret then
-                            new_joker = candidate
-                            break
-                        else
-                            if candidate.area then
-                                candidate.area:remove_card(candidate)
-                            end
-                            candidate:remove()
-                        end
-                    end
-                    if not new_joker then
-                        new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_deck')
+                    local rarity_roll = pseudorandom('friendly_rarity')
+                    local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
+                    local new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck')
+                    if is_secret_card(new_joker) then
+                        if new_joker.area then new_joker.area:remove_card(new_joker) end
+                        new_joker:remove()
+                        new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_deck_fallback')
                     end
                     new_joker:set_eternal(true)
                     if new_joker.ability then new_joker.ability.eternal = true end

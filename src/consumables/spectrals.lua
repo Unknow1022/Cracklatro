@@ -202,7 +202,7 @@ SMODS.Consumable {
             func = function()
                 play_sound('foil1')
                 for i = 1, 2 do
-                    local new_joker = create_card('Joker', G.jokers, nil, 1, nil, nil, nil, 'rot')
+                    local new_joker = create_card('Joker', G.jokers, nil, 3, nil, nil, nil, 'rot')
                     new_joker:set_eternal(true)
                     new_joker:add_to_deck()
                     G.jokers:emplace(new_joker)

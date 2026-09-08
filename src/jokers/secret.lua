@@ -1,6 +1,26 @@
 -- Secret Jokers (Secret Rarity)
 
--- Esteban
+-- Helper to register secret jokers with standard attributes and badges
+local function register_secret_joker(def)
+    def.rarity = def.rarity or 4
+    def.is_secret = true
+    def.soul_pos = def.soul_pos or { x = 1, y = 0 }
+    def.cost = def.cost or 20
+    def.in_pool = def.in_pool or function(self, args)
+        return false, { allow_duplicates = false }
+    end
+    def.set_card_type_badge = def.set_card_type_badge or function(self, card, badges)
+        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
+    end
+    def.set_badges = def.set_badges or function(self, card, badges)
+        if badges and #badges > 0 then
+            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
+        end
+    end
+    return SMODS.Joker(def)
+end
+
+-- 1. Esteban
 SMODS.Atlas {
     key = "esteban_joker",
     path = "esteban_joker.png",
@@ -8,9 +28,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'esteban',
     atlas = 'esteban_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Esteban',
         text = {
@@ -20,23 +41,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { xmult = 2.5 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 2.5
         return { vars = { xmult } }
@@ -53,7 +58,7 @@ SMODS.Joker {
     end
 }
 
--- Thiago
+-- 2. Thiago
 SMODS.Atlas {
     key = "thiago_joker",
     path = "thiago_joker.png",
@@ -61,9 +66,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'thiago',
     atlas = 'thiago_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Thiago',
         text = {
@@ -73,23 +79,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { chips_per_xmult = 20 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local chips_req = (card and card.ability and card.ability.extra and card.ability.extra.chips_per_xmult) or (self.config and self.config.extra and self.config.extra.chips_per_xmult) or 20
         return { vars = { chips_req } }
@@ -109,8 +99,7 @@ SMODS.Joker {
     end
 }
 
-
--- Black Hole
+-- 3. Black Hole
 SMODS.Atlas {
     key = "black_hole_joker",
     path = "black_hole_joker.png",
@@ -118,9 +107,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'black_hole_joker',
     atlas = 'black_hole_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Black Hole',
         text = {
@@ -129,23 +119,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { pow = 1.5 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local pow = (card and card.ability and card.ability.extra and card.ability.extra.pow) or (self.config and self.config.extra and self.config.extra.pow) or 1.5
         return { vars = { pow } }
@@ -172,7 +146,7 @@ SMODS.Joker {
     end
 }
 
--- Squele
+-- 4. Squele
 SMODS.Atlas {
     key = "squele_joker",
     path = "squele_joker.png",
@@ -180,9 +154,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'squele',
     atlas = 'squele_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Squele',
         text = {
@@ -194,23 +169,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { mult = 10, xmult = 1.5, odds = 10 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or (self.config and self.config.extra and self.config.extra.mult) or 10
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 1.5
@@ -234,23 +193,18 @@ SMODS.Joker {
                         return true
                     end
                 }))
-                return {
-                    mult = card.ability.extra.mult,
-                    x_mult = card.ability.extra.xmult,
-                    card = card
-                }
-            else
-                return {
-                    mult = card.ability.extra.mult,
-                    x_mult = card.ability.extra.xmult,
-                    card = card
-                }
             end
+
+            return {
+                mult = card.ability.extra.mult,
+                x_mult = card.ability.extra.xmult,
+                card = card
+            }
         end
     end
 }
 
--- Bluxdir
+-- 5. Bluxdir
 SMODS.Atlas {
     key = "bluxdir_joker",
     path = "bluxdir_joker.png",
@@ -258,9 +212,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'bluxdir',
     atlas = 'bluxdir_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Bluxdir',
         text = {
@@ -270,23 +225,7 @@ SMODS.Joker {
         }
     },
     config = {},
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     calculate = function(self, card, context)
         if context.pre_discard and not context.hook and context.full_hand and #context.full_hand > 0 then
             local text, loc_disp_text, poker_hands, scoring_hand, disp_text = G.FUNCS.get_poker_hand_info(context.full_hand)
@@ -297,33 +236,7 @@ SMODS.Joker {
     end
 }
 
--- Charles & Mochi Synergy Helpers
-local function is_charles_card(card)
-    if not card then return false end
-    local k = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
-    k = string.lower(tostring(k))
-    return string.find(k, 'charles') ~= nil
-end
-
-local function is_mochi_card(card)
-    if not card then return false end
-    local k = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
-    k = string.lower(tostring(k))
-    return string.find(k, 'mochi') ~= nil
-end
-
-local function has_charles_and_mochi()
-    if not (G.jokers and G.jokers.cards) then return false end
-    local has_charles = false
-    local has_mochi = false
-    for _, j in ipairs(G.jokers.cards) do
-        if is_charles_card(j) then has_charles = true end
-        if is_mochi_card(j) then has_mochi = true end
-    end
-    return has_charles and has_mochi
-end
-
--- Charles
+-- 6. Charles
 SMODS.Atlas {
     key = "charles_joker",
     path = "charles_joker.png",
@@ -331,9 +244,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'charles',
     atlas = 'charles_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Charles',
         text = {
@@ -344,23 +258,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { xmult = 2, dollars = 5 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or (self.config and self.config.extra and self.config.extra.xmult) or 2
         local dollars = (card and card.ability and card.ability.extra and card.ability.extra.dollars) or (self.config and self.config.extra and self.config.extra.dollars) or 5
@@ -395,7 +293,6 @@ SMODS.Joker {
             local gives_xmult = context.other_card:is_suit('Spades') or context.other_card:is_suit('Hearts')
             local xmult = (card.ability and card.ability.extra and card.ability.extra.xmult) or 2
 
-            ease_dollars(dollars)
             if gives_xmult then
                 return {
                     x_mult = xmult,
@@ -412,7 +309,7 @@ SMODS.Joker {
     end
 }
 
--- Mochi
+-- 7. Mochi
 SMODS.Atlas {
     key = "mochi_joker",
     path = "mochi_joker.png",
@@ -420,9 +317,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'mochi',
     atlas = 'mochi_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Mochi',
         text = {
@@ -434,23 +332,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { xmult_gain = 0.25 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local xmult_gain = (card and card.ability and card.ability.extra and card.ability.extra.xmult_gain) or (self.config and self.config.extra and self.config.extra.xmult_gain) or 0.25
         local wild_count = 0
@@ -492,7 +374,7 @@ SMODS.Joker {
     end
 }
 
--- Helin
+-- 8. Helin
 SMODS.Atlas {
     key = "helin_joker",
     path = "helin_joker.png",
@@ -500,9 +382,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'helin',
     atlas = 'helin_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Helin',
         text = {
@@ -512,23 +395,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { power = 2 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local power = (card and card.ability and card.ability.extra and card.ability.extra.power) or (self.config and self.config.extra and self.config.extra.power) or 2
         return { vars = { power } }
@@ -552,7 +419,7 @@ SMODS.Joker {
     end
 }
 
--- RayTracing
+-- 9. RayTracing
 SMODS.Atlas {
     key = "raytracing_joker",
     path = "raytracing_joker.png",
@@ -560,9 +427,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'raytracing',
     atlas = 'raytracing_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'RayTracing',
         text = {
@@ -573,23 +441,7 @@ SMODS.Joker {
         }
     },
     config = {},
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = false,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     calculate = function(self, card, context)
         if context.end_of_round and not context.individual and not context.repetition and not context.blueprint then
             G.E_MANAGER:add_event(Event({
@@ -620,7 +472,7 @@ SMODS.Joker {
     end
 }
 
--- Paco
+-- 10. Paco
 SMODS.Atlas {
     key = "paco_joker",
     path = "paco_joker.png",
@@ -628,9 +480,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'paco',
     atlas = 'paco_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Paco',
         text = {
@@ -641,23 +494,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { xmult_per_discard = 2 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local discards = (G.GAME and G.GAME.current_round and G.GAME.current_round.discards_left) or 0
         local xmult_per_discard = (card and card.ability and card.ability.extra and card.ability.extra.xmult_per_discard) or (self.config and self.config.extra and self.config.extra.xmult_per_discard) or 2
@@ -678,8 +515,7 @@ SMODS.Joker {
     end
 }
 
-
--- Yairo
+-- 11. Yairo
 SMODS.Atlas {
     key = "yairo_joker",
     path = "yairo_joker.png",
@@ -687,9 +523,10 @@ SMODS.Atlas {
     py = 95
 }
 
-SMODS.Joker {
+register_secret_joker {
     key = 'yairo',
     atlas = 'yairo_joker',
+    pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'Yairo',
         text = {
@@ -698,23 +535,7 @@ SMODS.Joker {
         }
     },
     config = { extra = { xmult = 3, xchips = 1.5 } },
-    rarity = 4,
-    is_secret = true,
-    pos = { x = 0, y = 0 },
-    soul_pos = { x = 1, y = 0 },
-    cost = 20,
     blueprint_compat = true,
-    in_pool = function(self, args)
-        return false, { allow_duplicates = false }
-    end,
-    set_card_type_badge = function(self, card, badges)
-        badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-    end,
-    set_badges = function(self, card, badges)
-        if badges and #badges > 0 then
-            badges[1] = create_badge('Secret', HEX('000000'), G.C.WHITE, 1.2)
-        end
-    end,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         return { vars = { ex.xmult or 3, ex.xchips or 1.5 } }
@@ -733,4 +554,3 @@ SMODS.Joker {
         end
     end
 }
-

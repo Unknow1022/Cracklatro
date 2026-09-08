@@ -283,6 +283,16 @@ SMODS.Blind {
     },
     ease_background_colour = function(self)
         ease_custom_blind_background(self)
+    end,
+    modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
+        if G.GAME and G.GAME.mountain_disabled_hand then
+            G.GAME.mountain_disabled_hand = nil
+            return 0, 0, true
+        end
+        return mult, hand_chips, false
+    end,
+    defeat = function(self)
+        if G.GAME then G.GAME.mountain_disabled_hand = nil end
     end
 }
 

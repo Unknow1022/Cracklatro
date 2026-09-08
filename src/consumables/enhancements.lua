@@ -1,57 +1,23 @@
 -- Enhancements & Custom Seals
 
 -- Helper functions for Custom Enhancement Centers
-function get_diamond_enhancement_center()
+function get_custom_enhancement(name, fallback)
     if G.P_CENTERS then
-        if G.P_CENTERS['m_Crackedlatro_diamond'] then return G.P_CENTERS['m_Crackedlatro_diamond'] end
-        if G.P_CENTERS['m_diamond'] then return G.P_CENTERS['m_diamond'] end
+        if G.P_CENTERS['m_Crackedlatro_' .. name] then return G.P_CENTERS['m_Crackedlatro_' .. name] end
+        if G.P_CENTERS['m_' .. name] then return G.P_CENTERS['m_' .. name] end
         for k, v in pairs(G.P_CENTERS) do
-            if type(v) == 'table' and string.find(k, 'diamond') and v.set == 'Enhanced' then
+            if type(v) == 'table' and string.find(k, name, 1, true) and v.set == 'Enhanced' then
                 return v
             end
         end
     end
-    return G.P_CENTERS.m_steel
+    return fallback
 end
 
-function get_investment_enhancement_center()
-    if G.P_CENTERS then
-        if G.P_CENTERS['m_Crackedlatro_investment'] then return G.P_CENTERS['m_Crackedlatro_investment'] end
-        if G.P_CENTERS['m_investment'] then return G.P_CENTERS['m_investment'] end
-        for k, v in pairs(G.P_CENTERS) do
-            if type(v) == 'table' and string.find(k, 'investment') and v.set == 'Enhanced' then
-                return v
-            end
-        end
-    end
-    return G.P_CENTERS.m_gold
-end
-
-function get_lead_enhancement_center()
-    if G.P_CENTERS then
-        if G.P_CENTERS['m_Crackedlatro_lead'] then return G.P_CENTERS['m_Crackedlatro_lead'] end
-        if G.P_CENTERS['m_lead'] then return G.P_CENTERS['m_lead'] end
-        for k, v in pairs(G.P_CENTERS) do
-            if type(v) == 'table' and string.find(k, 'lead') and v.set == 'Enhanced' then
-                return v
-            end
-        end
-    end
-    return G.P_CENTERS.m_steel
-end
-
-function get_jeweled_enhancement_center()
-    if G.P_CENTERS then
-        if G.P_CENTERS['m_Crackedlatro_jeweled'] then return G.P_CENTERS['m_Crackedlatro_jeweled'] end
-        if G.P_CENTERS['m_jeweled'] then return G.P_CENTERS['m_jeweled'] end
-        for k, v in pairs(G.P_CENTERS) do
-            if type(v) == 'table' and string.find(k, 'jeweled') and v.set == 'Enhanced' then
-                return v
-            end
-        end
-    end
-    return G.P_CENTERS.m_lucky
-end
+function get_diamond_enhancement_center() return get_custom_enhancement('diamond', G.P_CENTERS.m_steel) end
+function get_investment_enhancement_center() return get_custom_enhancement('investment', G.P_CENTERS.m_gold) end
+function get_lead_enhancement_center() return get_custom_enhancement('lead', G.P_CENTERS.m_steel) end
+function get_jeweled_enhancement_center() return get_custom_enhancement('jeweled', G.P_CENTERS.m_lucky) end
 
 -- Seal 1: Dark Green Seal (Reworked)
 SMODS.Atlas {
@@ -377,7 +343,6 @@ SMODS.Enhancement {
     calculate = function(self, card, context)
         if (context.main_scoring or context.individual) and context.cardarea == G.play then
             if card:is_suit('Diamonds') or card:is_suit('Hearts') then
-                ease_dollars(card.ability.extra.dollars)
                 return {
                     x_mult = card.ability.extra.x_mult,
                     dollars = card.ability.extra.dollars,

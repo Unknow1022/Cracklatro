@@ -471,7 +471,6 @@ SMODS.Joker {
             local ex = card.ability.extra
 
             if r1 == '7' and r2 == '7' and r3 == '7' then
-                ease_dollars(ex.jackpot_cash)
                 G.E_MANAGER:add_event(Event({
                     func = function()
                         local sc = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'slot_jackpot')
@@ -488,7 +487,6 @@ SMODS.Joker {
                     colour = G.C.GOLD
                 }
             elseif r1 == r2 and r2 == r3 then
-                ease_dollars(ex.triple_cash)
                 return {
                     Xmult = ex.triple_xmult,
                     dollars = ex.triple_cash,
@@ -496,7 +494,6 @@ SMODS.Joker {
                     colour = G.C.MONEY
                 }
             elseif r1 == r2 or r2 == r3 or r1 == r3 then
-                ease_dollars(ex.pair_cash)
                 return {
                     mult = ex.pair_mult,
                     dollars = ex.pair_cash,
@@ -545,9 +542,8 @@ SMODS.Joker {
             local has_even = false
             if G.jokers and G.jokers.cards then
                 for _, j in ipairs(G.jokers.cards) do
-                    local k = (j.config and j.config.center and j.config.center.key) or j.config.center_key or (j.ability and j.ability.name)
-                    if k == 'j_odd_todd' or k == 'odd_todd' then has_odd = true end
-                    if k == 'j_even_steven' or k == 'even_steven' then has_even = true end
+                    if card_has_key(j, 'odd_todd') then has_odd = true end
+                    if card_has_key(j, 'even_steven') then has_even = true end
                 end
             end
             if has_odd and has_even then
@@ -629,8 +625,7 @@ SMODS.Joker {
             local other_will_activate = false
             if G.jokers and G.jokers.cards then
                 for _, j in ipairs(G.jokers.cards) do
-                    local jkey = (j.config and j.config.center and j.config.center.key) or j.config.center_key or (j.ability and j.ability.name)
-                    local is_self = (jkey == 'j_Crackedlatro_falta_de_lectura_joker' or jkey == 'falta_de_lectura_joker' or jkey == 'j_falta_de_lectura_joker' or jkey == 'falta_de_lectura')
+                    local is_self = card_has_key(j, 'falta_de_lectura')
                     if not is_self and not j.debuff and j.calculate_joker then
                         local check_ctx = {}
                         for k, v in pairs(context) do check_ctx[k] = v end

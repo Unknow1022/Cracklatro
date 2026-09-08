@@ -1,15 +1,44 @@
 -- Core Utilities & Engine Hooks for Cracklatro
 
+function get_card_key(card)
+    if not card then return nil end
+    return (card.config and card.config.center and card.config.center.key)
+        or (card.config and card.config.center_key)
+        or (card.ability and card.ability.name)
+        or nil
+end
+
+function card_has_key(card, key)
+    if not card or not key then return false end
+    local k = get_card_key(card)
+    if not k then return false end
+    if k == key then return true end
+    if string.find(k, key, 1, true) ~= nil then return true end
+    return false
+end
+
+function has_charles_and_mochi()
+    if not (G and G.jokers and G.jokers.cards) then return false end
+    local has_charles, has_mochi = false, false
+    for _, j in ipairs(G.jokers.cards) do
+        if not j.debuff then
+            if card_has_key(j, 'charles') then has_charles = true end
+            if card_has_key(j, 'mochi') then has_mochi = true end
+        end
+    end
+    return has_charles and has_mochi
+end
+
 function is_secret_card(card)
     if not card then return false end
     if card.is_secret or (card.config and card.config.center and card.config.center.is_secret) then return true end
-    local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+    local key = get_card_key(card) or ''
     key = string.lower(tostring(key))
     local secret_names = {
         'esteban', 'thiago', 'black_hole', 'squele', 'bluxdir', 'charles', 'mochi', 'helin', 'raytracing', 'paco', 'yairo'
     }
     for _, name in ipairs(secret_names) do
-        if string.find(key, name) then return true end
+        if string.find(key, name, 1, true) then return true end
     end
     return false
 end
@@ -38,13 +67,13 @@ function is_joker_copiable(card)
     if not card then return false end
     if card.debuff then return false end
 
-    local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
+    local key = get_card_key(card) or ''
     key = tostring(key)
     local name = (card.ability and card.ability.name) or (card.config and card.config.center and card.config.center.name) or ''
     name = tostring(name)
 
     if name == 'Blueprint' or name == 'Brainstorm' or name == 'Chameleon' or 
-       string.find(key, 'chameleon_joker') or string.find(key, 'blueprint') or string.find(key, 'brainstorm') then
+       string.find(key, 'chameleon_joker', 1, true) or string.find(key, 'blueprint', 1, true) or string.find(key, 'brainstorm', 1, true) then
         return false
     end
 
@@ -70,7 +99,7 @@ function Card:generate_UIBox_ability_table(...)
     G.GAME_IS_RENDERING_SECRET_CARD = false
 
     -- Chameleon compatibility display (just like Blueprint / Plano)
-    local is_chameleon = (self.ability and self.ability.name == 'Chameleon') or (self.config and self.config.center and self.config.center.key == 'j_Crackedlatro_chameleon_joker')
+    local is_chameleon = card_has_key(self, 'chameleon_joker') or (self.ability and self.ability.name == 'Chameleon')
     if is_chameleon and res and res.main then
         local left_joker = nil
         if G.jokers and G.jokers.cards then
@@ -343,8 +372,9 @@ end
 -- Mountain Blind consumable check
 local use_card_ref = Card.use_consumeable
 function Card:use_consumeable(area, copier)
-    if G.GAME and G.GAME.blind and (G.GAME.blind.name == 'b_Crackedlatro_mountain' or G.GAME.blind.name == 'mountain' or G.GAME.blind.key == 'b_Crackedlatro_mountain') then
+    if G.GAME and G.GAME.blind and (G.GAME.blind.name == 'b_Crackedlatro_mountain' or G.GAME.blind.name == 'mountain' or G.GAME.blind.key == 'b_Crackedlatro_mountain' or G.GAME.blind.name == 'The Mountain') and not G.GAME.blind.disabled then
         G.GAME.mountain_disabled_hand = true
+        if G.GAME.blind.wiggle then G.GAME.blind:wiggle() end
     end
     return use_card_ref(self, area, copier)
 end
@@ -851,7 +881,7 @@ local card_is_suit_ref = Card.is_suit
 function Card:is_suit(suit, bypass_debuff, flush_calc)
     if G and G.jokers and G.jokers.cards then
         for _, j in ipairs(G.jokers.cards) do
-            if j.config and (j.config.center.key == 'j_Crackedlatro_masterful_joker' or j.config.center_key == 'j_Crackedlatro_masterful_joker') and not j.debuff then
+            if card_has_key(j, 'masterful_joker') and not j.debuff then
                 if j.ability and j.ability.extra and j.ability.extra.mastered_ranks then
                     local rank = self.base and self.base.value
                     if rank and j.ability.extra.mastered_ranks[rank] then
@@ -864,12 +894,31 @@ function Card:is_suit(suit, bypass_debuff, flush_calc)
     return card_is_suit_ref(self, suit, bypass_debuff, flush_calc)
 end
 
+local function is_probability_seed(seed)
+    if type(seed) ~= 'string' then return false end
+    local s = string.lower(seed)
+    local prob_seeds = {
+        wheel_of_fortune = true, lucky_mult = true, lucky_money = true,
+        space_joker = true, bloodstone = true, business = true,
+        hallucination = true, gros_michel = true, cavendish = true,
+        glass = true, ['8_ball'] = true, eight_ball = true,
+        contratado = true, injured_joker = true, squele_project = true,
+        perfectionism_neg = true, discord_tag = true, blacksmith_reward = true,
+    }
+    if prob_seeds[s] then return true end
+    if string.find(s, 'prob') or string.find(s, 'chance') or string.find(s, 'luck')
+       or string.find(s, 'wheel') or string.find(s, 'odds') or string.find(s, 'roll') then
+        return true
+    end
+    return false
+end
+
 -- Lucky One: 4-Leaf Clover guarantees 100% success on next probability roll
 local pseudorandom_ref = pseudorandom
 function pseudorandom(seed, min, max)
-    if not min and not max and G and G.jokers and G.jokers.cards then
+    if not min and not max and is_probability_seed(seed) and G and G.jokers and G.jokers.cards then
         for _, j in ipairs(G.jokers.cards) do
-            if j.config and (j.config.center.key == 'j_Crackedlatro_lucky_one_joker' or j.config.center_key == 'j_Crackedlatro_lucky_one_joker') and not j.debuff then
+            if card_has_key(j, 'lucky_one_joker') and not j.debuff then
                 if j.ability and j.ability.extra and j.ability.extra.has_four_leaf then
                     j.ability.extra.has_four_leaf = false
                     card_eval_status_text(j, 'extra', nil, nil, nil, { message = 'Clover Miracle!', colour = G.C.GREEN })

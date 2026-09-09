@@ -375,6 +375,9 @@ function Card:use_consumeable(area, copier)
     if G.GAME and G.GAME.blind and (G.GAME.blind.name == 'b_Crackedlatro_mountain' or G.GAME.blind.name == 'mountain' or G.GAME.blind.key == 'b_Crackedlatro_mountain' or G.GAME.blind.name == 'The Mountain') and not G.GAME.blind.disabled then
         G.GAME.mountain_disabled_hand = true
         if G.GAME.blind.wiggle then G.GAME.blind:wiggle() end
+        if G.hand and G.hand.parse_highlighted then
+            G.hand:parse_highlighted()
+        end
     end
     return use_card_ref(self, area, copier)
 end
@@ -930,3 +933,436 @@ function pseudorandom(seed, min, max)
     end
     return pseudorandom_ref(seed, min, max)
 end
+
+-- ==========================================
+-- SPECTRAL SHATTER & CLEANUP SYSTEM
+-- ==========================================
+
+function Card:spectral_shatter()
+    local dissolve_time = 0.8
+    self.shattered = true
+    self.destroyed = true
+    self.dissolve = 0
+    self.dissolve_colours = {
+        HEX('1b4d2e'),              -- Dark green
+        HEX('2dd4bf'),              -- Spectral teal
+        G.C.SECONDARY_SET.Spectral, -- Spectral blue
+        {1, 1, 1, 0.95}             -- Ethereal white glimmer
+    }
+    self:juice_up(0.8, 0.5)
+
+    -- Pinza Showdown card destruction check
+    if G.GAME and G.GAME.blind and (G.GAME.blind.name == 'pinza' or G.GAME.blind.key == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'The Pincer') then
+        if not G.GAME.pinza_card_destroyed then
+            G.GAME.pinza_card_destroyed = true
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.2,
+                func = function()
+                    if G.jokers and G.jokers.cards then
+                        for _, j in ipairs(G.jokers.cards) do
+                            j:set_debuff(false)
+                            j.debuff = false
+                        end
+                    end
+                    play_sound('tarot2')
+                    return true
+                end
+            }))
+        end
+    end
+
+    local childParts = Particles(0, 0, 0, 0, {
+        timer_type = 'TOTAL',
+        timer = 0.005 * dissolve_time,
+        scale = 0.35,
+        speed = 3.5,
+        lifespan = 0.6 * dissolve_time,
+        attach = self,
+        colours = self.dissolve_colours,
+        fill = true
+    })
+
+    G.E_MANAGER:add_event(Event({
+        trigger = 'after',
+        blockable = false,
+        delay = 0.5 * dissolve_time,
+        func = function()
+            childParts:fade(0.2 * dissolve_time)
+            return true
+        end
+    }))
+
+    G.E_MANAGER:add_event(Event({
+        blockable = false,
+        func = function()
+            -- Spectral shattered sound effect
+            play_sound('magic_crumple' .. math.random(2, 3), 1.15 + math.random() * 0.1, 0.85)
+            play_sound('whoosh2', 0.85, 0.7)
+            play_sound('tarot2', 1.25, 0.6)
+            play_sound('glass' .. math.random(1, 6), 1.4 + math.random() * 0.2, 0.45)
+            play_sound('slice1', 1.1, 0.5)
+            return true
+        end
+    }))
+
+    G.E_MANAGER:add_event(Event({
+        trigger = 'ease',
+        blockable = false,
+        ref_table = self,
+        ref_value = 'dissolve',
+        ease_to = 1,
+        delay = 0.6 * dissolve_time,
+        func = function(t) return t end
+    }))
+
+    G.E_MANAGER:add_event(Event({
+        trigger = 'after',
+        blockable = false,
+        delay = 0.65 * dissolve_time,
+        func = function()
+            self:remove()
+            -- Comprehensive purge to prevent any ghost card in any area
+            if G.play and G.play.cards then
+                for i = #G.play.cards, 1, -1 do
+                    if G.play.cards[i] == self then
+                        table.remove(G.play.cards, i)
+                    end
+                end
+            end
+            if G.hand and G.hand.cards then
+                for i = #G.hand.cards, 1, -1 do
+                    if G.hand.cards[i] == self then
+                        table.remove(G.hand.cards, i)
+                    end
+                end
+                G.hand:set_ranks()
+                G.hand:align_cards()
+            end
+            if G.deck and G.deck.cards then
+                for i = #G.deck.cards, 1, -1 do
+                    if G.deck.cards[i] == self then
+                        table.remove(G.deck.cards, i)
+                    end
+                end
+            end
+            if G.discard and G.discard.cards then
+                for i = #G.discard.cards, 1, -1 do
+                    if G.discard.cards[i] == self then
+                        table.remove(G.discard.cards, i)
+                    end
+                end
+            end
+            if G.playing_cards then
+                for i = #G.playing_cards, 1, -1 do
+                    if G.playing_cards[i] == self then
+                        table.remove(G.playing_cards, i)
+                    end
+                end
+                for k, v in ipairs(G.playing_cards) do
+                    v.playing_card = k
+                end
+            end
+            return true
+        end
+    }))
+end
+
+-- Helper to purge any corrupted/ghost cards from hand or deck
+function purge_cracklatro_ghost_cards()
+    if G.hand and G.hand.cards then
+        local removed_any = false
+        for i = #G.hand.cards, 1, -1 do
+            local c = G.hand.cards[i]
+            if c.shattered or c.destroyed or c.removed or (c.dissolve and c.dissolve >= 1) then
+                table.remove(G.hand.cards, i)
+                removed_any = true
+            end
+        end
+        if removed_any then
+            G.hand:set_ranks()
+            G.hand:align_cards()
+        end
+    end
+    if G.deck and G.deck.cards then
+        for i = #G.deck.cards, 1, -1 do
+            local c = G.deck.cards[i]
+            if c.shattered or c.destroyed or c.removed or (c.dissolve and c.dissolve >= 1) then
+                table.remove(G.deck.cards, i)
+            end
+        end
+    end
+    if G.play and G.play.cards then
+        for i = #G.play.cards, 1, -1 do
+            local c = G.play.cards[i]
+            if c.removed then
+                table.remove(G.play.cards, i)
+            end
+        end
+    end
+end
+
+-- Shatter hook for Glass and Spectral cards breaking
+if Card.shatter then
+    local card_shatter_ref = Card.shatter
+    function Card:shatter()
+        if (self.seal and (self.seal == 'dark_green' or self.seal == 'Crackedlatro_dark_green')) or self.dark_green_broken then
+            return self:spectral_shatter()
+        end
+        if G.GAME and G.GAME.blind and (G.GAME.blind.name == 'pinza' or G.GAME.blind.key == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'b_Crackedlatro_pinza' or G.GAME.blind.name == 'The Pincer') then
+            if not G.GAME.pinza_card_destroyed then
+                G.GAME.pinza_card_destroyed = true
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.2,
+                    func = function()
+                        if G.jokers and G.jokers.cards then
+                            for _, j in ipairs(G.jokers.cards) do
+                                j:set_debuff(false)
+                                j.debuff = false
+                            end
+                        end
+                        play_sound('tarot2')
+                        return true
+                    end
+                }))
+            end
+        end
+        return card_shatter_ref(self)
+    end
+end
+
+-- =========================================================
+-- BOSS BLINDS DEBUFF & INVALID HAND WARNING SYSTEM
+-- =========================================================
+
+function is_cracklatro_blind(blind, target_key)
+    if not blind then return false end
+    local k = (blind.config and blind.config.blind and (blind.config.blind.key or blind.config.blind.name))
+              or (blind.config and blind.config.center and (blind.config.center.key or blind.config.center.name))
+              or blind.key or blind.name or ''
+    k = string.gsub(k, '^bl_Crackedlatro_', '')
+    k = string.gsub(k, '^b_Crackedlatro_', '')
+    k = string.gsub(k, '^bl_', '')
+    k = string.gsub(k, '^b_', '')
+    if target_key then
+        return k == target_key or string.find(string.lower(k), string.lower(target_key)) ~= nil
+    end
+    return k
+end
+
+function clear_cracklatro_phone_debuffs()
+    local areas = { G.hand, G.play, G.deck, G.discard }
+    for _, area in ipairs(areas) do
+        if area and area.cards then
+            for _, c in ipairs(area.cards) do
+                if c.debuffed_by_phone then
+                    c:set_debuff(false)
+                    c.debuffed_by_phone = nil
+                end
+            end
+        end
+    end
+    if G.playing_cards then
+        for _, c in ipairs(G.playing_cards) do
+            if c.debuffed_by_phone then
+                c:set_debuff(false)
+                c.debuffed_by_phone = nil
+            end
+        end
+    end
+end
+
+-- Hook Blind:debuff_hand to enable native Balatro invalid-hand warning (like The Psychic)
+-- and completely prevent Jokers and card scoring from activating.
+if Blind and Blind.debuff_hand then
+    local debuff_hand_ref = Blind.debuff_hand
+    function Blind:debuff_hand(cards, hand, handname, check)
+        if self.disabled then
+            return debuff_hand_ref(self, cards, hand, handname, check)
+        end
+
+        local debuffed = false
+
+        -- 1. The Mountain: Consumables disable scoring on the next hand
+        if is_cracklatro_blind(self, 'mountain') then
+            if G.GAME and G.GAME.mountain_disabled_hand then
+                if not check then
+                    G.GAME.mountain_disabled_hand = nil
+                end
+                debuffed = true
+            end
+        -- 2. The Door: Hands with odd number of cards (1, 3, 5) do not score
+        elseif is_cracklatro_blind(self, 'door') then
+            if cards and #cards > 0 and (#cards % 2 ~= 0) then
+                debuffed = true
+            end
+        -- 3. The Triangle: Hands with even number of cards (2, 4) do not score
+        elseif is_cracklatro_blind(self, 'triangle') then
+            if cards and #cards > 0 and (#cards % 2 == 0) then
+                debuffed = true
+            end
+        -- 4. The Guitar: Hands containing 5 cards do not score
+        elseif is_cracklatro_blind(self, 'guitar') then
+            if cards and #cards == 5 then
+                debuffed = true
+            end
+        end
+
+        -- Check custom debuff_hand on the blind definition if not already matched
+        if not debuffed and self.config and self.config.blind and type(self.config.blind.debuff_hand) == 'function' then
+            if self.config.blind.debuff_hand(self, cards, hand, handname, check) then
+                debuffed = true
+            end
+        end
+
+        if debuffed then
+            self.triggered = true
+            if not check then
+                G.GAME.cracklatro_hand_debuffed = true
+            end
+            return true
+        end
+
+        return debuff_hand_ref(self, cards, hand, handname, check)
+    end
+end
+
+-- Hook Blind:get_loc_debuff_text to provide clean descriptive text in the floating warning UIBox
+if Blind and Blind.get_loc_debuff_text then
+    local get_loc_debuff_text_ref = Blind.get_loc_debuff_text
+    function Blind:get_loc_debuff_text()
+        if is_cracklatro_blind(self, 'door') then
+            return (self.loc_debuff_text and self.loc_debuff_text ~= '') and self.loc_debuff_text or "Hands with odd number of cards do not score"
+        end
+        if is_cracklatro_blind(self, 'triangle') then
+            return (self.loc_debuff_text and self.loc_debuff_text ~= '') and self.loc_debuff_text or "Hands with even number of cards do not score"
+        end
+        if is_cracklatro_blind(self, 'guitar') then
+            return (self.loc_debuff_text and self.loc_debuff_text ~= '') and self.loc_debuff_text or "Hands containing 5 cards do not score"
+        end
+        if is_cracklatro_blind(self, 'mountain') then
+            return (self.loc_debuff_text and self.loc_debuff_text ~= '') and self.loc_debuff_text or "Using consumables disables scoring on the next hand"
+        end
+        return get_loc_debuff_text_ref(self)
+    end
+end
+
+-- Hook CardArea:parse_highlighted to dynamically show invalid cards for The Phone in real time
+if CardArea and CardArea.parse_highlighted then
+    local parse_highlighted_ref = CardArea.parse_highlighted
+    function CardArea:parse_highlighted()
+        if self == G.hand and G.GAME and G.GAME.blind and is_cracklatro_blind(G.GAME.blind, 'phone') and not G.GAME.blind.disabled then
+            -- Reset previous phone debuffs in hand first
+            if self.cards then
+                for _, c in ipairs(self.cards) do
+                    if c.debuffed_by_phone then
+                        c:set_debuff(false)
+                        c.debuffed_by_phone = nil
+                    end
+                end
+            end
+
+            -- Highlighted cards: only 1st scoring card is valid, subsequent scoring cards are visibly debuffed
+            if self.highlighted and #self.highlighted > 0 and G.FUNCS and G.FUNCS.get_poker_hand_info then
+                local text, disp_text, poker_hands, scoring_hand = G.FUNCS.get_poker_hand_info(self.highlighted)
+                if scoring_hand and #scoring_hand > 1 then
+                    for i = 2, #scoring_hand do
+                        scoring_hand[i]:set_debuff(true)
+                        scoring_hand[i].debuffed_by_phone = true
+                    end
+                end
+            end
+        else
+            if self == G.hand and self.cards then
+                for _, c in ipairs(self.cards) do
+                    if c.debuffed_by_phone then
+                        c:set_debuff(false)
+                        c.debuffed_by_phone = nil
+                    end
+                end
+            end
+        end
+
+        return parse_highlighted_ref(self)
+    end
+end
+
+-- Hook eval_card to guarantee NO Jokers activate if the hand was debuffed
+if eval_card then
+    local eval_card_ref = eval_card
+    function eval_card(card, context)
+        if G.GAME and G.GAME.cracklatro_hand_debuffed and context and (context.after or context.joker_main or context.before) then
+            return {}
+        end
+        return eval_card_ref(card, context)
+    end
+end
+
+-- Hook draw_from_play_to_discard for Spectral Shatter, debuff cleanup & ghost card purging
+if G and G.FUNCS and G.FUNCS.draw_from_play_to_discard then
+    local draw_from_play_to_discard_ref = G.FUNCS.draw_from_play_to_discard
+    G.FUNCS.draw_from_play_to_discard = function(e)
+        local broken_cards = {}
+        if G.play and G.play.cards then
+            for _, c in ipairs(G.play.cards) do
+                c.dark_green_scored_this_hand = nil
+                if c.dark_green_broken then
+                    broken_cards[#broken_cards + 1] = c
+                end
+            end
+        end
+
+        if #broken_cards > 0 then
+            -- Notify jokers that cards are destroyed
+            if G.jokers and G.jokers.cards then
+                for j = 1, #G.jokers.cards do
+                    eval_card(G.jokers.cards[j], { cardarea = G.jokers, remove_playing_cards = true, removed = broken_cards })
+                end
+            end
+            check_for_unlock{ type = 'shatter', shattered = broken_cards }
+
+            -- Trigger spectral shatter for each broken card
+            for _, c in ipairs(broken_cards) do
+                c.shattered = true
+                c.destroyed = true
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'immediate',
+                    func = function()
+                        card_eval_status_text(c, 'extra', nil, nil, nil, { message = 'Shattered!', colour = HEX('1b4d2e') })
+                        c:spectral_shatter()
+                        return true
+                    end
+                }))
+            end
+        end
+
+        -- Clean up debuff flags and ghost cards
+        if G.GAME then
+            G.GAME.cracklatro_hand_debuffed = nil
+        end
+        clear_cracklatro_phone_debuffs()
+        purge_cracklatro_ghost_cards()
+
+        return draw_from_play_to_discard_ref(e)
+    end
+end
+
+-- Hook draw_from_deck_to_hand as an extra safety measure to clear any ghost cards & reset flags
+if G and G.FUNCS and G.FUNCS.draw_from_deck_to_hand then
+    local draw_from_deck_to_hand_ref = G.FUNCS.draw_from_deck_to_hand
+    G.FUNCS.draw_from_deck_to_hand = function(e)
+        purge_cracklatro_ghost_cards()
+        if G.GAME then
+            G.GAME.cracklatro_hand_debuffed = nil
+        end
+        clear_cracklatro_phone_debuffs()
+        if G.playing_cards then
+            for _, c in ipairs(G.playing_cards) do
+                c.dark_green_scored_this_hand = nil
+            end
+        end
+        return draw_from_deck_to_hand_ref(e)
+    end
+end
+

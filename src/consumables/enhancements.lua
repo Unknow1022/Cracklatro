@@ -48,16 +48,13 @@ SMODS.Seal {
     end,
     calculate = function(self, card, context)
         if (context.main_scoring or context.individual) and context.cardarea == G.play then
-            local prob = (G.GAME and G.GAME.probabilities.normal or 1)
-            if pseudorandom('dark_green_break') < (prob / 5) then
-                G.E_MANAGER:add_event(Event({
-                    trigger = 'after',
-                    delay = 0.3,
-                    func = function()
-                        card:shatter()
-                        return true
-                    end
-                }))
+            if not card.dark_green_scored_this_hand then
+                card.dark_green_scored_this_hand = true
+                local prob = (G.GAME and G.GAME.probabilities.normal or 1)
+                if pseudorandom('dark_green_break') < (prob / 5) then
+                    card.dark_green_broken = true
+                    card.shattered = true
+                end
             end
             return {
                 x_mult = 2.5

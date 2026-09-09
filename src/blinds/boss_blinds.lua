@@ -284,14 +284,18 @@ SMODS.Blind {
     ease_background_colour = function(self)
         ease_custom_blind_background(self)
     end,
-    modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
+    debuff_hand = function(self, cards, hand, handname, check)
         if G.GAME and G.GAME.mountain_disabled_hand then
-            G.GAME.mountain_disabled_hand = nil
-            return 0, 0, true
+            if not check then
+                G.GAME.mountain_disabled_hand = nil
+            end
+            return true
         end
-        return mult, hand_chips, false
     end,
     defeat = function(self)
+        if G.GAME then G.GAME.mountain_disabled_hand = nil end
+    end,
+    disable = function(self)
         if G.GAME then G.GAME.mountain_disabled_hand = nil end
     end
 }
@@ -322,22 +326,10 @@ SMODS.Blind {
     ease_background_colour = function(self)
         ease_custom_blind_background(self)
     end,
-    modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
-        local odd_hand_names = {
-            ['High Card'] = true,
-            ['Three of a Kind'] = true,
-            ['Full House'] = true,
-            ['Five of a Kind'] = true,
-            ['Straight'] = true,
-            ['Flush'] = true,
-            ['Straight Flush'] = true,
-            ['Flush House'] = true,
-            ['Flush Five'] = true
-        }
-        if #cards % 2 ~= 0 or odd_hand_names[text] then
-            return 0, 0, true
+    debuff_hand = function(self, cards, hand, handname, check)
+        if cards and #cards > 0 and (#cards % 2 ~= 0) then
+            return true
         end
-        return mult, hand_chips, false
     end
 }
 
@@ -367,16 +359,10 @@ SMODS.Blind {
     ease_background_colour = function(self)
         ease_custom_blind_background(self)
     end,
-    modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
-        local even_hand_names = {
-            ['Pair'] = true,
-            ['Two Pair'] = true,
-            ['Four of a Kind'] = true
-        }
-        if #cards % 2 == 0 or even_hand_names[text] then
-            return 0, 0, true
+    debuff_hand = function(self, cards, hand, handname, check)
+        if cards and #cards > 0 and (#cards % 2 == 0) then
+            return true
         end
-        return mult, hand_chips, false
     end
 }
 
@@ -496,18 +482,9 @@ SMODS.Blind {
     ease_background_colour = function(self)
         ease_custom_blind_background(self)
     end,
-    modify_hand = function(self, cards, poker_hands, text, mult, hand_chips)
-        if #cards == 5 then
-            return 0, 0, true
-        end
-        return mult, hand_chips, false
-    end,
-    calculate = function(self, card, context)
-        if context.before and context.full_hand and #context.full_hand == 5 then
-            return {
-                message = 'Guitar Muted!',
-                colour = HEX('ce515a')
-            }
+    debuff_hand = function(self, cards, hand, handname, check)
+        if cards and #cards == 5 then
+            return true
         end
     end
 }
@@ -541,7 +518,7 @@ SMODS.Blind {
     calculate = function(self, card, context)
         if context.before and context.scoring_hand and #context.scoring_hand > 1 then
             for i = 2, #context.scoring_hand do
-                context.scoring_hand[i].debuff = true
+                context.scoring_hand[i]:set_debuff(true)
                 context.scoring_hand[i].debuffed_by_phone = true
             end
             return {
@@ -552,11 +529,17 @@ SMODS.Blind {
         if context.after and context.scoring_hand then
             for i = 2, #context.scoring_hand do
                 if context.scoring_hand[i].debuffed_by_phone then
-                    context.scoring_hand[i].debuff = false
+                    context.scoring_hand[i]:set_debuff(false)
                     context.scoring_hand[i].debuffed_by_phone = nil
                 end
             end
         end
+    end,
+    defeat = function(self)
+        if clear_cracklatro_phone_debuffs then clear_cracklatro_phone_debuffs() end
+    end,
+    disable = function(self)
+        if clear_cracklatro_phone_debuffs then clear_cracklatro_phone_debuffs() end
     end
 }
 

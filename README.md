@@ -40,6 +40,11 @@ Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas,
 ## ⚡ Novedades de la "Void Update" (v1.9)
 
 * 🕳️ **Ciegas Jefe Dinámicas con Paletas Reactivas**: Cada una de las 12 Ciegas Jefe cambia fluidamente en tiempo real el color del tapete de la mesa, el fondo y el filtro CRT de Balatro a sus tonalidades temáticas únicas (*The Pole, The Rod, The Magician, The Mountain, The Door, The Triangle, The Cube, The Void, The Guitar, The Phone, The Pincer, The Doppelgänger*).
+* 🚫 **Sistema de Anulación de Jugada e Invalidez ("Como El Psíquico")**:
+  * Los jefes que anulan la puntuación (**The Mountain, The Door, The Triangle, The Guitar**) integran el sistema nativo de `debuff_hand`.
+  * Muestran el cuadro de advertencia flotante *"Mano no puntuada"* con sacudida del jefe al seleccionar cartas no válidas en la mano.
+  * **Bloqueo Total de Jokers**: Al jugarse una mano no válida, se anula la puntuación y **ningún Joker se activa**.
+  * **The Phone**: Las cartas de puntuación posteriores a la primera se muestran en vivo tachadas con la franja roja de debuff en la mano y no disparan Jokers.
 * 💥 **Sistema de Quiebre Espectral (`spectral_shatter`)**:
   * Las cartas con **Sello Verde Oscuro** ahora puntúan su `X2.5 Multi` de forma limpia y garantizada.
   * Si se activa el quiebre (1 en 5), la destrucción se procesa tras finalizar la puntuación de la mano, evitando interrupciones y eliminando definitivamente el error de cartas invisibles/fantasma.
@@ -215,12 +220,12 @@ Todas las Ciegas Jefe cuentan con iluminación reactiva que altera el tapete, CR
 * **The Pole (El Poste)**: Las cartas con Edición (*Foil, Holo, Poly*) pierden **$10** al ser puntuadas.
 * **The Rod (La Vara)**: Si tu puntuación triplica el objetivo de la ciega, el requisito de la siguiente ciega se incrementa en **X1.5**.
 * **The Magician (El Mago)**: En el cálculo final, reduce las Fichas a la mitad y el Multiplicador a un tercio.
-* **The Mountain (La Montaña)**: Usar cualquier consumible desactiva la puntuación de la siguiente mano jugada.
-* **The Door (La Puerta)**: Las manos con un número impar de cartas no puntúan.
-* **The Triangle (El Triángulo)**: Las manos con un número par de cartas no puntúan.
+* **The Mountain (La Montaña)**: Usar cualquier consumible anula la puntuación de la siguiente mano jugada (muestra advertencia de mano no puntuada tipo *El Psíquico*; ningún Joker se activa).
+* **The Door (La Puerta)**: Las manos con un número impar de cartas no puntúan (aviso en vivo tipo *El Psíquico*; ningún Joker se activa).
+* **The Triangle (El Triángulo)**: Las manos con un número par de cartas no puntúan (aviso en vivo tipo *El Psíquico*; ningún Joker se activa).
 * **The Cube (El Cubo)**: Reduce las Fichas y el Multi a la mitad si el número resultante es par en el cálculo final.
-* **The Guitar (La Guitarra)**: Las manos jugadas de exactamente 5 cartas quedan silenciadas y no puntúan.
-* **The Phone (El Teléfono)**: Solo la 1ª carta puntúa y activa Jokers; todas las demás cartas no puntúan ni activan efectos.
+* **The Guitar (La Guitarra)**: Las manos jugadas de exactamente 5 cartas no puntúan (aviso en vivo tipo *El Psíquico*; ningún Joker se activa).
+* **The Phone (El Teléfono)**: Solo la 1ª carta puntúa y activa Jokers; las cartas 2+ se muestran tachadas/debuffeadas en la mano en tiempo real y no activan Jokers.
 
 ### 💀 Ciegas Finales Showdown (Ante 8+)
 * **The Void (El Vacío)**: Incrementa el requisito de fichas en **X1.25** tras cada mano jugada que no derrote la ciega ($8 de recompensa).

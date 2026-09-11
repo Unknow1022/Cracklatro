@@ -1244,7 +1244,29 @@ if Blind and Blind.get_loc_debuff_text then
         if is_cracklatro_blind(self, 'mountain') then
             return (self.loc_debuff_text and self.loc_debuff_text ~= '') and self.loc_debuff_text or "Using consumables disables scoring on the next hand"
         end
+        if is_cracklatro_blind(self, 'wizard') then
+            return (self.loc_debuff_text and self.loc_debuff_text ~= '') and self.loc_debuff_text or "All Enhanced cards are debuffed"
+        end
         return get_loc_debuff_text_ref(self)
+    end
+end
+
+-- Hook Blind:debuff_card for custom blind debuffs (The Magician / wizard)
+if Blind and Blind.debuff_card then
+    local debuff_card_ref = Blind.debuff_card
+    function Blind:debuff_card(card, from_blind)
+        if not self.disabled and is_cracklatro_blind(self, 'wizard') then
+            if card and card.area ~= G.jokers then
+                local is_enhanced = (card.ability and card.ability.set == 'Enhanced') or
+                                   (card.config and card.config.center and card.config.center.set == 'Enhanced') or
+                                   (card.config and card.config.center_key and G.P_CENTERS and G.P_CENTERS[card.config.center_key] and G.P_CENTERS[card.config.center_key].set == 'Enhanced')
+                if is_enhanced then
+                    card:set_debuff(true)
+                    return true
+                end
+            end
+        end
+        return debuff_card_ref(self, card, from_blind)
     end
 end
 

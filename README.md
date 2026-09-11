@@ -144,7 +144,7 @@ Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas,
 * **Reading Deficiency (Falta de Lectura)**: **X5 Multi** si la mano jugada no activa ningún otro Joker de tu alineación.
 * **Chameleon Joker**: Copia la habilidad del Joker a su izquierda si la mano jugada contiene al menos una carta del rango requerido (el rango cambia cada ronda).
 * **Injured Joker (Joker Lesionado)**: Otorga **+125 Fichas** y **X1.5 Multi** en Escaleras (*Straights*). Al final de cada ronda tiene **1 en 5** probabilidades de evolucionar/convertirse en *Motorized Joker*, *High Risk Joker*, *Invisible Joker*, *Mr. Bones*, *Vampire* o *Joker Stencil*.
-* **Motorized Joker (Joker Motorizado)**: Inicia con **+20 Multi**. Cada vez que una carta se reactiva (*retrigger*), gana **+20 Multi** adicional en esa mano.
+* **Motorized Joker (Joker Motorizado)**: Inicia con **+20 Multi**. Cada vez que una carta se reactiva (*retrigger*), gana **+2 Multi** adicional en esa mano.
 * **Hired Joker (Joker Contratado)**: **1 en 3** probabilidades en cada mano jugada de generar una Carta de Oficio (*Job Card*) aleatoria.
 * **Seal of Approval (Sello de Aprobación)**: Al jugar una mano de exactamente 1 sola carta, le aplica un sello aleatorio (*Dorado, Azul, Rojo, Púrpura, Verde Oscuro, Plata o Blanco*).
 * **Paint Puddle (Charco de Pintura)**: Selecciona un palo aleatorio por ronda (nunca repite el mismo palo dos veces consecutivas); las cartas de ese palo otorgan **+25 Multi** (+50 Multi si la carta es Versátil / *Wild Card*).
@@ -232,7 +232,7 @@ Todas las Ciegas Jefe cuentan con iluminación reactiva que altera el tapete, CR
 ### Ciegas Jefe Estándar (Ante 3+)
 * **The Pole (El Poste)**: Las cartas con Edición (*Foil, Holo, Poly*) pierden **$10** al ser puntuadas.
 * **The Rod (La Vara)**: Si tu puntuación triplica el objetivo de la ciega, el requisito de la siguiente ciega se incrementa en **X1.5**.
-* **The Magician (El Mago)**: En el cálculo final, reduce las Fichas a la mitad y el Multiplicador a un tercio.
+* **The Magician (El Mago)**: Todas las cartas que posean alguna mejora (Piedra, Suerte, Acero, Oro, Cristal, Bonificación, Multi, Silvestre, etc.) quedan anuladas (*debuffed*).
 * **The Mountain (La Montaña)**: Usar cualquier consumible anula la puntuación de la siguiente mano jugada (muestra advertencia de mano no puntuada tipo *El Psíquico*; ningún Joker se activa).
 * **The Door (La Puerta)**: Las manos con un número impar de cartas no puntúan (aviso en vivo tipo *El Psíquico*; ningún Joker se activa).
 * **The Triangle (El Triángulo)**: Las manos con un número par de cartas no puntúan (aviso en vivo tipo *El Psíquico*; ningún Joker se activa).

@@ -235,25 +235,46 @@ SMODS.Blind {
     loc_txt = {
         name = 'The Magician',
         text = {
-            "At final scoring, halves final Chips",
-            "and reduces final Mult to 1/3"
+            "All Enhanced cards",
+            "are debuffed"
         }
     },
     ease_background_colour = function(self)
         ease_custom_blind_background(self)
     end,
-    calculate = function(self, card, context)
-        if context.before then
-            G.GAME.wizard_triggered = nil
+    set_blind = function(self, reset, silent)
+        ease_custom_blind_background(self)
+        if G.playing_cards then
+            for _, c in ipairs(G.playing_cards) do
+                self:debuff_card(c)
+            end
         end
-        if context.final_scoring_step and not G.GAME.wizard_triggered then
-            G.GAME.wizard_triggered = true
-            return {
-                x_chips = 0.5,
-                Xmult = 1 / 3,
-                message = '/2 Chips, /3 Mult!',
-                colour = HEX('8a52b4')
-            }
+    end,
+    debuff_card = function(self, card, from_blind)
+        if self.disabled then return false end
+        if card and card.area ~= G.jokers then
+            local is_enhanced = (card.ability and card.ability.set == 'Enhanced') or
+                               (card.config and card.config.center and card.config.center.set == 'Enhanced') or
+                               (card.config and card.config.center_key and G.P_CENTERS and G.P_CENTERS[card.config.center_key] and G.P_CENTERS[card.config.center_key].set == 'Enhanced')
+            if is_enhanced then
+                card:set_debuff(true)
+                return true
+            end
+        end
+        return false
+    end,
+    disable = function(self)
+        if G.playing_cards then
+            for _, c in ipairs(G.playing_cards) do
+                c:set_debuff(false)
+            end
+        end
+    end,
+    defeat = function(self)
+        if G.playing_cards then
+            for _, c in ipairs(G.playing_cards) do
+                c:set_debuff(false)
+            end
         end
     end
 }

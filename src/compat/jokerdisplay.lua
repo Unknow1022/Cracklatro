@@ -719,7 +719,7 @@ jd_def["j_Crackedlatro_motorizado_joker"] = {
     },
     text_config = { colour = G.C.MULT },
     reminder_text = {
-        { text = "(+20 on each Retrigger)" }
+        { text = "(+2 on each Retrigger)" }
     }
 }
 

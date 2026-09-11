@@ -780,14 +780,14 @@ SMODS.Joker {
             "{C:inactive}(Currently {C:mult}+#1#{C:inactive} Mult)"
         }
     },
-    config = { extra = { mult = 20, mult_gain = 20 } },
+    config = { extra = { mult = 20, mult_gain = 2 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or 20
-        local mult_gain = (card and card.ability and card.ability.extra and card.ability.extra.mult_gain) or 20
+        local mult_gain = (card and card.ability and card.ability.extra and card.ability.extra.mult_gain) or 2
         return { vars = { mult, mult_gain } }
     end,
     calculate = function(self, card, context)

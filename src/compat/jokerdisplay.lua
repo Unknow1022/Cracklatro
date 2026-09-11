@@ -1,11 +1,15 @@
--- JokerDisplay Integration for Cracklatro
--- Native dynamic definitions and calculations (Compact & Real-Time)
+--[[
+    JokerDisplay Integration for Cracklatro
+    Full Native Display Suite for all 44 Jokers
+    Author: Unknow102 & Antigravity
+    Compatible with JokerDisplay >= 1.8.0 & SMODS
+--]]
 
 if not JokerDisplay then return end
 
 local jd_def = JokerDisplay.Definitions
 
--- Helpers for compact card formatting
+-- Helpers for compact card and suit formatting
 local function format_short_card(c)
     if not c or not c.base then return "?" end
     local val = c.base.value or '?'
@@ -25,43 +29,90 @@ end
 -- COMMON JOKERS (6)
 -- =========================================================================
 
--- Masterful Joker
+-- 1. Masterful Joker
 jd_def["j_Crackedlatro_masterful_joker"] = {
     text = {
         { text = "+" },
-        { ref_table = "card.joker_display_values", ref_value = "mult" }
+        { ref_table = "card.joker_display_values", ref_value = "mult", retrigger_type = "mult" }
     },
     text_config = { colour = G.C.MULT },
     reminder_text = {
         { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "count" },
-        { text = " Mastered)" }
+        { ref_table = "card.joker_display_values", ref_value = "mastered_text" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Mastered ranks count as all suits", colour = G.C.UI.TEXT_INACTIVE }
+        }
     },
     calc_function = function(card)
         local count = 0
         if card.ability and card.ability.extra and card.ability.extra.mastered_ranks then
             for _ in pairs(card.ability.extra.mastered_ranks) do count = count + 1 end
         end
-        card.joker_display_values.count = count
-        card.joker_display_values.mult = count * ((card.ability and card.ability.extra and card.ability.extra.mult_per_rank) or 10)
+        local mult_per = (card.ability and card.ability.extra and card.ability.extra.mult_per_rank) or 10
+        card.joker_display_values.mult = count * mult_per
+
+        local will_master = nil
+        local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and poker_hands then
+            local has_poker = (poker_hands['Four of a Kind'] and next(poker_hands['Four of a Kind'])) or
+                              (poker_hands['Five of a Kind'] and next(poker_hands['Five of a Kind'])) or
+                              (poker_hands['Flush Five'] and next(poker_hands['Flush Five']))
+            if has_poker and scoring_hand then
+                local counts = {}
+                for _, c in ipairs(scoring_hand) do
+                    local v = c.base and c.base.value
+                    if v then
+                        counts[v] = (counts[v] or 0) + 1
+                        if counts[v] >= 4 and not (card.ability.extra.mastered_ranks and card.ability.extra.mastered_ranks[v]) then
+                            will_master = v
+                        end
+                    end
+                end
+            end
+        end
+
+        if will_master then
+            card.joker_display_values.mastered_text = "Will Master " .. will_master .. "!"
+            card.joker_display_values.active_master = true
+        else
+            card.joker_display_values.mastered_text = count .. " Mastered"
+            card.joker_display_values.active_master = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active_master and G.C.PURPLE or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
--- Outstanding Joker (Real-time calculation of highest card absorption)
+-- 2. Outstanding Joker
 jd_def["j_Crackedlatro_outstanding_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "chips", colour = G.C.CHIPS }
+        { text = "+" },
+        { ref_table = "card.joker_display_values", ref_value = "chips", retrigger_type = "mult" }
     },
+    text_config = { colour = G.C.CHIPS },
     reminder_text = {
-        { text = "(Highest 1x Retrigger)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Highest card retriggers 1x", colour = G.C.ORANGE }
+        }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted >= 2 then
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand and #scoring_hand >= 2 then
             local highest_rank = -1
             local highest_card = nil
             local is_tied = false
-            for _, c in ipairs(highlighted) do
+            for _, c in ipairs(scoring_hand) do
                 local r = c:get_id() or 0
                 if r > highest_rank then
                     highest_rank = r
@@ -71,95 +122,180 @@ jd_def["j_Crackedlatro_outstanding_joker"] = {
                     is_tied = true
                 end
             end
+
             if highest_card and not is_tied then
                 local other_chips = 0
-                for _, c in ipairs(highlighted) do
+                for _, c in ipairs(scoring_hand) do
                     if c ~= highest_card then
                         other_chips = other_chips + (c.base and c.base.nominal or 0) + (c.ability and c.ability.perma_bonus or 0)
                     end
                 end
-                local bonus = other_chips * #highlighted
-                card.joker_display_values.chips = "+" .. bonus .. " Chips"
+                local bonus = other_chips * #scoring_hand
+                card.joker_display_values.chips = bonus
+                card.joker_display_values.rem = "Highest Card: " .. format_short_card(highest_card)
+                card.joker_display_values.active = true
             else
-                card.joker_display_values.chips = "+0 (Tied)"
+                card.joker_display_values.chips = 0
+                card.joker_display_values.rem = is_tied and "Tied for Highest" or "Need 2+ Cards"
+                card.joker_display_values.active = false
             end
         else
-            card.joker_display_values.chips = "Retrigger"
+            card.joker_display_values.chips = 0
+            card.joker_display_values.rem = "Highest 1x Retrigger"
+            card.joker_display_values.active = false
         end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
+    end,
+    retrigger_function = function(playing_card, scoring_hand, held_in_hand, joker_card)
+        if held_in_hand or not scoring_hand or #scoring_hand < 2 then return 0 end
+        if not JokerDisplay.in_scoring(playing_card, scoring_hand) then return 0 end
+        local highest_rank = -1
+        local highest_card = nil
+        local is_tied = false
+        for _, c in ipairs(scoring_hand) do
+            local r = c:get_id() or 0
+            if r > highest_rank then
+                highest_rank = r
+                highest_card = c
+                is_tied = false
+            elseif r == highest_rank then
+                is_tied = true
+            end
+        end
+        if playing_card == highest_card and not is_tied then
+            return 1 * JokerDisplay.calculate_joker_triggers(joker_card)
+        end
+        return 0
     end
 }
 
--- Blueberry
+-- 3. Blueberry
 jd_def["j_Crackedlatro_blueberry_joker"] = {
     text = {
         { text = "+1 Hand", colour = G.C.BLUE }
     },
     reminder_text = {
         { text = "(" },
-        { ref_table = "card.ability.extra", ref_value = "rounds_left" },
-        { text = " rnds left)" }
-    }
+        { ref_table = "card.joker_display_values", ref_value = "rounds_left" },
+        { text = " left)" }
+    },
+    extra = {
+        {
+            { text = "Self-destructs after rounds end", colour = G.C.UI.TEXT_INACTIVE }
+        }
+    },
+    calc_function = function(card)
+        local r = (card.ability and card.ability.extra and card.ability.extra.rounds_left) or 3
+        card.joker_display_values.rounds_left = r .. (r == 1 and " rnd" or " rnds")
+        card.joker_display_values.is_last = (r <= 1)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.is_last and G.C.RED or G.C.FILTER
+        end
+    end
 }
 
--- DJ Joker (Real-time availability indicator)
+-- 4. DJ Joker
 jd_def["j_Crackedlatro_dj_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status" }
+        { text = "Remix Card", colour = G.C.SECONDARY_SET.Enhanced }
     },
-    text_config = { colour = G.C.SECONDARY_SET.Enhanced },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Converts 1 card to Lucky/Steel/Gold/Glass", colour = G.C.UI.TEXT_INACTIVE }
+        }
     },
     calc_function = function(card)
         local used = card.ability and card.ability.extra and card.ability.extra.used
         if used then
-            card.joker_display_values.status = "Used"
-            card.joker_display_values.rem = "(Used this round)"
+            card.joker_display_values.rem = "Used this round"
+            card.joker_display_values.active = false
         else
-            local highlighted = (G.hand and G.hand.highlighted) or {}
-            if #highlighted == 1 then
-                card.joker_display_values.status = "Active"
-                card.joker_display_values.rem = "(Will Remix Card)"
+            local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+            if text ~= 'Unknown' and scoring_hand and #scoring_hand == 1 then
+                card.joker_display_values.rem = "Will Remix " .. format_short_card(scoring_hand[1])
+                card.joker_display_values.active = true
             else
-                card.joker_display_values.status = "Ready"
-                card.joker_display_values.rem = "(Play 1 Card)"
+                card.joker_display_values.rem = "Play exactly 1 Card"
+                card.joker_display_values.active = false
             end
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.SECONDARY_SET.Enhanced or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Designer Joker (Real-time total dollars from selected Wild cards)
+-- 5. Designer Joker
 jd_def["j_Crackedlatro_disenador_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "dollars" }
+        { text = "+$" },
+        { ref_table = "card.joker_display_values", ref_value = "dollars", retrigger_type = "mult" }
     },
     text_config = { colour = G.C.MONEY },
     reminder_text = {
-        { text = "(Wild Cards)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
+        local dollars = 0
         local wild_count = 0
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        for _, c in ipairs(highlighted) do
-            if is_wild_card(c) then wild_count = wild_count + 1 end
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, c in ipairs(scoring_hand) do
+                if is_wild_card(c) then
+                    local triggers = JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                    dollars = dollars + (card.ability.extra.dollars or 1) * triggers
+                    wild_count = wild_count + 1
+                end
+            end
         end
-        if wild_count > 0 then
-            card.joker_display_values.dollars = "+$" .. wild_count
-        else
-            card.joker_display_values.dollars = "+$1/Wild"
+        card.joker_display_values.dollars = dollars
+        card.joker_display_values.rem = wild_count > 0 and (wild_count .. " Wild" .. (wild_count > 1 and "s" or "")) or "Wild Cards"
+        card.joker_display_values.active = (dollars > 0)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.MONEY or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- TTS Joker (Real-time letter calculation and progress)
+-- 6. TTS Joker
 jd_def["j_Crackedlatro_tts_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.MULT }
+        { text = "+" },
+        { ref_table = "card.joker_display_values", ref_value = "chips", colour = G.C.CHIPS, retrigger_type = "mult" },
+        { text = " +" },
+        { ref_table = "card.joker_display_values", ref_value = "mult", colour = G.C.MULT, retrigger_type = "mult" }
     },
     reminder_text = {
         { text = "(" },
-        { ref_table = "card.ability.extra", ref_value = "letters_progress" },
-        { text = "/50: +$10)" }
+        { ref_table = "card.joker_display_values", ref_value = "letters" },
+        { text = " letters)" }
+    },
+    extra = {
+        {
+            { text = "Progress: " },
+            { ref_table = "card.ability.extra", ref_value = "letters_progress", colour = G.C.MONEY },
+            { text = "/50 -> +$10", colour = G.C.MONEY }
+        }
     },
     calc_function = function(card)
         local letter_counts = {
@@ -167,19 +303,23 @@ jd_def["j_Crackedlatro_tts_joker"] = {
             ['7'] = 5, ['8'] = 5, ['9'] = 4, ['10'] = 3,
             ['Jack'] = 4, ['Queen'] = 5, ['King'] = 4, ['Ace'] = 3
         }
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted > 0 then
-            local total_letters = 0
-            for _, c in ipairs(highlighted) do
+        local total_letters = 0
+        local total_chips = 0
+        local total_mult = 0
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, c in ipairs(scoring_hand) do
                 local val = c.base and c.base.value
-                total_letters = total_letters + (letter_counts[val] or 4)
+                local l = letter_counts[val] or 4
+                local triggers = JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                total_letters = total_letters + l
+                total_chips = total_chips + (l * (card.ability.extra.chips_per_letter or 4)) * triggers
+                total_mult = total_mult + (l * (card.ability.extra.mult_per_letter or 1)) * triggers
             end
-            local chips = total_letters * ((card.ability and card.ability.extra and card.ability.extra.chips_per_letter) or 4)
-            local mult = total_letters * ((card.ability and card.ability.extra and card.ability.extra.mult_per_letter) or 1)
-            card.joker_display_values.text_val = "+" .. chips .. " +" .. mult
-        else
-            card.joker_display_values.text_val = "+4C / +1M"
         end
+        card.joker_display_values.chips = total_chips
+        card.joker_display_values.mult = total_mult
+        card.joker_display_values.letters = total_letters
     end
 }
 
@@ -187,83 +327,144 @@ jd_def["j_Crackedlatro_tts_joker"] = {
 -- UNCOMMON JOKERS (14)
 -- =========================================================================
 
--- Shareholder Joker
+-- 7. Shareholder Joker
 jd_def["j_Crackedlatro_shareholder_joker"] = {
     text = {
-        { text = "Stock: $" },
-        { ref_table = "card.ability.extra", ref_value = "current_price" },
-        { text = " (+" },
-        { ref_table = "card.joker_display_values", ref_value = "mult" },
-        { text = "M)" }
+        { text = "+" },
+        { ref_table = "card.joker_display_values", ref_value = "mult", retrigger_type = "mult" }
     },
-    text_config = { colour = G.C.MONEY },
+    text_config = { colour = G.C.MULT },
     reminder_text = {
-        { text = "(Pays Price at End)" }
+        { text = "(Pays +$" },
+        { ref_table = "card.ability.extra", ref_value = "current_price" },
+        { text = " at end)" }
+    },
+    reminder_text_config = { colour = G.C.MONEY },
+    extra = {
+        {
+            { text = "Market Trend: " },
+            { ref_table = "card.joker_display_values", ref_value = "trend_str" }
+        }
     },
     calc_function = function(card)
-        local p = (card.ability and card.ability.extra and card.ability.extra.current_price) or 8
-        card.joker_display_values.mult = p * 2
+        local price = (card.ability and card.ability.extra and card.ability.extra.current_price) or 8
+        card.joker_display_values.mult = price * 2
+        local trend = (card.ability and card.ability.extra and card.ability.extra.market_trend) or 'Normal'
+        card.joker_display_values.trend_str = trend
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if extra and extra.children and extra.children[1] and extra.children[1].children and extra.children[1].children[2] then
+            local trend = card.joker_display_values.trend_str
+            extra.children[1].children[2].config.colour = trend == 'Bull' and G.C.GREEN or (trend == 'Bear' and G.C.RED or G.C.UI.TEXT_LIGHT)
+        end
     end
 }
 
--- Builder Joker (Real-time ascending structure check)
+-- 8. Builder Joker
 jd_def["j_Crackedlatro_builder_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "xmult", colour = G.C.XMULT }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "4+ cards: +20 Perma Chips to highest", colour = G.C.CHIPS }
+        }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted >= 2 then
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand and #scoring_hand >= 2 then
             local is_ascending = true
-            for i = 1, #highlighted - 1 do
-                local cur_id = highlighted[i]:get_id() or 0
-                local next_id = highlighted[i + 1]:get_id() or 0
+            for i = 1, #scoring_hand - 1 do
+                local cur_id = scoring_hand[i]:get_id() or 0
+                local next_id = scoring_hand[i + 1]:get_id() or 0
                 if cur_id >= next_id then
                     is_ascending = false
                     break
                 end
             end
             if is_ascending then
-                local mult = 1 + (#highlighted * 0.5)
-                card.joker_display_values.xmult = "X" .. string.format("%.1f", mult)
-                card.joker_display_values.rem = "(Stable: Ascending)"
+                card.joker_display_values.x_mult = 1 + (#scoring_hand * (card.ability.extra.xmult_per_card or 0.5))
+                card.joker_display_values.rem = "Ascending (" .. #scoring_hand .. " cards)"
+                card.joker_display_values.active = true
             else
-                card.joker_display_values.xmult = "+10 Chips"
-                card.joker_display_values.rem = "(Unstable Order)"
+                card.joker_display_values.x_mult = 1
+                card.joker_display_values.rem = "Unstable (+10 Chips)"
+                card.joker_display_values.active = false
             end
         else
-            card.joker_display_values.xmult = "+X0.5/card"
-            card.joker_display_values.rem = "(Ascending Order)"
+            card.joker_display_values.x_mult = 1
+            card.joker_display_values.rem = "Ascending Order (+X0.5/c)"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Banquet (Real-time held cards threshold check)
+-- 9. Banquet
 jd_def["j_Crackedlatro_banquet_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.XMULT }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "held_count" },
+        { text = "/7 Held)" }
+    },
+    extra = {
+        {
+            { text = "+2 Perma Chips per held card", colour = G.C.CHIPS }
+        },
+        {
+            { text = "Sell: +$15 & Negative Food", colour = G.C.SECONDARY_SET.Enhanced }
+        }
     },
     calc_function = function(card)
         local in_hand = (G.hand and G.hand.cards and #G.hand.cards) or 0
         local highlighted = (G.hand and G.hand.highlighted and #G.hand.highlighted) or 0
         local held = math.max(0, in_hand - highlighted)
-        if held >= 7 then
-            card.joker_display_values.text_val = "X2.5"
-            card.joker_display_values.rem = "(" .. held .. "/7: Active)"
+        local thresh = (card.ability and card.ability.extra and card.ability.extra.hand_threshold) or 7
+        card.joker_display_values.held_count = held
+        if held >= thresh then
+            card.joker_display_values.x_mult = card.ability.extra.xmult or 2.5
+            card.joker_display_values.active = true
         else
-            card.joker_display_values.text_val = "+2 Chips"
-            card.joker_display_values.rem = "(" .. held .. "/7 Held)"
+            card.joker_display_values.x_mult = 1
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Appraiser
+-- 10. Appraiser
 jd_def["j_Crackedlatro_appraiser_joker"] = {
     text = {
         { text = "+$" },
@@ -273,7 +474,7 @@ jd_def["j_Crackedlatro_appraiser_joker"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "count" },
-        { text = " Editions)" }
+        { text = " Editions in deck)" }
     },
     calc_function = function(card)
         local count = 0
@@ -290,21 +491,33 @@ jd_def["j_Crackedlatro_appraiser_joker"] = {
     end
 }
 
--- Runway (Real-time unique traits calculation)
+-- 11. Runway
 jd_def["j_Crackedlatro_runway_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "xmult", colour = G.C.XMULT }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Defeating Blind transfers 1 trait to center", colour = G.C.DARK_EDITION }
+        }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted >= 1 then
-            local center_idx = math.ceil(#highlighted / 2)
-            local center_card = highlighted[center_idx]
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand and #scoring_hand >= 1 then
+            local center_idx = math.ceil(#scoring_hand / 2)
+            local center_card = scoring_hand[center_idx]
             local traits = {}
-            for _, sc in ipairs(highlighted) do
+            for _, sc in ipairs(scoring_hand) do
                 if sc ~= center_card then
                     if sc.seal then traits['seal_' .. sc.seal] = true end
                     if sc.edition then
@@ -319,402 +532,765 @@ jd_def["j_Crackedlatro_runway_joker"] = {
             end
             local trait_count = 0
             for _ in pairs(traits) do trait_count = trait_count + 1 end
-            local total_xmult = 1 + (trait_count * 0.5)
-            card.joker_display_values.xmult = "X" .. string.format("%.1f", total_xmult)
-            card.joker_display_values.rem = "(" .. trait_count .. " Unique Traits)"
+            local per = (card.ability and card.ability.extra and card.ability.extra.xmult_per_trait) or 0.5
+            card.joker_display_values.x_mult = 1 + (trait_count * per)
+            card.joker_display_values.rem = trait_count .. " Unique Traits (" .. format_short_card(center_card) .. ")"
+            card.joker_display_values.active = (trait_count > 0)
         else
-            card.joker_display_values.xmult = "+X0.5/trait"
-            card.joker_display_values.rem = "(Center Card Model)"
+            card.joker_display_values.x_mult = 1
+            card.joker_display_values.rem = "Center Card Model"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Slot Machine
+-- 12. Slot Machine
 jd_def["j_Crackedlatro_slot_machine_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.GOLD }
+        { ref_table = "card.joker_display_values", ref_value = "reels_preview" }
     },
+    text_config = { colour = G.C.GOLD },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Pair: +$3, +15 Mult", colour = G.C.MULT }
+        },
+        {
+            { text = "Triple: +$12, X2.5 Mult", colour = G.C.XMULT }
+        },
+        {
+            { text = "Jackpot 777: +$35, X4 Mult, Spectral", colour = G.C.GOLD }
+        }
     },
     calc_function = function(card)
         local has_lucky = false
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        for _, sc in ipairs(highlighted) do
-            if sc.ability and (sc.ability.name == 'Lucky Card' or sc.ability.effect == 'Lucky Card') then
-                has_lucky = true
-                break
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, sc in ipairs(scoring_hand) do
+                if sc.ability and (sc.ability.name == 'Lucky Card' or sc.ability.effect == 'Lucky Card') then
+                    has_lucky = true
+                    break
+                end
             end
         end
         if has_lucky then
-            card.joker_display_values.text_val = "7 | ? | ?"
-            card.joker_display_values.rem = "(Lucky: Reel 1 = 7)"
+            card.joker_display_values.reels_preview = "[ 7 | ? | ? ]"
+            card.joker_display_values.rem = "Lucky Card: Reel 1 = 7"
+            card.joker_display_values.active = true
         else
-            card.joker_display_values.text_val = "Slot Machine"
-            card.joker_display_values.rem = "(2/3 Match | 777)"
+            card.joker_display_values.reels_preview = "[ ? | ? | ? ]"
+            card.joker_display_values.rem = "Spin on Play"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.UI.TEXT_LIGHT
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Duel of Value (Real-time 2 even 2 odd validation)
+-- 13. Duel of Value
 jd_def["j_Crackedlatro_duel_of_value_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "xmult", colour = G.C.XMULT }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Two Pair with exactly 2 Even, 2 Odd", colour = G.C.UI.TEXT_INACTIVE }
+        }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted == 4 then
-            local even_count, odd_count = 0, 0
-            for _, c in ipairs(highlighted) do
+        local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
+        local is_two_pair = (poker_hands and poker_hands['Two Pair'] and next(poker_hands['Two Pair']))
+        if text ~= 'Unknown' and is_two_pair and scoring_hand and #scoring_hand == 4 then
+            local evens, odds = 0, 0
+            for _, c in ipairs(scoring_hand) do
                 local id = c:get_id() or 0
-                if id >= 2 and id <= 10 then
-                    if id % 2 == 0 then even_count = even_count + 1 else odd_count = odd_count + 1 end
-                elseif id == 14 then
-                    odd_count = odd_count + 1
+                if id > 0 then
+                    if id % 2 == 0 then evens = evens + 1 else odds = odds + 1 end
                 end
             end
-            if even_count == 2 and odd_count == 2 then
-                card.joker_display_values.xmult = "X3.0"
-                card.joker_display_values.rem = "(Active!)"
+            if evens == 2 and odds == 2 then
+                card.joker_display_values.x_mult = card.ability.extra.xmult or 3.0
+                card.joker_display_values.rem = "Duel Active!"
+                card.joker_display_values.active = true
                 return
             end
         end
-        card.joker_display_values.xmult = "X1.0"
-        card.joker_display_values.rem = "(2 Even, 2 Odd)"
+        card.joker_display_values.x_mult = 1.0
+        card.joker_display_values.rem = "Two Pair (2 Even, 2 Odd)"
+        card.joker_display_values.active = false
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
--- Reading Deficiency (Falta de Lectura)
+-- 14. Reading Deficiency (Falta de Lectura)
 jd_def["j_Crackedlatro_falta_de_lectura_joker"] = {
     text = {
         {
             border_nodes = {
                 { text = "X" },
-                { ref_table = "card.ability.extra", ref_value = "xmult" }
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
             }
         }
     },
-    text_config = { colour = G.C.WHITE },
     reminder_text = {
-        { text = "(No Other Jokers)" }
-    }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    calc_function = function(card)
+        local other_jokers = false
+        if G.jokers and G.jokers.cards then
+            for _, j in ipairs(G.jokers.cards) do
+                if j ~= card and not j.debuff and (not j.ability or j.ability.name ~= 'Reading Deficiency') then
+                    other_jokers = true
+                    break
+                end
+            end
+        end
+        if not other_jokers then
+            card.joker_display_values.x_mult = card.ability.extra.xmult or 5.0
+            card.joker_display_values.rem = "Active (Alone)"
+            card.joker_display_values.active = true
+        else
+            card.joker_display_values.x_mult = card.ability.extra.xmult or 5.0
+            card.joker_display_values.rem = "No other Jokers may trigger"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
+    end
 }
 
--- Chameleon Joker (Real-time copy state check)
+-- 15. Chameleon Joker
 jd_def["j_Crackedlatro_chameleon_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.PURPLE }
+        { text = "Needs " },
+        { ref_table = "card.ability.extra", ref_value = "required_rank", colour = G.C.ATTENTION }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(Copy Left: " },
+        { ref_table = "card.ability.extra", ref_value = "required_rank" },
+        { text = ")" }
     },
     calc_function = function(card)
         local req = card.ability and card.ability.extra and card.ability.extra.required_rank or 'Ace'
         local has_rank = false
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        for _, c in ipairs(highlighted) do
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        local pool = (text ~= 'Unknown' and scoring_hand) or (G.hand and G.hand.highlighted) or {}
+        for _, c in ipairs(pool) do
             local val = c.base and c.base.value
             if val == req or tostring(c:get_id()) == tostring(req) then
                 has_rank = true
                 break
             end
         end
+
         if has_rank then
-            card.joker_display_values.status = "Active"
-            card.joker_display_values.rem = "(Copy Left: " .. req .. ")"
+            local copied_joker, copied_debuff = JokerDisplay.calculate_blueprint_copy(card)
+            JokerDisplay.copy_display(card, copied_joker, copied_debuff)
         else
-            card.joker_display_values.status = "Needs " .. req
-            card.joker_display_values.rem = "(Copy Joker Left)"
+            JokerDisplay.copy_display(card, nil)
         end
+    end,
+    get_blueprint_joker = function(card)
+        if not G.jokers or not G.jokers.cards then return nil end
+        for i = 1, #G.jokers.cards do
+            if G.jokers.cards[i] == card then
+                return G.jokers.cards[i - 1]
+            end
+        end
+        return nil
     end
 }
 
--- Motorized Joker
+-- 16. Motorized Joker
 jd_def["j_Crackedlatro_motorizado_joker"] = {
     text = {
         { text = "+" },
-        { ref_table = "card.ability.extra", ref_value = "mult" }
+        { ref_table = "card.ability.extra", ref_value = "mult", retrigger_type = "mult" }
     },
     text_config = { colour = G.C.MULT },
     reminder_text = {
-        { text = "(+20 on Retrigger)" }
+        { text = "(+20 on each Retrigger)" }
     }
 }
 
--- Hired Joker (Joker Contratado)
+-- 17. Hired Joker (Joker Contratado)
 jd_def["j_Crackedlatro_contratado_joker"] = {
     text = {
         { text = "Job Card", colour = HEX('5c1e11') }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Minero, Alquimista, Detective, Joyero...", colour = G.C.UI.TEXT_INACTIVE }
+        }
     },
     calc_function = function(card)
-        if G.consumeables and #G.consumeables.cards >= G.consumeables.config.card_limit then
-            card.joker_display_values.rem = "(Slots Full!)"
+        local is_full = G.consumeables and #G.consumeables.cards >= G.consumeables.config.card_limit
+        if is_full then
+            card.joker_display_values.rem = "Slots Full!"
+            card.joker_display_values.active = false
         else
-            card.joker_display_values.rem = "(1 in 3 Chance)"
+            card.joker_display_values.rem = "1 in 3 Chance"
+            card.joker_display_values.active = true
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.RED
         end
     end
 }
 
--- Seal of Approval (Sello de Aprobación)
+-- 18. Seal of Approval (Sello de Aprobación)
 jd_def["j_Crackedlatro_sello_aprobacion_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.GOLD }
-    },
-    reminder_text = {
-        { text = "(Random Seal)" }
-    },
-    calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        card.joker_display_values.status = (#highlighted == 1) and "Active" or "1 Card"
-    end
-}
-
--- Paint Puddle (Charco de Pintura - Real-time suit & wild mult calculation)
-jd_def["j_Crackedlatro_charco_pintura_joker"] = {
-    text = {
-        { ref_table = "card.joker_display_values", ref_value = "mult_str", colour = G.C.MULT }
+        { text = "+Seal", colour = G.C.GOLD }
     },
     reminder_text = {
         { text = "(" },
-        { ref_table = "card.ability.extra", ref_value = "suit", colour = G.C.ATTENTION },
-        { text = " / Wild)" }
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
-        local suit = card.ability and card.ability.extra and card.ability.extra.suit or 'Hearts'
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted > 0 then
-            local suit_count, wild_count = 0, 0
-            for _, c in ipairs(highlighted) do
-                if is_wild_card(c) then
-                    wild_count = wild_count + 1
-                elseif c:is_suit(suit) then
-                    suit_count = suit_count + 1
-                end
-            end
-            local total_mult = (wild_count * 50) + (suit_count * 25)
-            card.joker_display_values.mult_str = "+" .. total_mult .. " Mult"
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand and #scoring_hand == 1 then
+            card.joker_display_values.rem = "Approves " .. format_short_card(scoring_hand[1])
+            card.joker_display_values.active = true
         else
-            card.joker_display_values.mult_str = "+25 / +50"
+            card.joker_display_values.rem = "Play exactly 1 Card"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Injured Joker (Joker Lesionado)
+-- 19. Paint Puddle (Charco de Pintura)
+jd_def["j_Crackedlatro_charco_pintura_joker"] = {
+    text = {
+        { text = "+" },
+        { ref_table = "card.joker_display_values", ref_value = "mult", retrigger_type = "mult" }
+    },
+    text_config = { colour = G.C.MULT },
+    reminder_text = {
+        { text = "(" },
+        { ref_table = "card.ability.extra", ref_value = "suit" },
+        { text = " / Wild)" }
+    },
+    extra = {
+        {
+            { text = "Suit: +25 Mult | Wild: +50 Mult", colour = G.C.UI.TEXT_INACTIVE }
+        }
+    },
+    calc_function = function(card)
+        local suit = (card.ability and card.ability.extra and card.ability.extra.suit) or 'Hearts'
+        local total_mult = 0
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, c in ipairs(scoring_hand) do
+                local triggers = JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                if is_wild_card(c) then
+                    total_mult = total_mult + (card.ability.extra.mult_wild or 50) * triggers
+                elseif c:is_suit(suit) then
+                    total_mult = total_mult + (card.ability.extra.mult_suit or 25) * triggers
+                end
+            end
+        end
+        card.joker_display_values.mult = total_mult
+        card.joker_display_values.suit_name = suit
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            local suit = card.joker_display_values.suit_name or 'Hearts'
+            if G.C.SUITS and G.C.SUITS[suit] then
+                reminder_text.children[2].config.colour = lighten(G.C.SUITS[suit], 0.35)
+            end
+        end
+    end
+}
+
+-- 20. Injured Joker (Joker Lesionado)
 jd_def["j_Crackedlatro_lesionado_joker"] = {
     text = {
-        { text = "+125 X1.5", colour = G.C.XMULT }
+        { text = "+" },
+        { ref_table = "card.joker_display_values", ref_value = "chips", colour = G.C.CHIPS, retrigger_type = "mult" },
+        { text = " " },
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { text = "(Straight | 1/5 Morph)" }
-    }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "1 in 5 chance to morph at end of round", colour = G.C.ORANGE }
+        }
+    },
+    calc_function = function(card)
+        local text, poker_hands = JokerDisplay.evaluate_hand()
+        local is_straight = (poker_hands and (poker_hands['Straight'] and next(poker_hands['Straight']) or
+                                              poker_hands['Straight Flush'] and next(poker_hands['Straight Flush'])))
+        if text ~= 'Unknown' and is_straight then
+            card.joker_display_values.chips = card.ability.extra.chips or 125
+            card.joker_display_values.x_mult = card.ability.extra.xmult or 1.5
+            card.joker_display_values.rem = "Straight Active!"
+            card.joker_display_values.active = true
+        else
+            card.joker_display_values.chips = 0
+            card.joker_display_values.x_mult = 1.0
+            card.joker_display_values.rem = "Requires Straight"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[4] then
+            text.children[4].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
+    end
 }
 
 -- =========================================================================
 -- RARE JOKERS (13)
 -- =========================================================================
 
--- Doctor Jo.
+-- 21. Doctor Jo.
 jd_def["j_Crackedlatro_doctor_jo_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.GREEN }
+        { ref_table = "card.joker_display_values", ref_value = "status" }
     },
+    text_config = { colour = G.C.GREEN },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Stops Perishable & Reimburses $3/Rental", colour = G.C.MONEY }
+        },
+        {
+            { text = "Final hand: +1 Hand (X3) if short on chips", colour = G.C.RED }
+        }
     },
     calc_function = function(card)
         local hands_left = (G.GAME and G.GAME.current_round and G.GAME.current_round.hands_left) or 0
         local used = card.ability and card.ability.extra and card.ability.extra.defibrillator_used
         if used then
-            card.joker_display_values.status = "Used"
-            card.joker_display_values.rem = "(Free Rentals)"
-        elseif hands_left == 1 then
-            card.joker_display_values.status = "CLEAR (X3)!"
-            card.joker_display_values.rem = "(Defibrillator Ready)"
+            card.joker_display_values.status = "Medical Insurance"
+            card.joker_display_values.rem = "Defibrillator Used"
+            card.joker_display_values.is_defib = false
+        elseif hands_left <= 1 then
+            card.joker_display_values.status = "CLEAR! +1 Hand (X3)"
+            card.joker_display_values.rem = "Defibrillator Armed"
+            card.joker_display_values.is_defib = true
         else
-            card.joker_display_values.status = "Insurance"
-            card.joker_display_values.rem = "(Free Rentals | Defib)"
+            card.joker_display_values.status = "Medical Insurance"
+            card.joker_display_values.rem = "Defibrillator Standby"
+            card.joker_display_values.is_defib = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.is_defib and G.C.RED or G.C.GREEN
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.is_defib and G.C.RED or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Symmetrical Joker (Real-time 4+ same suit check)
+-- 22. Symmetrical Joker
 jd_def["j_Crackedlatro_symmetrical_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "xmult", colour = G.C.XMULT }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted >= 4 then
-            local suit_counts = { Hearts = 0, Diamonds = 0, Spades = 0, Clubs = 0 }
-            for _, c in ipairs(highlighted) do
-                for s in pairs(suit_counts) do
-                    if c:is_suit(s) then suit_counts[s] = suit_counts[s] + 1 end
+        local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
+        local is_poker = poker_hands and ((poker_hands['Four of a Kind'] and next(poker_hands['Four of a Kind'])) or
+                                          (poker_hands['Five of a Kind'] and next(poker_hands['Five of a Kind'])) or
+                                          (poker_hands['Flush Five'] and next(poker_hands['Flush Five'])))
+        if text ~= 'Unknown' and is_poker and scoring_hand and #scoring_hand >= 4 then
+            local first_suit = scoring_hand[1] and scoring_hand[1].base and scoring_hand[1].base.suit
+            local same = true
+            for _, c in ipairs(scoring_hand) do
+                if not c.base or c.base.suit ~= first_suit then
+                    same = false
+                    break
                 end
             end
-            local same_suit = false
-            for _, count in pairs(suit_counts) do
-                if count >= 4 then same_suit = true; break end
-            end
-            if same_suit then
-                card.joker_display_values.xmult = "X4.0"
-                card.joker_display_values.rem = "(Active!)"
+            if same then
+                card.joker_display_values.x_mult = card.ability.extra.xmult or 4.0
+                card.joker_display_values.rem = "Symmetrical Active!"
+                card.joker_display_values.active = true
                 return
             end
         end
-        card.joker_display_values.xmult = "X1.0"
-        card.joker_display_values.rem = "(4+ Kind, 1 Suit)"
+        card.joker_display_values.x_mult = 1.0
+        card.joker_display_values.rem = "4+ of Kind, Same Suit"
+        card.joker_display_values.active = false
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
--- Balance
+-- 23. Balance
 jd_def["j_Crackedlatro_balance_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.SECONDARY_SET.Spectral }
+        { text = "+2 Spectrals", colour = G.C.SECONDARY_SET.Spectral }
     },
     reminder_text = {
-        { text = "(4 of Kind, 1 Suit)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        card.joker_display_values.status = (#highlighted >= 4) and "Active (+2)" or "+2 Spectrals"
+        local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
+        local is_four = poker_hands and poker_hands['Four of a Kind'] and next(poker_hands['Four of a Kind'])
+        if text ~= 'Unknown' and is_four and scoring_hand and #scoring_hand == 4 then
+            local first_suit = scoring_hand[1] and scoring_hand[1].base and scoring_hand[1].base.suit
+            local same = true
+            for _, c in ipairs(scoring_hand) do
+                if not c.base or c.base.suit ~= first_suit then
+                    same = false
+                    break
+                end
+            end
+            if same then
+                card.joker_display_values.rem = "Flush Four Active!"
+                card.joker_display_values.active = true
+                return
+            end
+        end
+        card.joker_display_values.rem = "Flush Four (1 Suit)"
+        card.joker_display_values.active = false
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.SECONDARY_SET.Spectral or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
--- Merchant
+-- 24. Merchant
 jd_def["j_Crackedlatro_merchant_joker"] = {
     text = {
         { text = "-$" },
         { ref_table = "card.ability.extra", ref_value = "cost_per_shop" }
     },
-    text_config = { colour = G.C.MONEY },
+    text_config = { colour = G.C.RED },
     reminder_text = {
         { text = "(On Shop Exit)" }
+    },
+    extra = {
+        {
+            { text = "+1 Slot, +1 Pack, +1 Voucher, -25%", colour = G.C.GREEN }
+        }
     }
 }
 
--- Lover (Soulmates - Compact shorthand & real-time combo detection)
+-- 25. Lover (Soulmates)
 jd_def["j_Crackedlatro_lover_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.HEARTS }
+        { ref_table = "card.joker_display_values", ref_value = "main_text" }
     },
+    text_config = { colour = G.C.HEARTS },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Both Soulmates: X3, +$6, +20 Perma Chips", colour = G.C.GOLD }
+        },
+        {
+            { text = "Scored Hearts: +10 Mult each", colour = G.C.MULT }
+        }
     },
     calc_function = function(card)
-        local sm1, sm2 = get_or_pick_soulmates()
+        local sm1, sm2 = (type(get_or_pick_soulmates) == 'function' and get_or_pick_soulmates()) or nil, nil
         local s1 = format_short_card(sm1)
         local s2 = format_short_card(sm2)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
         local has_sm1, has_sm2 = false, false
         local heart_count = 0
-        for _, c in ipairs(highlighted) do
-            if c == sm1 then has_sm1 = true end
-            if c == sm2 then has_sm2 = true end
-            if c:is_suit('Hearts') then heart_count = heart_count + 1 end
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, c in ipairs(scoring_hand) do
+                if c == sm1 then has_sm1 = true end
+                if c == sm2 then has_sm2 = true end
+                if c:is_suit('Hearts') then
+                    heart_count = heart_count + JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                end
+            end
         end
 
         if has_sm1 and has_sm2 then
-            card.joker_display_values.text_val = "X3 +$6"
-            card.joker_display_values.rem = "(Soulmates Active!)"
+            card.joker_display_values.main_text = "X3 Mult +$6"
+            card.joker_display_values.rem = "Soulmates Active!"
+            card.joker_display_values.active = true
         elseif heart_count > 0 then
-            card.joker_display_values.text_val = "+" .. (heart_count * 10) .. "M"
-            card.joker_display_values.rem = "(" .. s1 .. " & " .. s2 .. ")"
+            card.joker_display_values.main_text = "+" .. (heart_count * 10) .. " Mult"
+            card.joker_display_values.rem = s1 .. " & " .. s2
+            card.joker_display_values.active = true
         else
-            card.joker_display_values.text_val = "X3 +$6"
-            card.joker_display_values.rem = "(" .. s1 .. " & " .. s2 .. ")"
+            card.joker_display_values.main_text = "X3 +$6"
+            card.joker_display_values.rem = s1 .. " & " .. s2
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Blacksmith (Real-time heat progress)
+-- 26. Blacksmith
 jd_def["j_Crackedlatro_blacksmith_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.ORANGE }
+        { ref_table = "card.joker_display_values", ref_value = "heat_status" }
     },
+    text_config = { colour = G.C.ORANGE },
     reminder_text = {
-        { text = "(Seal/Steel at 300)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "At 300 Heat: 50% Silver Seal, 50% Steel", colour = HEX('bdc3c7') }
+        }
     },
     calc_function = function(card)
-        local temp = (card.ability and card.ability.extra and card.ability.extra.temp) or 0
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        local gain = #highlighted * 5
-        if temp + gain >= 300 then
-            card.joker_display_values.text_val = "FORGE READY!"
+        local cur = (card.ability and card.ability.extra and card.ability.extra.temp) or 0
+        local projected = 0
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            projected = #scoring_hand * (card.ability.extra.heat_per_card or 5)
+        end
+        local total = cur + projected
+        if total >= 300 then
+            card.joker_display_values.heat_status = "FORGE READY!"
+            card.joker_display_values.rem = "Strikes on Score"
+            card.joker_display_values.active = true
         else
-            card.joker_display_values.text_val = temp .. "/300 Heat"
+            card.joker_display_values.heat_status = cur .. "/300 Heat"
+            card.joker_display_values.rem = projected > 0 and ("+" .. projected .. " Heat this hand") or "+5 Heat/card"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.ORANGE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Lucky One (Real-time petals tracking)
+-- 27. Lucky One
 jd_def["j_Crackedlatro_lucky_one_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.GREEN }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "4 Petals = Guaranteed Win on Next Roll", colour = G.C.GREEN }
+        }
     },
     calc_function = function(card)
-        local has = card.ability and card.ability.extra and card.ability.extra.has_four_leaf
+        local is_ready = card.ability and card.ability.extra and card.ability.extra.has_four_leaf
         local petals = (card.ability and card.ability.extra and card.ability.extra.petals) or 0
-        if has then
-            card.joker_display_values.status = "X2 Mult"
-            card.joker_display_values.rem = "(100% Win Roll)"
+        if is_ready then
+            card.joker_display_values.x_mult = card.ability.extra.xmult or 2.0
+            card.joker_display_values.rem = "100% Luck Ready!"
+            card.joker_display_values.active = true
         else
-            card.joker_display_values.status = petals .. "/4 Petals"
-            card.joker_display_values.rem = "(Score Clubs)"
+            card.joker_display_values.x_mult = 1.0
+            card.joker_display_values.rem = petals .. "/4 Petals (Clubs)"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Miner (Real-time strata indicator)
+-- 28. Miner
 jd_def["j_Crackedlatro_miner_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "depth_str", colour = G.C.BLUE }
+        { ref_table = "card.joker_display_values", ref_value = "bonus_str" }
     },
+    text_config = { colour = G.C.DIAMONDS },
     reminder_text = {
-        { text = "(Score Diamonds)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "depth_str" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "0-50m: +25C | 50-120m: +$2", colour = G.C.UI.TEXT_INACTIVE }
+        },
+        {
+            { text = "120-300m: X1.35 | 300m+: X1.5 & Retrigger", colour = G.C.UI.TEXT_INACTIVE }
+        }
     },
     calc_function = function(card)
         local d = (card.ability and card.ability.extra and card.ability.extra.depth) or 0
-        if d < 50 then
-            card.joker_display_values.depth_str = d .. "m (+25C)"
-        elseif d < 120 then
-            card.joker_display_values.depth_str = d .. "m (+$2)"
-        elseif d < 300 then
-            card.joker_display_values.depth_str = d .. "m (X1.35)"
+        card.joker_display_values.depth_str = d .. "m Depth"
+        if d >= 300 then
+            card.joker_display_values.bonus_str = "X1.5 + Retrigger"
+            card.joker_display_values.active = true
+        elseif d >= 120 then
+            card.joker_display_values.bonus_str = "X1.35 Mult"
+            card.joker_display_values.active = true
+        elseif d >= 50 then
+            card.joker_display_values.bonus_str = "+$2 / Diamond"
+            card.joker_display_values.active = true
         else
-            card.joker_display_values.depth_str = d .. "m (Core: X1.5)"
+            card.joker_display_values.bonus_str = "+25 Chips / Diamond"
+            card.joker_display_values.active = false
         end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.CHIPS
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = lighten(G.C.SUITS["Diamonds"], 0.35)
+        end
+    end,
+    retrigger_function = function(playing_card, scoring_hand, held_in_hand, joker_card)
+        if held_in_hand or not scoring_hand then return 0 end
+        local d = (joker_card.ability and joker_card.ability.extra and joker_card.ability.extra.depth) or 0
+        if d >= 300 and playing_card:is_suit('Diamonds') and JokerDisplay.in_scoring(playing_card, scoring_hand) then
+            return 1 * JokerDisplay.calculate_joker_triggers(joker_card)
+        end
+        return 0
     end
 }
 
--- Joke Joker
+-- 29. Joke Joker
 jd_def["j_Crackedlatro_joke_joker"] = {
     text = {
-        { text = "Blank -> +1 Joker", colour = G.C.DARK_EDITION }
+        { text = "Blank -> Antimatter", colour = G.C.SECONDARY_SET.Voucher }
     },
     reminder_text = {
-        { text = "(Shop Voucher)" }
+        { text = "(+1 Joker Slot)" }
     }
 }
 
--- Perfectionism (Real-time Blind active check)
+-- 30. Perfectionism
 jd_def["j_Crackedlatro_perfectionism_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.DARK_EDITION }
+        { text = "+Polychrome", colour = G.C.DARK_EDITION }
     },
     reminder_text = {
-        { text = "(Adds Polychrome)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "1 in 5 chance for Negative", colour = G.C.PURPLE }
+        }
     },
     calc_function = function(card)
         local is_big_or_boss = false
@@ -723,217 +1299,369 @@ jd_def["j_Crackedlatro_perfectionism_joker"] = {
                 is_big_or_boss = true
             end
         end
-        card.joker_display_values.status = is_big_or_boss and "Active (Big/Boss)" or "Inactive (Small)"
+        card.joker_display_values.rem = is_big_or_boss and "Active (Big/Boss)" or "Inactive (Small Blind)"
+        card.joker_display_values.active = is_big_or_boss
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.DARK_EDITION or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
--- Reaper Joker (Parca)
+-- 31. Reaper Joker (Parca)
 jd_def["j_Crackedlatro_parca_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.PURPLE }
+        { text = "+Invisible Joker", colour = G.C.PURPLE }
     },
     reminder_text = {
-        { text = "(Morphs to Invisible)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
         local used = card.ability and card.ability.extra and card.ability.extra.used
-        card.joker_display_values.status = used and "Used" or "Ready on Sell"
+        local has_room = G.jokers and #G.jokers.cards < G.jokers.config.card_limit
+        if used then
+            card.joker_display_values.rem = "Used this round"
+            card.joker_display_values.active = false
+        elseif not has_room then
+            card.joker_display_values.rem = "Joker Slots Full"
+            card.joker_display_values.active = false
+        else
+            card.joker_display_values.rem = "Sell other Joker"
+            card.joker_display_values.active = true
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.PURPLE or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
--- Infostealer Joker (Warning if cannot afford)
+-- 32. Infostealer Joker
 jd_def["j_Crackedlatro_infostealer_joker"] = {
     text = {
         {
             border_nodes = {
                 { text = "X" },
-                { ref_table = "card.ability.extra", ref_value = "xmult" }
+                { ref_table = "card.ability.extra", ref_value = "xmult", retrigger_type = "exp" }
             }
         }
     },
-    text_config = { colour = G.C.WHITE },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "Leaves shop: pay $10 for +X0.5, else -X0.5", colour = G.C.MONEY }
+        }
     },
     calc_function = function(card)
         local dollars = (G.GAME and G.GAME.dollars) or 0
-        if dollars >= 10 then
-            card.joker_display_values.rem = "(Can afford: +X0.5)"
+        local cost = (card.ability and card.ability.extra and card.ability.extra.cost) or 10
+        if dollars >= cost then
+            card.joker_display_values.rem = "Can afford: +X0.5"
+            card.joker_display_values.can_afford = true
         else
-            card.joker_display_values.rem = "(Can't afford: -X0.5!)"
+            card.joker_display_values.rem = "Can't afford: -X0.5!"
+            card.joker_display_values.can_afford = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.can_afford and G.C.GREEN or G.C.RED
         end
     end
 }
 
--- Supersaturated Joker (Sobresaturado)
+-- 33. Supersaturated Joker (Sobresaturado)
 jd_def["j_Crackedlatro_sobresaturado_joker"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.SECONDARY_SET.Enhanced }
+        { text = "+Enh / Seal / Ed", colour = G.C.SECONDARY_SET.Enhanced }
     },
     reminder_text = {
-        { text = "(1st Scored Card)" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
         local used = card.ability and card.ability.extra and card.ability.extra.used
-        card.joker_display_values.status = used and "Used" or "Enh/Seal/Ed"
-    end
-}
-
--- =========================================================================
--- SECRET JOKERS (13)
--- =========================================================================
-
--- Esteban (Real-time Spades & Clubs mult)
-jd_def["j_Crackedlatro_esteban"] = {
-    text = {
-        { ref_table = "card.joker_display_values", ref_value = "xmult_str", colour = G.C.XMULT }
-    },
-    reminder_text = {
-        { text = "(♠ & ♣)" }
-    },
-    calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted > 0 then
-            local count = 0
-            for _, c in ipairs(highlighted) do
-                if c:is_suit('Spades') or c:is_suit('Clubs') then count = count + 1 end
-            end
-            if count > 0 then
-                card.joker_display_values.xmult_str = "X" .. string.format("%.1f", 2.5 ^ count)
-            else
-                card.joker_display_values.xmult_str = "X1.0"
-            end
+        if used then
+            card.joker_display_values.rem = "Used this round"
+            card.joker_display_values.active = false
         else
-            card.joker_display_values.xmult_str = "X2.5/card"
+            local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+            if text ~= 'Unknown' and scoring_hand and #scoring_hand > 0 then
+                local pcard = scoring_hand[1]
+                local has_enh = (pcard.config and pcard.config.center and pcard.config.center ~= G.P_CENTERS.c_base) or (pcard.ability and pcard.ability.effect and pcard.ability.effect ~= 'Base')
+                local has_seal = (pcard.seal ~= nil)
+                local has_edition = (pcard.edition ~= nil)
+                if has_enh and has_seal and has_edition then
+                    card.joker_display_values.rem = "1st Card: +$10 (Saturated)"
+                else
+                    card.joker_display_values.rem = "Improves " .. format_short_card(pcard)
+                end
+                card.joker_display_values.active = true
+            else
+                card.joker_display_values.rem = "1st Scored Card"
+                card.joker_display_values.active = true
+            end
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.SECONDARY_SET.Enhanced or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Thiago
+-- =========================================================================
+-- SECRET JOKERS (11)
+-- =========================================================================
+
+-- 34. Esteban
+jd_def["j_Crackedlatro_esteban"] = {
+    text = {
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
+    },
+    reminder_text = {
+        { text = "(" },
+        { text = "♠", colour = G.C.SUITS["Spades"] },
+        { text = " & " },
+        { text = "♣", colour = G.C.SUITS["Clubs"] },
+        { text = ": X2.5/c)" }
+    },
+    calc_function = function(card)
+        local count = 0
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, c in ipairs(scoring_hand) do
+                if c:is_suit('Spades') or c:is_suit('Clubs') then
+                    count = count + JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                end
+            end
+        end
+        local per = (card.ability and card.ability.extra and card.ability.extra.xmult) or 2.5
+        card.joker_display_values.x_mult = count > 0 and (per ^ count) or 1.0
+        card.joker_display_values.active = (count > 0)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+    end
+}
+
+-- 35. Thiago
 jd_def["j_Crackedlatro_thiago"] = {
     text = {
         {
             border_nodes = {
                 { text = "X" },
-                { ref_table = "card.joker_display_values", ref_value = "xmult" }
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
             }
         }
     },
-    text_config = { colour = G.C.WHITE },
     reminder_text = {
-        { text = "(/20 Chips)" }
+        { text = "(X1 per 20 Chips)" }
     },
     calc_function = function(card)
         local current_chips = (hand_chips and hand_chips > 0 and hand_chips) or 0
         local req = (card.ability and card.ability.extra and card.ability.extra.chips_per_xmult) or 20
-        card.joker_display_values.xmult = math.max(1, math.floor(current_chips / req))
+        local x = math.floor(current_chips / req)
+        card.joker_display_values.x_mult = math.max(1, x)
+        card.joker_display_values.active = (x > 1)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
-
--- Black Hole
+-- 36. Black Hole
 jd_def["j_Crackedlatro_black_hole_joker"] = {
     text = {
-        { text = "^1.5 C & M", colour = G.C.DARK_EDITION }
+        {
+            border_nodes = {
+                { text = "^" },
+                { ref_table = "card.ability.extra", ref_value = "pow" }
+            },
+            border_colour = G.C.DARK_EDITION
+        }
     },
     reminder_text = {
         { text = "(Chips & Mult)" }
     }
 }
 
--- Squele (Real-time Hearts mult)
+-- 37. Squele
 jd_def["j_Crackedlatro_squele"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.MULT }
+        { text = "+" },
+        { ref_table = "card.joker_display_values", ref_value = "mult", colour = G.C.MULT, retrigger_type = "mult" },
+        { text = " " },
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        }
     },
     reminder_text = {
-        { text = "(♥ | 1/10 Spec)" }
+        { text = "(" },
+        { text = "♥", colour = G.C.SUITS["Hearts"] },
+        { text = " | 1/10 Bloodstone)" }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted > 0 then
-            local hearts = 0
-            for _, c in ipairs(highlighted) do
-                if c:is_suit('Hearts') then hearts = hearts + 1 end
+        local hearts = 0
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, c in ipairs(scoring_hand) do
+                if c:is_suit('Hearts') then
+                    hearts = hearts + JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                end
             end
-            if hearts > 0 then
-                local mult = hearts * 10
-                local xmult = string.format("%.1f", 1.5 ^ hearts)
-                card.joker_display_values.text_val = "+" .. mult .. " X" .. xmult
-            else
-                card.joker_display_values.text_val = "+0 X1.0"
-            end
-        else
-            card.joker_display_values.text_val = "+10 X1.5"
+        end
+        card.joker_display_values.mult = hearts * (card.ability.extra.mult or 10)
+        card.joker_display_values.x_mult = hearts > 0 and ((card.ability.extra.xmult or 1.5) ^ hearts) or 1.0
+        card.joker_display_values.active = (hearts > 0)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[4] then
+            text.children[4].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- Bluxdir (Real-time hand level up target on discard)
+-- 38. Bluxdir
 jd_def["j_Crackedlatro_bluxdir"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.ATTENTION }
+        { ref_table = "card.joker_display_values", ref_value = "hand_level" }
     },
+    text_config = { colour = G.C.ATTENTION },
     reminder_text = {
-        { text = "(On Discard)" }
+        { text = "(Levels Up on Discard)" }
     },
     calc_function = function(card)
         local highlighted = (G.hand and G.hand.highlighted) or {}
         if #highlighted > 0 and G.FUNCS and G.FUNCS.get_poker_hand_info then
             local text = G.FUNCS.get_poker_hand_info(highlighted)
-            if text and text ~= 'NULL' then
-                card.joker_display_values.status = "+1 " .. text
+            if text and text ~= 'NULL' and text ~= 'Unknown' then
+                card.joker_display_values.hand_level = "+1 " .. text
+                card.joker_display_values.active = true
             else
-                card.joker_display_values.status = "+1 Level"
+                card.joker_display_values.hand_level = "+1 Level"
+                card.joker_display_values.active = false
             end
         else
-            card.joker_display_values.status = "+1 Level"
+            card.joker_display_values.hand_level = "+1 Level"
+            card.joker_display_values.active = false
+        end
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.ATTENTION
         end
     end
 }
 
--- Charles (Real-time cards & synergy)
+-- 39. Charles
 jd_def["j_Crackedlatro_charles"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.XMULT }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            }
+        },
+        { text = " +$" },
+        { ref_table = "card.joker_display_values", ref_value = "dollars", colour = G.C.MONEY, retrigger_type = "mult" }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
+    },
+    extra = {
+        {
+            { text = "With Mochi: 1x Retrigger & 2x Synergy!", colour = HEX('ff69b4') }
+        }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
         local has_mochi = has_charles_and_mochi_jd()
-        if #highlighted > 0 then
-            local suits_count = 0
-            for _, c in ipairs(highlighted) do
-                if c:is_suit('Spades') or c:is_suit('Hearts') then suits_count = suits_count + 1 end
+        local suit_count = 0
+        local card_count = 0
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            card_count = #scoring_hand
+            for _, c in ipairs(scoring_hand) do
+                local triggers = JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                if c:is_suit('Spades') or c:is_suit('Hearts') then
+                    suit_count = suit_count + triggers
+                end
             end
-            local dollars = #highlighted * 5 * (has_mochi and 2 or 1)
-            local mult_base = 2 ^ suits_count
-            local mult_str = (suits_count > 0 and ("X" .. mult_base) or "")
-            card.joker_display_values.text_val = mult_str .. " +$" .. dollars
-        else
-            card.joker_display_values.text_val = "X2 +$5"
         end
-        card.joker_display_values.rem = has_mochi and "(Best Friends! 2x)" or "(♠ & ♥ | +$5/card)"
+        local dollars_per = (card.ability.extra.dollars or 5) * (has_mochi and 2 or 1)
+        card.joker_display_values.dollars = card_count * dollars_per
+        card.joker_display_values.x_mult = suit_count > 0 and ((card.ability.extra.xmult or 2) ^ suit_count) or 1.0
+        card.joker_display_values.rem = has_mochi and "Best Friends! (Retrigger)" or "♠ & ♥ (+ $5/c)"
+        card.joker_display_values.active = (suit_count > 0 or card_count > 0)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = has_charles_and_mochi_jd() and HEX('ff69b4') or G.C.UI.TEXT_INACTIVE
+        end
+    end,
+    retrigger_function = function(playing_card, scoring_hand, held_in_hand, joker_card)
+        if held_in_hand or not scoring_hand then return 0 end
+        if has_charles_and_mochi_jd() and JokerDisplay.in_scoring(playing_card, scoring_hand) then
+            return 1 * JokerDisplay.calculate_joker_triggers(joker_card)
+        end
+        return 0
     end
 }
 
--- Mochi
+-- 40. Mochi
 jd_def["j_Crackedlatro_mochi"] = {
     text = {
         {
             border_nodes = {
                 { text = "X" },
-                { ref_table = "card.joker_display_values", ref_value = "xmult" }
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
             }
         }
     },
-    text_config = { colour = G.C.WHITE },
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "wild_count" },
-        { text = " Wilds)" }
+        { text = " Wilds in deck)" }
+    },
+    extra = {
+        {
+            { text = "Scored cards become Wild Cards", colour = G.C.UI.TEXT_INACTIVE }
+        }
     },
     calc_function = function(card)
         local wild_count = 0
@@ -944,31 +1672,42 @@ jd_def["j_Crackedlatro_mochi"] = {
         end
         local gain = (card.ability and card.ability.extra and card.ability.extra.xmult_gain) or 0.25
         card.joker_display_values.wild_count = wild_count
-        card.joker_display_values.xmult = string.format("%.2f", 1.0 + (wild_count * gain))
+        card.joker_display_values.x_mult = 1.0 + (wild_count * gain)
     end
 }
 
--- Helin (Real-time active on first hand only)
+-- 41. Helin
 jd_def["j_Crackedlatro_helin"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "status", colour = G.C.DARK_EDITION }
+        {
+            border_nodes = {
+                { text = "^" },
+                { ref_table = "card.ability.extra", ref_value = "power" }
+            },
+            border_colour = G.C.DARK_EDITION
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
         local is_first = G.GAME and G.GAME.current_round and G.GAME.current_round.hands_played == 0
-        if is_first then
-            card.joker_display_values.status = "^2 Mult"
-            card.joker_display_values.rem = "(Active this hand)"
-        else
-            card.joker_display_values.status = "Inactive"
-            card.joker_display_values.rem = "(1st Hand only)"
+        card.joker_display_values.rem = is_first and "Active (1st Hand)" or "Inactive"
+        card.joker_display_values.active = is_first
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.DARK_EDITION or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
 
--- RayTracing
+-- 42. RayTracing
 jd_def["j_Crackedlatro_raytracing"] = {
     text = {
         { text = "+2 Spectrals", colour = G.C.DARK_EDITION }
@@ -978,56 +1717,100 @@ jd_def["j_Crackedlatro_raytracing"] = {
     }
 }
 
--- Paco (Real-time discards mult)
+-- 43. Paco
 jd_def["j_Crackedlatro_paco"] = {
     text = {
         {
             border_nodes = {
                 { text = "X" },
-                { ref_table = "card.joker_display_values", ref_value = "xmult" }
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
             }
         }
     },
-    text_config = { colour = G.C.WHITE },
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "discards" },
-        { text = " Discards)" }
+        { text = " Discards left)" }
     },
     calc_function = function(card)
         local discards = (G.GAME and G.GAME.current_round and G.GAME.current_round.discards_left) or 0
-        local per_discard = (card.ability and card.ability.extra and card.ability.extra.xmult_per_discard) or 2
+        local per = (card.ability and card.ability.extra and card.ability.extra.xmult_per_discard) or 2
         card.joker_display_values.discards = discards
-        card.joker_display_values.xmult = math.max(1, discards * per_discard)
+        card.joker_display_values.x_mult = math.max(1, discards * per)
+        card.joker_display_values.active = (discards > 0)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
     end
 }
 
-
--- Yairo (Scored 6s & 7s)
+-- 44. Yairo
 jd_def["j_Crackedlatro_yairo"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "text_val", colour = G.C.XMULT }
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+            },
+            border_colour = G.C.MULT
+        },
+        { text = " " },
+        {
+            border_nodes = {
+                { text = "X" },
+                { ref_table = "card.joker_display_values", ref_value = "x_chips", retrigger_type = "exp" }
+            },
+            border_colour = G.C.CHIPS
+        }
     },
     reminder_text = {
-        { ref_table = "card.joker_display_values", ref_value = "rem" }
+        { text = "(" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { text = ")" }
     },
     calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        local six_or_seven = 0
-        for _, c in ipairs(highlighted) do
-            local id = (c.get_id and c:get_id()) or (c.base and c.base.id)
-            local val = c.base and c.base.value
-            if id == 6 or val == '6' or id == 7 or val == '7' then
-                six_or_seven = six_or_seven + 1
+        local count = 0
+        local text, _, scoring_hand = JokerDisplay.evaluate_hand()
+        if text ~= 'Unknown' and scoring_hand then
+            for _, c in ipairs(scoring_hand) do
+                local id = (c.get_id and c:get_id()) or (c.base and c.base.id)
+                local val = c.base and c.base.value
+                if id == 6 or id == 7 or val == '6' or val == '7' then
+                    count = count + JokerDisplay.calculate_card_triggers(c, scoring_hand)
+                end
             end
         end
-
-        if six_or_seven > 0 then
-            card.joker_display_values.text_val = "X3M X1.5C"
-            card.joker_display_values.rem = "(" .. six_or_seven .. " 6s/7s)"
-        else
-            card.joker_display_values.text_val = "X3M X1.5C"
-            card.joker_display_values.rem = "(per 6 or 7 scored)"
+        local mult_per = (card.ability and card.ability.extra and card.ability.extra.xmult) or 3
+        local chips_per = (card.ability and card.ability.extra and card.ability.extra.xchips) or 1.5
+        card.joker_display_values.x_mult = count > 0 and (mult_per ^ count) or 1.0
+        card.joker_display_values.x_chips = count > 0 and (chips_per ^ count) or 1.0
+        card.joker_display_values.rem = count > 0 and (count .. " scored (6s & 7s)") or "6s & 7s scored"
+        card.joker_display_values.active = (count > 0)
+    end,
+    style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.MULT or G.C.UI.TEXT_INACTIVE
+        end
+        if text and text.children and text.children[3] then
+            text.children[3].config.colour = card.joker_display_values.active and G.C.CHIPS or G.C.UI.TEXT_INACTIVE
+        end
+        if reminder_text and reminder_text.children and reminder_text.children[2] then
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
+
+-- Automatic key aliasing for universal compatibility (with and without prefix)
+for k, v in pairs(jd_def) do
+    if string.sub(k, 1, 15) == "j_Crackedlatro_" then
+        local short_k = "j_" .. string.sub(k, 16)
+        if not jd_def[short_k] then
+            jd_def[short_k] = v
+        end
+    end
+end

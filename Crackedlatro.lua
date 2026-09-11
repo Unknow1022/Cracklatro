@@ -1,5 +1,6 @@
 --[[
     The Cracked Balatro (Cracklatro)
+    Version: 2.0 - La "Display" Update
     Author: Unknow102
     Framework: Steamodded (SMODS)
 --]]

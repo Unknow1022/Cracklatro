@@ -4,14 +4,14 @@
 
 ![Balatro Version](https://img.shields.io/badge/Balatro-v1.0.1o-orange?style=for-the-badge&logo=balatro)
 ![Steamodded](https://img.shields.io/badge/Steamodded-v1.0.0%2B-blue?style=for-the-badge)
-![Cracklatro Version](https://img.shields.io/badge/Version-1.9%20Void%20Update-9932CC?style=for-the-badge)
+![Cracklatro Version](https://img.shields.io/badge/Version-2.0%20La%20Display%20Update-9932CC?style=for-the-badge)
 ![JokerDisplay](https://img.shields.io/badge/JokerDisplay-Compatible-2ea44f?style=for-the-badge)
 ![Language](https://img.shields.io/badge/Language-Espa%C3%B1ol%20%7C%20English-lightgrey?style=for-the-badge)
 
 **Una expansión masiva y completa para Balatro creada sobre el framework Steamodded (SMODS).**  
 Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas, una nueva categoría de consumibles (Cartas de Oficio), Paquetes de Refuerzo de Empleo, Ciegas Jefe dinámicas con iluminación CRT ambiental, Barajas temáticas, Sellos con efectos espectrales inéditos, Vales y Etiquetas.
 
-[Instalación](#%EF%B8%8F-instalación-y-requisitos) • [Novedades v1.9](#-novedades-de-la-void-update-v19) • [Contenido](#-resumen-general-de-contenido) • [Jokers Secretos](#-rareza-secreta-11-jokers-secretos) • [Jokers Estándar](#-jokers-estándar-33-jokers) • [Cartas de Oficio](#-cartas-de-oficio-job-cards---10-y-paquetes-3) • [Espectrales y Sellos](#-consumibles-espectrales-8-sellos-y-mejoras) • [Ciegas Jefe](#%EF%B8%8F-ciegas-jefe-boss-blinds---12) • [Barajas](#-barajas-personalizadas-decks---4) • [FAQ](#-preguntas-frecuentes-faq)
+[Instalación](#%EF%B8%8F-instalación-y-requisitos) • [Novedades v2.0](#%EF%B8%8F-novedades-de-la-display-update-v20) • [Contenido](#-resumen-general-de-contenido) • [Jokers Secretos](#-rareza-secreta-11-jokers-secretos) • [Jokers Estándar](#-jokers-estándar-33-jokers) • [Cartas de Oficio](#-cartas-de-oficio-job-cards---10-y-paquetes-3) • [Espectrales y Sellos](#-consumibles-espectrales-8-sellos-y-mejoras) • [Ciegas Jefe](#%EF%B8%8F-ciegas-jefe-boss-blinds---12) • [Barajas](#-barajas-personalizadas-decks---4) • [FAQ](#-preguntas-frecuentes-faq)
 
 </div>
 
@@ -34,6 +34,19 @@ Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas,
 | 🎫 **Vales de Tienda** | **2** | Catador (*Taster*) y Crítico (*Critic*) para filtrar rarezas en tienda. |
 | 🏷️ **Etiquetas de Salto** | **3** | Tag Discord, Tag de Brujería y Tag de Oferta. |
 | 📈 **Total Jokers** | **44** | Todos con sprites personalizados, soporte para localización y compatibilidad con **JokerDisplay**. |
+
+---
+
+## 🖥️ Novedades de la "Display Update" (v2.0)
+
+* 🎨 **Renovación Total de la Suite JokerDisplay (44 Jokers)**:
+  * **Arquitectura Limpia y Modular**: Todos los displays residen en un archivo `.lua` separado (`src/compat/jokerdisplay.lua`) sin alterar la lógica de los comodines.
+  * **Insignias Balatro Oficiales (`border_nodes`)**: Las multiplicaciones y exponentes (`XMult`, `XChips`, `^Mult`, `^Chips`) ahora se renderizan con las cajas redondeadas oficiales de Balatro en rojo, azul y violeta oscuro, con soporte completo para escalado y notaciones de Talisman.
+  * **Evaluación en Tiempo Real y Dinámica (`JokerDisplay.evaluate_hand`)**: Se reemplazó la lectura estática de cartas seleccionadas por evaluación segura que distingue cartas anotadas, boca abajo, cartas de piedra, y efectos de *Splash*.
+  * **Soporte de Retriggers en Cadena (`retrigger_function`)**: *Outstanding Joker*, *Miner* (Magma Core 300m+) y *Charles* (en sinergia con Mochi) comunican sus repeticiones al motor de JokerDisplay.
+  * **Displays Dinámicos Copiados (`get_blueprint_joker` & `JokerDisplay.copy_display`)**: *Chameleon Joker* adopta en vivo la interfaz gráfica del joker de la izquierda al cumplirse el rango objetivo.
+  * **Estilos Reactivos y Colores Dinámicos (`style_function`)**: Resaltado en verde/dorado para condiciones activadas, atenuación en inactividad y colores temáticos por palo (`G.C.SUITS`).
+  * **Filas Colapsables (`extra`)**: Despliega tablas de pagos (Tragamonedas), tendencias de mercado (Accionista), metas de calor (Herrero) y recompensas de venta haciendo clic izquierdo en el display.
 
 ---
 

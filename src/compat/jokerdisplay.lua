@@ -41,11 +41,6 @@ jd_def["j_Crackedlatro_masterful_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "mastered_text" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "Mastered ranks count as all suits", colour = G.C.UI.TEXT_INACTIVE }
-        }
-    },
     calc_function = function(card)
         local count = 0
         if card.ability and card.ability.extra and card.ability.extra.mastered_ranks then
@@ -75,10 +70,10 @@ jd_def["j_Crackedlatro_masterful_joker"] = {
         end
 
         if will_master then
-            card.joker_display_values.mastered_text = "Will Master " .. will_master .. "!"
+            card.joker_display_values.mastered_text = "+" .. will_master
             card.joker_display_values.active_master = true
         else
-            card.joker_display_values.mastered_text = count .. " Mastered"
+            card.joker_display_values.mastered_text = count > 0 and (count .. " M") or "-"
             card.joker_display_values.active_master = false
         end
     end,
@@ -92,81 +87,69 @@ jd_def["j_Crackedlatro_masterful_joker"] = {
 -- 2. Outstanding Joker
 jd_def["j_Crackedlatro_outstanding_joker"] = {
     text = {
-        { text = "+" },
-        { ref_table = "card.joker_display_values", ref_value = "chips", retrigger_type = "mult" }
-    },
-    text_config = { colour = G.C.CHIPS },
-    reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
-    },
-    extra = {
         {
-            { text = "Highest card retriggers 1x", colour = G.C.ORANGE }
+            ref_table = "card.joker_display_values",
+            ref_value = "retrigger_str"
         }
     },
+    reminder_text = {
+        { text = "(" },
+        {
+            ref_table = "card.joker_display_values",
+            ref_value = "card_str"
+        },
+        { text = ")" }
+    },
     calc_function = function(card)
+        local triggers = JokerDisplay.calculate_joker_triggers(card)
         local text, _, scoring_hand = JokerDisplay.evaluate_hand()
-        if text ~= 'Unknown' and scoring_hand and #scoring_hand >= 2 then
+        if text ~= 'Unknown' and scoring_hand and #scoring_hand > 0 then
             local highest_rank = -1
             local highest_card = nil
-            local is_tied = false
             for _, c in ipairs(scoring_hand) do
-                local r = c:get_id() or 0
+                local r = (c.get_id and c:get_id()) or (c.base and c.base.id) or 0
                 if r > highest_rank then
                     highest_rank = r
                     highest_card = c
-                    is_tied = false
-                elseif r == highest_rank then
-                    is_tied = true
                 end
             end
 
-            if highest_card and not is_tied then
-                local other_chips = 0
-                for _, c in ipairs(scoring_hand) do
-                    if c ~= highest_card then
-                        other_chips = other_chips + (c.base and c.base.nominal or 0) + (c.ability and c.ability.perma_bonus or 0)
-                    end
-                end
-                local bonus = other_chips * #scoring_hand
-                card.joker_display_values.chips = bonus
-                card.joker_display_values.rem = "Highest Card: " .. format_short_card(highest_card)
+            if highest_card then
+                card.joker_display_values.retrigger_str = (1 * triggers) .. "x"
+                card.joker_display_values.card_str = format_short_card(highest_card)
                 card.joker_display_values.active = true
             else
-                card.joker_display_values.chips = 0
-                card.joker_display_values.rem = is_tied and "Tied for Highest" or "Need 2+ Cards"
+                card.joker_display_values.retrigger_str = "0x"
+                card.joker_display_values.card_str = "-"
                 card.joker_display_values.active = false
             end
         else
-            card.joker_display_values.chips = 0
-            card.joker_display_values.rem = "Highest 1x Retrigger"
+            card.joker_display_values.retrigger_str = (1 * triggers) .. "x"
+            card.joker_display_values.card_str = "-"
             card.joker_display_values.active = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
+        if text and text.children and text.children[1] then
+            text.children[1].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+        end
         if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
+            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.ORANGE or G.C.UI.TEXT_INACTIVE
         end
     end,
     retrigger_function = function(playing_card, scoring_hand, held_in_hand, joker_card)
-        if held_in_hand or not scoring_hand or #scoring_hand < 2 then return 0 end
+        if held_in_hand or not scoring_hand or #scoring_hand == 0 then return 0 end
         if not JokerDisplay.in_scoring(playing_card, scoring_hand) then return 0 end
         local highest_rank = -1
         local highest_card = nil
-        local is_tied = false
         for _, c in ipairs(scoring_hand) do
-            local r = c:get_id() or 0
+            local r = (c.get_id and c:get_id()) or (c.base and c.base.id) or 0
             if r > highest_rank then
                 highest_rank = r
                 highest_card = c
-                is_tied = false
-            elseif r == highest_rank then
-                is_tied = true
             end
         end
-        if playing_card == highest_card and not is_tied then
+        if playing_card == highest_card then
             return 1 * JokerDisplay.calculate_joker_triggers(joker_card)
         end
         return 0
@@ -181,12 +164,7 @@ jd_def["j_Crackedlatro_blueberry_joker"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "rounds_left" },
-        { text = " left)" }
-    },
-    extra = {
-        {
-            { text = "Self-destructs after rounds end", colour = G.C.UI.TEXT_INACTIVE }
-        }
+        { text = ")" }
     },
     calc_function = function(card)
         local r = (card.ability and card.ability.extra and card.ability.extra.rounds_left) or 3
@@ -203,30 +181,25 @@ jd_def["j_Crackedlatro_blueberry_joker"] = {
 -- 4. DJ Joker
 jd_def["j_Crackedlatro_dj_joker"] = {
     text = {
-        { text = "Remix Card", colour = G.C.SECONDARY_SET.Enhanced }
+        { text = "Remix", colour = G.C.SECONDARY_SET.Enhanced }
     },
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "Converts 1 card to Lucky/Steel/Gold/Glass", colour = G.C.UI.TEXT_INACTIVE }
-        }
-    },
     calc_function = function(card)
         local used = card.ability and card.ability.extra and card.ability.extra.used
         if used then
-            card.joker_display_values.rem = "Used this round"
+            card.joker_display_values.rem = "Used"
             card.joker_display_values.active = false
         else
             local text, _, scoring_hand = JokerDisplay.evaluate_hand()
             if text ~= 'Unknown' and scoring_hand and #scoring_hand == 1 then
-                card.joker_display_values.rem = "Will Remix " .. format_short_card(scoring_hand[1])
+                card.joker_display_values.rem = format_short_card(scoring_hand[1])
                 card.joker_display_values.active = true
             else
-                card.joker_display_values.rem = "Play exactly 1 Card"
+                card.joker_display_values.rem = "1 Card"
                 card.joker_display_values.active = false
             end
         end
@@ -267,7 +240,7 @@ jd_def["j_Crackedlatro_disenador_joker"] = {
             end
         end
         card.joker_display_values.dollars = dollars
-        card.joker_display_values.rem = wild_count > 0 and (wild_count .. " Wild" .. (wild_count > 1 and "s" or "")) or "Wild Cards"
+        card.joker_display_values.rem = wild_count > 0 and (wild_count .. " Wild") or "Wild"
         card.joker_display_values.active = (dollars > 0)
     end,
     style_function = function(card, text, reminder_text, extra)
@@ -288,14 +261,7 @@ jd_def["j_Crackedlatro_tts_joker"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "letters" },
-        { text = " letters)" }
-    },
-    extra = {
-        {
-            { text = "Progress: " },
-            { ref_table = "card.ability.extra", ref_value = "letters_progress", colour = G.C.MONEY },
-            { text = "/50 -> +$10", colour = G.C.MONEY }
-        }
+        { text = ")" }
     },
     calc_function = function(card)
         local letter_counts = {
@@ -319,7 +285,8 @@ jd_def["j_Crackedlatro_tts_joker"] = {
         end
         card.joker_display_values.chips = total_chips
         card.joker_display_values.mult = total_mult
-        card.joker_display_values.letters = total_letters
+        local prog = (card.ability and card.ability.extra and card.ability.extra.letters_progress) or 0
+        card.joker_display_values.letters = prog .. "/50"
     end
 }
 

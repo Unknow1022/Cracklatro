@@ -93,22 +93,22 @@ SMODS.Joker {
     loc_txt = {
         name = 'Outstanding Joker',
         text = {
-            "Strictly highest scored card {C:attention}retriggers 1 time{}",
-            "and gains {C:chips}+Chips{} equal to base Chips of",
-            "all other scoring cards times hand size"
+            "Retrigger the {C:attention}highest{}",
+            "value card in played",
+            "hand {C:attention}1{} time"
         }
     },
     unlock = {
         "Play a",
         "{C:attention}Five of a Kind{}"
     },
-    config = { extra = {} },
+    config = { extra = { repetitions = 1 } },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
-        return { vars = {} }
+        return { vars = { (card and card.ability and card.ability.extra and card.ability.extra.repetitions) or 1 } }
     end,
     check_for_unlock = function(self, args)
         if (args.type == 'hand' or args.type == 'play_hand') and (args.handname == 'Five of a Kind' or args.handname == 'Flush Five') then
@@ -119,49 +119,22 @@ SMODS.Joker {
         end
     end,
     calculate = function(self, card, context)
-        local highest_card = nil
-        local highest_rank = -1
-        local is_tied = false
-        if context.scoring_hand and #context.scoring_hand >= 2 then
-            for _, c in ipairs(context.scoring_hand) do
-                local r = c:get_id() or 0
-                if r > highest_rank then
-                    highest_rank = r
-                    highest_card = c
-                    is_tied = false
-                elseif r == highest_rank then
-                    is_tied = true
+        if context.repetition and context.cardarea == G.play then
+            if context.scoring_hand and #context.scoring_hand > 0 then
+                local highest_card = nil
+                local highest_rank = -1
+                for _, c in ipairs(context.scoring_hand) do
+                    local r = (c.get_id and c:get_id()) or (c.base and c.base.id) or 0
+                    if r > highest_rank then
+                        highest_rank = r
+                        highest_card = c
+                    end
                 end
-            end
-        end
-
-        if highest_card and not is_tied then
-            if context.repetition and context.cardarea == G.play then
-                if context.other_card == highest_card then
+                if highest_card and context.other_card == highest_card then
                     return {
-                        repetitions = 1,
+                        repetitions = (card.ability.extra and card.ability.extra.repetitions) or 1,
                         card = card
                     }
-                end
-            end
-
-            if context.individual and context.cardarea == G.play then
-                if context.other_card == highest_card then
-                    local other_chips = 0
-                    for _, c in ipairs(context.scoring_hand) do
-                        if c ~= highest_card then
-                            other_chips = other_chips + (c.base and c.base.nominal or 0) + (c.ability and c.ability.perma_bonus or 0)
-                        end
-                    end
-                    local bonus_chips = other_chips * #context.scoring_hand
-                    if bonus_chips > 0 then
-                        return {
-                            chips = bonus_chips,
-                            message = 'Outstanding! +' .. bonus_chips .. ' Chips',
-                            colour = G.C.CHIPS,
-                            card = card
-                        }
-                    end
                 end
             end
         end

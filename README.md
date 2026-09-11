@@ -124,7 +124,7 @@ Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas,
 ### ⚪ Comunes (6)
 
 * **Masterful Joker**: Al puntuar un Poker (*Four of a Kind*), Repóker (*Five of a Kind*) o Repóker de Color (*Flush Five*), asimila ese rango de forma permanente. Las cartas de rangos asimilados **cuentan como todos los palos simultáneamente**. Otorga **+10 Multi** por cada rango asimilado.
-* **Outstanding Joker**: La carta puntuada con el rango estrictamente más alto es *Sobresaliente*: absorbe las fichas base de todas las demás cartas puntuadas multiplicadas por el tamaño de la mano y **se reactiva 1 vez**. *(Desbloqueo: Jugar un Repóker)*.
+* **Outstanding Joker**: Reactiva la carta de mayor valor en la mano jugada **1 vez**. *(Desbloqueo: Jugar un Repóker)*.
 * **Blueberry**: Otorga **+1 Mano** al seleccionar Ciega. Se autodestruye tras 3 rondas. *(Arte por kars_on_mars)*.
 * **DJ Joker**: Si la mano jugada contiene exactamente **1 sola carta**, la convierte en una carta mejorada aleatoria (**Suerte, Acero, Oro o Vidrio**) *(1 vez por ronda)*.
 * **Designer Joker (Joker Diseñador)**: Las Cartas Silvestres (*Wild Cards*) otorgan **+$1** al ser puntuadas.

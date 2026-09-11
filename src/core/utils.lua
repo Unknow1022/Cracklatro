@@ -916,15 +916,19 @@ local function is_probability_seed(seed)
     return false
 end
 
--- Lucky One: 4-Leaf Clover guarantees 100% success on next probability roll
+-- Lucky One: Guaranteed success on next probability roll using stored charges
 local pseudorandom_ref = pseudorandom
 function pseudorandom(seed, min, max)
     if not min and not max and is_probability_seed(seed) and G and G.jokers and G.jokers.cards then
         for _, j in ipairs(G.jokers.cards) do
             if card_has_key(j, 'lucky_one_joker') and not j.debuff then
-                if j.ability and j.ability.extra and j.ability.extra.has_four_leaf then
-                    j.ability.extra.has_four_leaf = false
-                    card_eval_status_text(j, 'extra', nil, nil, nil, { message = 'Clover Miracle!', colour = G.C.GREEN })
+                if j.ability and j.ability.extra and (j.ability.extra.charges or 0) > 0 then
+                    j.ability.extra.charges = j.ability.extra.charges - 1
+                    j.ability.extra.xmult = (j.ability.extra.xmult or 1.5) + (j.ability.extra.xmult_gain or 0.1)
+                    card_eval_status_text(j, 'extra', nil, nil, nil, {
+                        message = 'Guaranteed! (' .. j.ability.extra.charges .. '/5)',
+                        colour = G.C.GREEN
+                    })
                     play_sound('tarot1')
                     return 0.0000000001
                 end

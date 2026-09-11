@@ -1154,25 +1154,23 @@ jd_def["j_Crackedlatro_lucky_one_joker"] = {
     },
     extra = {
         {
-            { text = "4 Petals = Guaranteed Win on Next Roll", colour = G.C.GREEN }
+            { text = "Guaranteed: ", colour = G.C.UI.TEXT_INACTIVE },
+            { ref_table = "card.joker_display_values", ref_value = "charges_str", colour = G.C.GREEN }
         }
     },
     calc_function = function(card)
-        local is_ready = card.ability and card.ability.extra and card.ability.extra.has_four_leaf
-        local petals = (card.ability and card.ability.extra and card.ability.extra.petals) or 0
-        if is_ready then
-            card.joker_display_values.x_mult = card.ability.extra.xmult or 2.0
-            card.joker_display_values.rem = "100% Luck Ready!"
-            card.joker_display_values.active = true
-        else
-            card.joker_display_values.x_mult = 1.0
-            card.joker_display_values.rem = petals .. "/4 Petals (Clubs)"
-            card.joker_display_values.active = false
-        end
+        local ex = card.ability and card.ability.extra
+        local xmult = (ex and ex.xmult) or 1.5
+        local charges = (ex and ex.charges) or 0
+        local clubs = (ex and ex.clubs_scored) or 0
+        card.joker_display_values.x_mult = xmult
+        card.joker_display_values.rem = clubs .. "/5 Clubs"
+        card.joker_display_values.charges_str = charges .. "/5"
+        card.joker_display_values.active = charges > 0
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
-            text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
+            text.children[1].config.colour = G.C.XMULT
         end
         if reminder_text and reminder_text.children and reminder_text.children[2] then
             reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE

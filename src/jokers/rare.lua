@@ -493,9 +493,11 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lucky One',
         text = {
-            "Scored {C:clubs}Clubs{} gather a Petal {C:inactive}(#1#/4){}.",
-            "At 4 Petals, gives {X:mult,C:white}X#2#{} Mult and",
-            "guarantees success on next probability roll"
+            "{C:green}+1{} to all {C:attention}probabilities{}.",
+            "Scored {C:clubs}Clubs{} add {C:attention}1 Guaranteed Roll{} every 5 ({C:inactive}#3#/5{}).",
+            "Stores up to {C:attention}5{} Guaranteed Rolls ({C:green}#4#/5{}).",
+            "Gains {X:mult,C:white}+X#2#{} Mult when any probability succeeds",
+            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
         }
     },
     unlock = {
@@ -503,44 +505,71 @@ SMODS.Joker {
         "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
         "in a single run"
     },
-    config = { extra = { petals = 0, leaves_needed = 4, has_four_leaf = false, xmult = 2.0 } },
+    config = { extra = { xmult = 1.5, xmult_gain = 0.1, clubs_scored = 0, clubs_needed = 5, charges = 0, max_charges = 5 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        local p = ex.has_four_leaf and "READY!" or tostring(ex.petals or 0)
-        return { vars = { p, ex.xmult or 2.0 } }
+        return { vars = { ex.xmult or 1.5, ex.xmult_gain or 0.1, ex.clubs_scored or 0, ex.charges or 0 } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
+    add_to_deck = function(self, card, from_debuff)
+        if G.GAME and G.GAME.probabilities then
+            for k, v in pairs(G.GAME.probabilities) do
+                G.GAME.probabilities[k] = v + 1
+            end
+        end
+    end,
+    remove_from_deck = function(self, card, from_debuff)
+        if G.GAME and G.GAME.probabilities then
+            for k, v in pairs(G.GAME.probabilities) do
+                G.GAME.probabilities[k] = math.max(1, v - 1)
+            end
+        end
+    end,
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play and not context.blueprint then
             if context.other_card:is_suit('Clubs') then
-                if not card.ability.extra.has_four_leaf then
-                    card.ability.extra.petals = (card.ability.extra.petals or 0) + 1
-                    if card.ability.extra.petals >= (card.ability.extra.leaves_needed or 4) then
-                        card.ability.extra.has_four_leaf = true
-                        card.ability.extra.petals = 0
+                card.ability.extra.clubs_scored = (card.ability.extra.clubs_scored or 0) + 1
+                if card.ability.extra.clubs_scored >= (card.ability.extra.clubs_needed or 5) then
+                    card.ability.extra.clubs_scored = 0
+                    if (card.ability.extra.charges or 0) < (card.ability.extra.max_charges or 5) then
+                        card.ability.extra.charges = (card.ability.extra.charges or 0) + 1
                         return {
-                            message = '4-Leaf Clover Assembled!',
+                            message = 'Guaranteed Roll! (' .. card.ability.extra.charges .. '/5)',
                             colour = G.C.GREEN,
                             card = card
                         }
                     else
                         return {
-                            message = 'Petal ' .. card.ability.extra.petals .. '/4',
-                            colour = G.C.CLUBS,
+                            message = 'Max Charges (5/5)!',
+                            colour = G.C.GOLD,
                             card = card
                         }
                     end
+                else
+                    return {
+                        message = 'Club ' .. card.ability.extra.clubs_scored .. '/5',
+                        colour = G.C.CLUBS,
+                        card = card
+                    }
                 end
             end
         end
 
-        if context.joker_main and card.ability.extra.has_four_leaf then
+        if context.individual and context.other_card and context.other_card.lucky_trigger and not context.blueprint then
+            card.ability.extra.xmult = (card.ability.extra.xmult or 1.5) + (card.ability.extra.xmult_gain or 0.1)
             return {
-                Xmult = card.ability.extra.xmult
+                extra = { focus = card, message = '+X' .. (card.ability.extra.xmult_gain or 0.1) .. ' Mult!', colour = G.C.MULT },
+                card = card
+            }
+        end
+
+        if context.joker_main then
+            return {
+                Xmult = card.ability.extra.xmult or 1.5
             }
         end
     end

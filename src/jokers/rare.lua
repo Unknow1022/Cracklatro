@@ -14,9 +14,10 @@ SMODS.Joker {
     loc_txt = {
         name = 'Doctor Jo.',
         text = {
-            "Reimburses {C:money}Rental{} fees and stops {C:attention}Perishable{} loss.",
-            "On final hand, if short on chips: grants",
-            "{C:blue}+1 Hand{} with {X:mult,C:white}X3{} Mult and removes all debuffs {C:inactive}(1 per Blind){}"
+            "Removes {C:attention}debuffs{} from all Jokers.",
+            "Cures {C:attention}Perishable{} Jokers into clean copies.",
+            "If round is not won on final hand: grants",
+            "{C:blue}+1 Hand{} {C:inactive}(1 per Blind){}"
         }
     },
     config = { extra = { defibrillator_used = false } },
@@ -25,6 +26,8 @@ SMODS.Joker {
     cost = 8,
     blueprint_compat = false,
     calculate = function(self, card, context)
+        card.ability.extra = card.ability.extra or {}
+
         -- Start of shop or round: heal debuffs and reset defib
         if (context.starting_shop or context.setting_blind) and not context.blueprint then
             card.ability.extra.defibrillator_used = false
@@ -39,30 +42,41 @@ SMODS.Joker {
             end
         end
 
-        -- Medical Insurance: Reimburse rental fees and preserve perishable
-        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
+        -- Cure Perishable Jokers: destroy perishable copy and create a fresh clean one
+        if (context.end_of_round or context.starting_shop) and not context.blueprint and not context.individual and not context.repetition then
             card.ability.extra.defibrillator_used = false
-            local rental_reimburse = 0
             if G.jokers and G.jokers.cards then
                 for _, j in ipairs(G.jokers.cards) do
-                    if j.ability and j.ability.rental then
-                        rental_reimburse = rental_reimburse + 3
-                    end
-                    if j.ability and j.ability.perishable then
-                        j.ability.perish_tally = (j.ability.perish_tally or 5) + 1
+                    if j ~= card and j.ability and j.ability.perishable and not j.cured_by_doctor_jo then
+                        j.cured_by_doctor_jo = true
+                        local target_j = j
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.3,
+                            func = function()
+                                play_sound('tarot1')
+                                local j_key = (target_j.config and target_j.config.center and target_j.config.center.key) or (target_j.config and target_j.config.center_key)
+                                local j_ed = target_j.edition
+                                target_j:start_dissolve()
+                                local clean_j = create_card('Joker', G.jokers, nil, nil, nil, nil, j_key, 'doctor_jo')
+                                if clean_j.ability then
+                                    clean_j.ability.perishable = nil
+                                    clean_j.ability.perish_tally = nil
+                                end
+                                if j_ed then clean_j:set_edition(j_ed, true) end
+                                clean_j:add_to_deck()
+                                G.jokers:emplace(clean_j)
+                                clean_j:juice_up(0.6, 0.6)
+                                card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Perishable Cured!', colour = G.C.GREEN })
+                                return true
+                            end
+                        }))
                     end
                 end
             end
-            if rental_reimburse > 0 then
-                ease_dollars(rental_reimburse)
-                return {
-                    message = 'Medical Insurance! +$' .. rental_reimburse,
-                    colour = G.C.MONEY
-                }
-            end
         end
 
-        -- Emergency Defibrillator
+        -- Emergency Defibrillator: Only grants +1 hand if not winning the round on final hand
         if context.after and not context.blueprint and G.GAME.chips < G.GAME.blind.chips then
             if G.GAME.current_round and G.GAME.current_round.hands_left == 0 and not card.ability.extra.defibrillator_used then
                 card.ability.extra.defibrillator_used = true
@@ -77,17 +91,10 @@ SMODS.Joker {
                     end
                 end
                 return {
-                    message = 'CLEAR! +1 Hand (X3)',
+                    message = 'CLEAR! +1 Hand',
                     colour = G.C.RED
                 }
             end
-        end
-
-        -- Emergency Hand X3 Mult boost
-        if context.joker_main and card.ability.extra.defibrillator_used then
-            return {
-                Xmult = 3.0
-            }
         end
     end
 }
@@ -493,11 +500,11 @@ SMODS.Joker {
     loc_txt = {
         name = 'Lucky One',
         text = {
-            "{C:green}+1{} to all {C:attention}probabilities{}.",
-            "Scored {C:clubs}Clubs{} add {C:attention}1 Guaranteed Roll{} every 5 ({C:inactive}#3#/5{}).",
-            "Stores up to {C:attention}5{} Guaranteed Rolls ({C:green}#4#/5{}).",
-            "Gains {X:mult,C:white}+X#2#{} Mult when any probability succeeds",
-            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult)"
+            "Every {C:attention}5{} scored {C:clubs}Clubs{}, the next",
+            "{C:green}probability{} is guaranteed {C:green}(1 in 1){}.",
+            "{C:inactive}(#2#/5 Clubs, #3# - Resets at end of round){}",
+            "Gains {X:mult,C:white}+X#1#{} Mult when any probability succeeds",
+            "{C:inactive}(Currently {X:mult,C:white}X#4#{C:inactive} Mult){}"
         }
     },
     unlock = {
@@ -505,50 +512,32 @@ SMODS.Joker {
         "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
         "in a single run"
     },
-    config = { extra = { xmult = 1.5, xmult_gain = 0.1, clubs_scored = 0, clubs_needed = 5, charges = 0, max_charges = 5 } },
+    config = { extra = { xmult = 1.5, xmult_gain = 0.1, clubs_scored = 0, clubs_needed = 5, guaranteed = false } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        return { vars = { ex.xmult or 1.5, ex.xmult_gain or 0.1, ex.clubs_scored or 0, ex.charges or 0 } }
+        local status = (ex and ex.guaranteed) and (G.CRACKEDLATRO_SPANISH and "¡Garantizado!" or "Guaranteed!") or (G.CRACKEDLATRO_SPANISH and "Pendiente" or "Pending")
+        return { vars = { ex.xmult_gain or 0.1, ex.clubs_scored or 0, status, ex.xmult or 1.5 } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
-    add_to_deck = function(self, card, from_debuff)
-        if G.GAME and G.GAME.probabilities then
-            for k, v in pairs(G.GAME.probabilities) do
-                G.GAME.probabilities[k] = v + 1
-            end
-        end
-    end,
-    remove_from_deck = function(self, card, from_debuff)
-        if G.GAME and G.GAME.probabilities then
-            for k, v in pairs(G.GAME.probabilities) do
-                G.GAME.probabilities[k] = math.max(1, v - 1)
-            end
-        end
-    end,
     calculate = function(self, card, context)
+        card.ability.extra = card.ability.extra or {}
+
         if context.individual and context.cardarea == G.play and not context.blueprint then
             if context.other_card:is_suit('Clubs') then
                 card.ability.extra.clubs_scored = (card.ability.extra.clubs_scored or 0) + 1
                 if card.ability.extra.clubs_scored >= (card.ability.extra.clubs_needed or 5) then
                     card.ability.extra.clubs_scored = 0
-                    if (card.ability.extra.charges or 0) < (card.ability.extra.max_charges or 5) then
-                        card.ability.extra.charges = (card.ability.extra.charges or 0) + 1
-                        return {
-                            message = 'Guaranteed Roll! (' .. card.ability.extra.charges .. '/5)',
-                            colour = G.C.GREEN,
-                            card = card
-                        }
-                    else
-                        return {
-                            message = 'Max Charges (5/5)!',
-                            colour = G.C.GOLD,
-                            card = card
-                        }
-                    end
+                    card.ability.extra.guaranteed = true
+                    if G.GAME then G.GAME.lucky_one_guaranteed = true end
+                    return {
+                        message = 'Guaranteed Next!',
+                        colour = G.C.GREEN,
+                        card = card
+                    }
                 else
                     return {
                         message = 'Club ' .. card.ability.extra.clubs_scored .. '/5',
@@ -572,6 +561,12 @@ SMODS.Joker {
                 Xmult = card.ability.extra.xmult or 1.5
             }
         end
+
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
+            card.ability.extra.clubs_scored = 0
+            card.ability.extra.guaranteed = false
+            if G.GAME then G.GAME.lucky_one_guaranteed = false end
+        end
     end
 }
 
@@ -590,9 +585,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Miner',
         text = {
-            "Scored {C:diamonds}Diamonds{} dig deeper {C:inactive}(Current: #2#m){}:",
+            "Scored {C:diamonds}Diamonds{} dig 1m deeper {C:inactive}(Max 1000m, Current: #2#m){}:",
             "0-50m: {C:chips}+25{} Chips | 50-120m: {C:money}+$2{} | 120-300m: {X:mult,C:white}X1.35{} Mult",
-            "300m+: {X:mult,C:white}X1.5{} Mult, retriggers, and extracts a Spectral card"
+            "300m+: {X:mult,C:white}X1.5{} Mult, retriggers, and extracts a {C:spectral}Spectral{} card at round end"
         }
     },
     unlock = {
@@ -600,7 +595,7 @@ SMODS.Joker {
         "{C:inactive}(Hearts, Spades, Clubs, Diamonds){}",
         "in a single run"
     },
-    config = { extra = { depth = 0, depth_per_card = 5 } },
+    config = { extra = { depth = 0, depth_per_card = 1, max_depth = 1000 } },
     rarity = 3,
     pos = { x = 0, y = 0 },
     cost = 8,
@@ -608,7 +603,7 @@ SMODS.Joker {
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local d = ex.depth or 0
-        return { vars = { ex.depth_per_card or 5, d } }
+        return { vars = { ex.depth_per_card or 1, d } }
     end,
     check_for_unlock = check_all_suits_flushed_unlock,
     calculate = function(self, card, context)
@@ -626,7 +621,7 @@ SMODS.Joker {
         if context.individual and context.cardarea == G.play then
             if context.other_card:is_suit('Diamonds') then
                 if not context.blueprint and not context.repetition then
-                    card.ability.extra.depth = (card.ability.extra.depth or 0) + (card.ability.extra.depth_per_card or 5)
+                    card.ability.extra.depth = math.min(1000, (card.ability.extra.depth or 0) + (card.ability.extra.depth_per_card or 1))
                 end
                 local d = card.ability.extra.depth or 0
                 if d < 50 then
@@ -983,9 +978,9 @@ SMODS.Joker {
     loc_txt = {
         name = 'Supersaturated Joker',
         text = {
-            "First scored card gains a missing Enhancement, Seal, or Edition.",
-            "If already fully improved, gives {C:money}+$10{} instead",
-            "{C:inactive}(Once per round, #1#){}"
+            "If played hand contains only {C:attention}1 card{}, adds a",
+            "random missing {C:enhanced}Enhancement{}, {C:gold}Seal{}, or {C:dark_edition}Edition{}.",
+            "{C:inactive}(Does not overwrite existing traits. Once per round, #1#){}"
         }
     },
     config = { extra = { used = false } },
@@ -1001,72 +996,63 @@ SMODS.Joker {
     calculate = function(self, card, context)
         if context.individual and context.cardarea == G.play and not context.blueprint then
             card.ability.extra = card.ability.extra or {}
-            if not card.ability.extra.used then
+            local play_count = (context.full_hand and #context.full_hand) or (context.scoring_hand and #context.scoring_hand) or (G.play and G.play.cards and #G.play.cards) or 0
+            if play_count == 1 and not card.ability.extra.used then
                 local pcard = context.other_card
                 local has_enh = (pcard.config and pcard.config.center and pcard.config.center ~= G.P_CENTERS.c_base) or (pcard.ability and pcard.ability.effect and pcard.ability.effect ~= 'Base')
                 local has_seal = (pcard.seal ~= nil)
                 local has_edition = (pcard.edition ~= nil)
 
-                if has_enh and has_seal and has_edition then
-                    card.ability.extra.used = true
-                    return {
-                        dollars = 10,
-                        message = '+$10 Saturated!',
-                        colour = G.C.MONEY,
-                        card = card
-                    }
-                else
-                    local missing = {}
-                    if not has_enh then table.insert(missing, 'enhancement') end
-                    if not has_seal then table.insert(missing, 'seal') end
-                    if not has_edition then table.insert(missing, 'edition') end
+                local missing = {}
+                if not has_enh then table.insert(missing, 'enhancement') end
+                if not has_seal then table.insert(missing, 'seal') end
+                if not has_edition then table.insert(missing, 'edition') end
 
-                    if #missing > 0 then
-                        card.ability.extra.used = true
-                        local chosen_type = pseudorandom_element(missing, pseudoseed('sobresaturado_type'))
-                        if chosen_type == 'enhancement' then
-                            local enhs = { G.P_CENTERS.m_bonus, G.P_CENTERS.m_mult, G.P_CENTERS.m_wild, G.P_CENTERS.m_glass, G.P_CENTERS.m_steel, G.P_CENTERS.m_stone, G.P_CENTERS.m_gold, G.P_CENTERS.m_lucky }
-                            local chosen_enh = pseudorandom_element(enhs, pseudoseed('sobresaturado_enh'))
-                            G.E_MANAGER:add_event(Event({
-                                trigger = 'after',
-                                delay = 0.2,
-                                func = function()
-                                    play_sound('tarot1')
-                                    pcard:set_ability(chosen_enh)
-                                    pcard:juice_up(0.4, 0.4)
-                                    card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Enhanced!', colour = G.C.SECONDARY_SET.Enhanced })
-                                    return true
-                                end
-                            }))
-                        elseif chosen_type == 'seal' then
-                            local seals = { 'Gold', 'Blue', 'Red', 'Purple', 'Crackedlatro_dark_green', 'Crackedlatro_silver', 'Crackedlatro_white' }
-                            local chosen_seal = pseudorandom_element(seals, pseudoseed('sobresaturado_seal'))
-                            G.E_MANAGER:add_event(Event({
-                                trigger = 'after',
-                                delay = 0.2,
-                                func = function()
-                                    play_sound('gold_seal')
-                                    pcard:set_seal(chosen_seal, nil, true)
-                                    pcard:juice_up(0.4, 0.4)
-                                    card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Sealed!', colour = G.C.GOLD })
-                                    return true
-                                end
-                            }))
-                        elseif chosen_type == 'edition' then
-                            local eds = { 'e_foil', 'e_holo', 'e_polychrome' }
-                            local chosen_ed = pseudorandom_element(eds, pseudoseed('sobresaturado_ed'))
-                            G.E_MANAGER:add_event(Event({
-                                trigger = 'after',
-                                delay = 0.2,
-                                func = function()
-                                    play_sound('polychrome1')
-                                    pcard:set_edition(chosen_ed, true)
-                                    pcard:juice_up(0.4, 0.4)
-                                    card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Polished!', colour = G.C.DARK_EDITION })
-                                    return true
-                                end
-                            }))
-                        end
+                if #missing > 0 then
+                    card.ability.extra.used = true
+                    local chosen_type = pseudorandom_element(missing, pseudoseed('sobresaturado_type'))
+                    if chosen_type == 'enhancement' then
+                        local enhs = { G.P_CENTERS.m_bonus, G.P_CENTERS.m_mult, G.P_CENTERS.m_wild, G.P_CENTERS.m_glass, G.P_CENTERS.m_steel, G.P_CENTERS.m_stone, G.P_CENTERS.m_gold, G.P_CENTERS.m_lucky }
+                        local chosen_enh = pseudorandom_element(enhs, pseudoseed('sobresaturado_enh'))
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.2,
+                            func = function()
+                                play_sound('tarot1')
+                                pcard:set_ability(chosen_enh)
+                                pcard:juice_up(0.4, 0.4)
+                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Enhanced!', colour = G.C.SECONDARY_SET.Enhanced })
+                                return true
+                            end
+                        }))
+                    elseif chosen_type == 'seal' then
+                        local seals = { 'Gold', 'Blue', 'Red', 'Purple', 'Crackedlatro_dark_green', 'Crackedlatro_silver', 'Crackedlatro_white' }
+                        local chosen_seal = pseudorandom_element(seals, pseudoseed('sobresaturado_seal'))
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.2,
+                            func = function()
+                                play_sound('gold_seal')
+                                pcard:set_seal(chosen_seal, nil, true)
+                                pcard:juice_up(0.4, 0.4)
+                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Sealed!', colour = G.C.GOLD })
+                                return true
+                            end
+                        }))
+                    elseif chosen_type == 'edition' then
+                        local eds = { 'e_foil', 'e_holo', 'e_polychrome' }
+                        local chosen_ed = pseudorandom_element(eds, pseudoseed('sobresaturado_ed'))
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.2,
+                            func = function()
+                                play_sound('polychrome1')
+                                pcard:set_edition(chosen_ed, true)
+                                pcard:juice_up(0.4, 0.4)
+                                card_eval_status_text(pcard, 'extra', nil, nil, nil, { message = 'Polished!', colour = G.C.DARK_EDITION })
+                                return true
+                            end
+                        }))
                     end
                 end
             end

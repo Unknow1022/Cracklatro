@@ -8,6 +8,7 @@
 local files = {
     -- Core & Engine Hooks
     "src/core/utils.lua",
+    "src/core/localization.lua",
 
     -- Jokers
     "src/jokers/common.lua",

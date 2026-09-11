@@ -307,23 +307,23 @@ SMODS.Joker {
     loc_txt = {
         name = 'Runway',
         text = {
-            "Center card of played hand gains {X:mult,C:white}+X#1#{} Mult",
-            "for each unique trait on other played cards.",
-            "Defeating Blind permanently transfers one trait to it"
+            "Gains {X:mult,C:white}+X#2#{} Mult whenever",
+            "a card is {C:enhanced}Enhanced{}",
+            "{C:inactive}(Currently {X:mult,C:white}X#1#{C:inactive} Mult){}"
         }
     },
     unlock = {
         "Have 5 cards with",
         "{C:attention}Editions{} in your deck"
     },
-    config = { extra = { xmult_per_trait = 0.5 } },
-    rarity = 2,
+    config = { extra = { xmult = 1.0, xmult_gain = 0.1 } },
+    rarity = 3,
     pos = { x = 0, y = 0 },
-    cost = 6,
+    cost = 8,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        return { vars = { ex.xmult_per_trait or 0.5 } }
+        return { vars = { ex.xmult or 1.0, ex.xmult_gain or 0.1 } }
     end,
     check_for_unlock = function(self, args)
         if G.playing_cards then
@@ -339,66 +339,10 @@ SMODS.Joker {
         end
     end,
     calculate = function(self, card, context)
-        if context.scoring_hand and #context.scoring_hand >= 1 then
-            local center_idx = math.ceil(#context.scoring_hand / 2)
-            local center_card = context.scoring_hand[center_idx]
-
-            if context.individual and context.cardarea == G.play and context.other_card == center_card then
-                local traits = {}
-                for i, sc in ipairs(context.scoring_hand) do
-                    if sc ~= center_card then
-                        if sc.seal then traits['seal_' .. sc.seal] = sc.seal end
-                        if sc.edition then
-                            for ed_k, ed_v in pairs(sc.edition) do
-                                if ed_v and ed_k ~= 'type' then traits['ed_' .. ed_k] = ed_k end
-                            end
-                        end
-                        if sc.ability and sc.ability.set == 'Enhanced' then
-                            traits['enh_' .. sc.ability.name] = sc.config.center
-                        end
-                    end
-                end
-
-                local trait_count = 0
-                for _ in pairs(traits) do trait_count = trait_count + 1 end
-
-                if trait_count > 0 then
-                    local total_xmult = 1 + (trait_count * card.ability.extra.xmult_per_trait)
-                    return {
-                        x_mult = total_xmult,
-                        message = 'TOP MODEL! X' .. total_xmult,
-                        colour = G.C.DARK_EDITION,
-                        card = card
-                    }
-                end
-            end
-
-            -- If hand defeats blind, bestow a permanent trait
-            if context.after and not context.blueprint and G.GAME.chips >= G.GAME.blind.chips then
-                if center_card and not center_card.runway_bestowed then
-                    center_card.runway_bestowed = true
-                    local pool = {}
-                    for i, sc in ipairs(context.scoring_hand) do
-                        if sc ~= center_card then
-                            if sc.seal and not center_card.seal then table.insert(pool, { type = 'seal', val = sc.seal }) end
-                            if sc.edition and not center_card.edition then
-                                for ed_k, ed_v in pairs(sc.edition) do
-                                    if ed_v and ed_k ~= 'type' then table.insert(pool, { type = 'edition', val = 'e_' .. ed_k }) end
-                                end
-                            end
-                        end
-                    end
-                    if #pool > 0 then
-                        local chosen = pseudorandom_element(pool, pseudoseed('runway_trait'))
-                        if chosen.type == 'seal' then
-                            center_card:set_seal(chosen.val, true)
-                        elseif chosen.type == 'edition' then
-                            center_card:set_edition(chosen.val, true)
-                        end
-                        center_card:juice_up(0.6, 0.6)
-                    end
-                end
-            end
+        if context.joker_main and card.ability.extra and card.ability.extra.xmult and card.ability.extra.xmult > 1 then
+            return {
+                Xmult = card.ability.extra.xmult
+            }
         end
     end
 }
@@ -411,6 +355,36 @@ SMODS.Atlas {
     py = 95
 }
 
+local SLOT_CHALLENGES = {
+    { id = 'flush', desc = "Play a Flush", check = function(ctx) return ctx.poker_hands and ctx.poker_hands['Flush'] and next(ctx.poker_hands['Flush']) end },
+    { id = 'straight', desc = "Play a Straight", check = function(ctx) return ctx.poker_hands and ctx.poker_hands['Straight'] and next(ctx.poker_hands['Straight']) end },
+    { id = 'full_house', desc = "Play a Full House", check = function(ctx) return ctx.poker_hands and ctx.poker_hands['Full House'] and next(ctx.poker_hands['Full House']) end },
+    { id = 'three_kind', desc = "Play a Three of a Kind", check = function(ctx) return ctx.poker_hands and ctx.poker_hands['Three of a Kind'] and next(ctx.poker_hands['Three of a Kind']) end },
+    { id = 'enhanced', desc = "Play an Enhanced card", check = function(ctx)
+        if ctx.scoring_hand then
+            for _, sc in ipairs(ctx.scoring_hand) do
+                if sc.config and sc.config.center and sc.config.center ~= G.P_CENTERS.c_base then return true end
+            end
+        end
+        return false
+    end },
+    { id = 'seven_or_lucky', desc = "Play a 7 or Lucky Card", check = function(ctx)
+        if ctx.scoring_hand then
+            for _, sc in ipairs(ctx.scoring_hand) do
+                if (sc:get_id() == 7) or (sc.ability and (sc.ability.name == 'Lucky Card' or sc.ability.effect == 'Lucky Card')) then return true end
+            end
+        end
+        return false
+    end }
+}
+
+local function get_slot_challenge(card)
+    local ex = (card and card.ability and card.ability.extra) or {}
+    local idx = ex.challenge_idx or 1
+    if idx < 1 or idx > #SLOT_CHALLENGES then idx = 1 end
+    return SLOT_CHALLENGES[idx]
+end
+
 SMODS.Joker {
     key = 'slot_machine_joker',
     atlas = 'slot_machine_joker',
@@ -421,7 +395,9 @@ SMODS.Joker {
             "Spins 3 reels on each hand played.",
             "{C:attention}Pair match{}: {C:money}+$#1#{} and {C:mult}+#2#{} Mult.",
             "{C:attention}Three of a kind{}: {C:money}+$#3#{} and {X:mult,C:white}X#4#{} Mult.",
-            "{C:attention}Triple 7 Jackpot{}: {C:money}+$#5#{}, {X:mult,C:white}X#6#{} Mult, and a Spectral card"
+            "{C:attention}Triple 7 Jackpot{}: {C:money}+$#5#{}, {X:mult,C:white}X#6#{} Mult, and a {C:spectral}Spectral{} card.",
+            "{C:green}Round Challenge{}: {C:attention}#7#{} {C:inactive}(#8#){}.",
+            "Use the {C:money}Bet{} button to win {C:money}X1.5{} your wager upon completion"
         }
     },
     unlock = {
@@ -429,14 +405,17 @@ SMODS.Joker {
         "{C:money}$20{} from a single",
         "{C:attention}Lucky Card{}"
     },
-    config = { extra = { pair_cash = 3, pair_mult = 15, triple_cash = 12, triple_xmult = 2.5, jackpot_cash = 35, jackpot_xmult = 4.0 } },
+    config = { extra = { pair_cash = 3, pair_mult = 15, triple_cash = 12, triple_xmult = 2.5, jackpot_cash = 35, jackpot_xmult = 4.0, challenge_idx = 1, bet_placed = false, bet_amount = 0, challenge_completed = false, last_payout_text = "" } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        return { vars = { ex.pair_cash, ex.pair_mult, ex.triple_cash, ex.triple_xmult, ex.jackpot_cash, ex.jackpot_xmult } }
+        local ch = get_slot_challenge(card or self)
+        local is_es = G.CRACKEDLATRO_SPANISH == true
+        local bet_str = (ex and ex.bet_placed) and ((is_es and "Apostado $" or "Bet: $") .. (ex.bet_amount or 5)) or (is_es and "Sin apuesta" or "No bet")
+        return { vars = { ex.pair_cash, ex.pair_mult, ex.triple_cash, ex.triple_xmult, ex.jackpot_cash, ex.jackpot_xmult, ch.desc, bet_str } }
     end,
     check_for_unlock = function(self, args)
         if args.type == 'lucky_both' or (G.GAME and G.GAME.lucky_hit_both) then
@@ -444,6 +423,17 @@ SMODS.Joker {
         end
     end,
     calculate = function(self, card, context)
+        card.ability.extra = card.ability.extra or {}
+
+        if (context.setting_blind or context.first_hand_drawn) and not context.blueprint and not card.ability.extra.rotated_this_round then
+            card.ability.extra.rotated_this_round = true
+            card.ability.extra.challenge_idx = pseudorandom('slot_ch_' .. ((G.GAME and G.GAME.round_resets and G.GAME.round_resets.ante) or 1) .. '_' .. ((G.GAME and G.GAME.current_round and G.GAME.current_round.hands_played) or 0), 1, #SLOT_CHALLENGES)
+            card.ability.extra.bet_placed = false
+            card.ability.extra.challenge_completed = false
+            card.ability.extra.bet_amount = 0
+            card.ability.extra.last_payout_text = ""
+        end
+
         if context.before and not context.blueprint and context.scoring_hand then
             local symbols = { 'Cherry', 'Lemon', 'Bell', '7' }
             local has_lucky = false
@@ -471,6 +461,7 @@ SMODS.Joker {
             local ex = card.ability.extra
 
             if r1 == '7' and r2 == '7' and r3 == '7' then
+                card.ability.extra.last_payout_text = "777 Jackpot! X" .. ex.jackpot_xmult .. " / +$" .. ex.jackpot_cash
                 if not context.blueprint then
                     G.E_MANAGER:add_event(Event({
                         func = function()
@@ -489,6 +480,7 @@ SMODS.Joker {
                     colour = G.C.GOLD
                 }
             elseif r1 == r2 and r2 == r3 then
+                card.ability.extra.last_payout_text = "Triple Match! X" .. ex.triple_xmult .. " / +$" .. ex.triple_cash
                 return {
                     Xmult = ex.triple_xmult,
                     dollars = ex.triple_cash,
@@ -496,13 +488,40 @@ SMODS.Joker {
                     colour = G.C.MONEY
                 }
             elseif r1 == r2 or r2 == r3 or r1 == r3 then
+                card.ability.extra.last_payout_text = "Pair Match! +" .. ex.pair_mult .. " Mult / +$" .. ex.pair_cash
                 return {
                     mult = ex.pair_mult,
                     dollars = ex.pair_cash,
                     message = 'PAIR MATCH! +$' .. ex.pair_cash,
                     colour = G.C.MULT
                 }
+            else
+                card.ability.extra.last_payout_text = "Miss"
             end
+        end
+
+        -- Check Challenge completion for the active bet
+        if context.after and not context.blueprint and card.ability.extra.bet_placed and not card.ability.extra.challenge_completed then
+            local ch = get_slot_challenge(card)
+            if ch and ch.check(context) then
+                card.ability.extra.challenge_completed = true
+                card.ability.extra.bet_placed = false
+                local payout = math.ceil((card.ability.extra.bet_amount or 5) * 1.5)
+                ease_dollars(payout)
+                local msg_txt = G.CRACKEDLATRO_SPANISH and ('¡Reto Cumplido! +$' .. payout) or ('Challenge Completed! +$' .. payout)
+                card.ability.extra.last_payout_text = (card.ability.extra.last_payout_text or "") .. " | " .. msg_txt
+                return {
+                    message = msg_txt,
+                    colour = G.C.MONEY
+                }
+            end
+        end
+
+        if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
+            card.ability.extra.rotated_this_round = nil
+            card.ability.extra.bet_placed = false
+            card.ability.extra.challenge_completed = false
+            card.ability.extra.bet_amount = 0
         end
     end
 }
@@ -779,16 +798,16 @@ SMODS.Joker {
         text = {
             "Gains {C:mult}+#2#{} Mult whenever",
             "a card is {C:attention}retriggered{}",
-            "{C:inactive}(Currently {C:mult}+#1#{C:inactive} Mult)"
+            "{C:inactive}(Currently {C:mult}+#1#{C:inactive} Mult){}"
         }
     },
-    config = { extra = { mult = 20, mult_gain = 2 } },
+    config = { extra = { mult = 0, mult_gain = 2 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
-        local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or 20
+        local mult = (card and card.ability and card.ability.extra and card.ability.extra.mult) or 0
         local mult_gain = (card and card.ability and card.ability.extra and card.ability.extra.mult_gain) or 2
         return { vars = { mult, mult_gain } }
     end,
@@ -1017,48 +1036,35 @@ SMODS.Joker {
     loc_txt = {
         name = 'Injured Joker',
         text = {
-            "{C:chips}+#1#{} Chips and {X:mult,C:white}X#2#{} Mult",
-            "if played hand contains a {C:attention}Straight{}",
-            "{C:green}#3# in #4#{} chance at the end of round",
-            "to transform into another Joker"
+            "{C:green}#1# in #2#{} chance at the end of round",
+            "to transform into another Joker.",
+            "{C:inactive}(Use button above to view options){}"
         }
     },
-    config = { extra = { chips = 125, xmult = 1.5, odds = 5 } },
+    config = { extra = { odds = 5 } },
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
-        local chips = (card and card.ability and card.ability.extra and card.ability.extra.chips) or 125
-        local xmult = (card and card.ability and card.ability.extra and card.ability.extra.xmult) or 1.5
         local odds = (card and card.ability and card.ability.extra and card.ability.extra.odds) or 5
         local prob = (G.GAME and G.GAME.probabilities.normal) or 1
-        return { vars = { chips, xmult, prob, odds } }
+        return { vars = { prob, odds } }
     end,
     calculate = function(self, card, context)
-        if context.joker_main and context.poker_hands then
-            local is_straight = (context.poker_hands['Straight'] and next(context.poker_hands['Straight'])) or
-                                (context.poker_hands['Straight Flush'] and next(context.poker_hands['Straight Flush']))
-            if is_straight then
-                return {
-                    chips = card.ability.extra.chips,
-                    Xmult = card.ability.extra.xmult,
-                    card = card
-                }
-            end
-        end
-
         if context.end_of_round and not context.blueprint and not context.individual and not context.repetition then
             local odds = (card.ability and card.ability.extra and card.ability.extra.odds) or 5
             local prob = (G.GAME and G.GAME.probabilities.normal) or 1
             if pseudorandom('injured_joker') < (prob / odds) then
                 local motorized_key = (G.P_CENTERS and G.P_CENTERS['j_Crackedlatro_motorizado_joker']) and 'j_Crackedlatro_motorizado_joker' or 'j_motorizado_joker'
+                local msg_rock = G.CRACKEDLATRO_SPANISH and '¡A rockear!' or "Let's rock!"
+                local msg_cursed = G.CRACKEDLATRO_SPANISH and '¡Maldito!' or 'Cursed!'
                 local transform_options = {
-                    { key = motorized_key, message = 'A rockear!', colour = G.C.ORANGE },
-                    { key = 'j_stuntman', message = 'A rockear!', colour = G.C.ORANGE },
-                    { key = 'j_invisible', message = 'Maldito!', colour = G.C.RED },
-                    { key = 'j_mr_bones', message = 'Maldito!', colour = G.C.RED },
-                    { key = 'j_vampire', message = 'Maldito!', colour = G.C.RED },
+                    { key = motorized_key, message = msg_rock, colour = G.C.ORANGE },
+                    { key = 'j_stuntman', message = msg_rock, colour = G.C.ORANGE },
+                    { key = 'j_invisible', message = msg_cursed, colour = G.C.RED },
+                    { key = 'j_mr_bones', message = msg_cursed, colour = G.C.RED },
+                    { key = 'j_vampire', message = msg_cursed, colour = G.C.RED },
                     { key = 'j_stencil', message = '?', colour = G.C.PURPLE }
                 }
                 local chosen = pseudorandom_element(transform_options, pseudoseed('injured_transform'))

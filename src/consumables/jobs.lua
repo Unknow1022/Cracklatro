@@ -80,12 +80,12 @@ SMODS.Sticker {
     rate = 0,
     needs_enable_flag = false,
     loc_txt = {
-        name = 'Jardinero',
-        label = 'Jardinero',
+        name = 'Gardener',
+        label = 'Gardener',
         text = {
-            "Al descartar esta carta, añade",
-            "{C:chips}+2{} Fichas base permanentes a",
-            "todas las cartas de su mismo palo"
+            "When discarding this card, permanently adds",
+            "{C:chips}+2{} base Chips to all cards",
+            "of the same suit in full deck"
         }
     },
     calculate = function(self, card, context)
@@ -107,8 +107,9 @@ SMODS.Sticker {
                 end
                 play_sound('chips1')
                 local suit_name = (localize and localize(suit, 'suits_plural')) or suit
+                local chip_msg = G.CRACKEDLATRO_SPANISH and ('+2 Fichas (' .. suit_name .. ')!') or ('+2 Chips (' .. suit_name .. ')!')
                 return {
-                    message = '+2 Fichas (' .. suit_name .. ')!',
+                    message = chip_msg,
                     colour = G.C.CHIPS,
                     card = card
                 }
@@ -130,9 +131,9 @@ SMODS.Sticker {
         name = 'Detective',
         label = 'Detective',
         text = {
-            "En la mano inicial de la ronda,",
-            "revela las próximas 3 cartas a robar",
-            "y les otorga {C:gold}Sello Dorado{} o {C:blue}Sello Azul{}"
+            "On opening hand of the round,",
+            "reveals the next 3 drawn cards and",
+            "gives them {C:gold}Gold Seal{} or {C:blue}Blue Seal{}"
         }
     },
     calculate = function(self, card, context)
@@ -140,23 +141,25 @@ SMODS.Sticker {
             if G.deck and G.deck.cards and #G.deck.cards > 0 then
                 local count = math.min(3, #G.deck.cards)
                 local seals = { 'Gold', 'Blue' }
-                card_eval_status_text(card, 'extra', nil, nil, nil, { message = '¡Investigando Mazo!', colour = HEX('2980b9') })
+                local start_msg = G.CRACKEDLATRO_SPANISH and '¡Investigando Mazo!' or 'Investigating Deck!'
+                card_eval_status_text(card, 'extra', nil, nil, nil, { message = start_msg, colour = HEX('2980b9') })
                 for i = 1, count do
                     local top_c = G.deck.cards[#G.deck.cards - (i - 1)]
                     if top_c then
                         local chosen_seal = pseudorandom_element(seals, pseudoseed('detective_seal'))
                         top_c:set_seal(chosen_seal, true)
                         top_c:juice_up(0.4, 0.4)
-                        local rank_str = (top_c.base and top_c.base.value) or 'Carta'
+                        local rank_str = (top_c.base and top_c.base.value) or 'Card'
                         local suit_str = (top_c.base and top_c.base.suit) or ''
-                        local seal_name = chosen_seal == 'Gold' and 'Dorado' or 'Azul'
+                        local seal_name = chosen_seal == 'Gold' and (G.CRACKEDLATRO_SPANISH and 'Dorado' or 'Gold') or (G.CRACKEDLATRO_SPANISH and 'Azul' or 'Blue')
+                        local of_str = G.CRACKEDLATRO_SPANISH and ' de ' or ' of '
                         G.E_MANAGER:add_event(Event({
                             trigger = 'after',
                             delay = 0.3,
                             func = function()
                                 play_sound('tarot1', 1 + 0.1 * i)
                                 card_eval_status_text(card, 'extra', nil, nil, nil, {
-                                    message = rank_str .. ' de ' .. suit_str .. ' (' .. seal_name .. ')',
+                                    message = rank_str .. of_str .. suit_str .. ' (' .. seal_name .. ')',
                                     colour = chosen_seal == 'Gold' and G.C.GOLD or G.C.BLUE
                                 })
                                 return true
@@ -165,7 +168,7 @@ SMODS.Sticker {
                     end
                 end
                 return {
-                    message = '¡Pistas Descubiertas!',
+                    message = G.CRACKEDLATRO_SPANISH and '¡Pistas Descubiertas!' or 'Clues Discovered!',
                     colour = HEX('2980b9'),
                     card = card
                 }
@@ -187,9 +190,9 @@ SMODS.Sticker {
         name = 'Chef',
         label = 'Chef',
         text = {
-            "Al puntuar en figuras (J, Q, K),",
-            "transforma a las demás cartas",
-            "puntuadas en {C:mult}Cartas Multi{}"
+            "When scoring face cards (J, Q, K),",
+            "converts all other scored cards",
+            "into {C:mult}Mult Cards{}"
         }
     },
     calculate = function(self, card, context)
@@ -207,7 +210,7 @@ SMODS.Sticker {
             if converted > 0 then
                 play_sound('tarot1')
                 return {
-                    message = '¡Sazonado!',
+                    message = G.CRACKEDLATRO_SPANISH and '¡Sazonado!' or 'Seasoned!',
                     colour = HEX('e67e22'),
                     card = card
                 }
@@ -226,12 +229,12 @@ SMODS.Sticker {
     rate = 0,
     needs_enable_flag = false,
     loc_txt = {
-        name = 'Arqueólogo',
-        label = 'Arqueólogo',
+        name = 'Archaeologist',
+        label = 'Archaeologist',
         text = {
-            "Al puntuar en tu última mano,",
-            "rescata 1 carta descartada con",
-            "una edición ({C:dark_edition}Foil{}, {C:dark_edition}Holo{}, {C:dark_edition}Poly{})"
+            "When scoring on final hand of round,",
+            "recovers 1 discarded card with",
+            "an edition ({C:dark_edition}Foil{}, {C:dark_edition}Holo{}, {C:dark_edition}Poly{})"
         }
     },
     calculate = function(self, card, context)
@@ -250,7 +253,7 @@ SMODS.Sticker {
                         local chosen_ed = pseudorandom_element(edition_choices, pseudoseed('archaeologist_ed'))
                         rescued:set_edition(chosen_ed, true)
                         return {
-                            message = '¡Excavado!',
+                            message = G.CRACKEDLATRO_SPANISH and '¡Excavado!' or 'Excavated!',
                             colour = G.C.GOLD,
                             card = card
                         }

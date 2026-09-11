@@ -511,7 +511,7 @@ SMODS.Consumable {
     atlas = 'c_refuerzo',
     pos = { x = 0, y = 0 },
     loc_txt = {
-        name = 'Refuerzo',
+        name = 'Reinforcement',
         text = {
             "Add a {C:chips}Silver Seal{}",
             "to {C:attention}1 selected card{}"

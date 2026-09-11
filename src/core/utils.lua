@@ -1393,3 +1393,231 @@ if G and G.FUNCS and G.FUNCS.draw_from_deck_to_hand then
     end
 end
 
+-- Hook Card.set_ability to trigger Runway (+X0.1 Mult per enhanced card)
+if Card and Card.set_ability then
+    local card_set_ability_ref = Card.set_ability
+    function Card:set_ability(center, initial, delay_sprites)
+        local ret = card_set_ability_ref(self, center, initial, delay_sprites)
+        if not initial and center and center.set == 'Enhanced' then
+            if G.jokers and G.jokers.cards then
+                for _, j in ipairs(G.jokers.cards) do
+                    if not j.debuff and card_has_key(j, 'runway') and j.ability and j.ability.extra then
+                        local gain = j.ability.extra.xmult_gain or 0.1
+                        j.ability.extra.xmult = (j.ability.extra.xmult or 1.0) + gain
+                        card_eval_status_text(j, 'extra', nil, nil, nil, {
+                            message = 'X' .. string.format('%.1f', j.ability.extra.xmult) .. ' Mult!',
+                            colour = G.C.XMULT
+                        })
+                        j:juice_up(0.4, 0.4)
+                    end
+                end
+            end
+        end
+        return ret
+    end
+end
+
+-- Hook pseudorandom for Lucky One guaranteed probability
+if pseudorandom then
+    local pseudorandom_ref = pseudorandom
+    function pseudorandom(seed, min, max)
+        if not min and not max and G.GAME and G.GAME.lucky_one_guaranteed then
+            G.GAME.lucky_one_guaranteed = false
+            if G.jokers and G.jokers.cards then
+                for _, j in ipairs(G.jokers.cards) do
+                    if not j.debuff and card_has_key(j, 'lucky_one') then
+                        card_eval_status_text(j, 'extra', nil, nil, nil, { message = 'Guaranteed!', colour = G.C.GREEN })
+                        j:juice_up(0.5, 0.5)
+                    end
+                end
+            end
+            return 0
+        end
+        return pseudorandom_ref(seed, min, max)
+    end
+end
+
+-- Hook G.UIDEF.use_and_sell_buttons for Slot Machine (Apostar) and Injured Joker (Transformaciones)
+if G and G.UIDEF and G.UIDEF.use_and_sell_buttons then
+    local use_and_sell_buttons_ref = G.UIDEF.use_and_sell_buttons
+    G.UIDEF.use_and_sell_buttons = function(card)
+        local base_background = use_and_sell_buttons_ref(card)
+        if not base_background then return base_background end
+        local base_attach = base_background:get_UIE_by_ID('ATTACH_TO_ME')
+        if not base_attach then return base_background end
+        local card_width = card.T.w + (card.ability.consumeable and -0.1 or card.ability.set == 'Voucher' and -0.16 or 0)
+
+        if card.area == G.jokers and G.STATE ~= G.STATES.TUTORIAL then
+            local is_es = G.CRACKEDLATRO_SPANISH == true
+            -- Slot Machine "Bet" button
+            if card_has_key(card, 'slot_machine') then
+                local bet_text = is_es and "Apostar" or "Bet"
+                base_attach.children.slot_machine_bet = UIBox{
+                    T = {card.VT.x, card.VT.y, 0, 0},
+                    definition = {
+                        n = G.UIT.ROOT, config = {align = 'cr', colour = G.C.CLEAR}, nodes = {
+                            {n = G.UIT.R, config = {
+                                ref_table = card,
+                                ref_parent = base_attach,
+                                align = 'cr',
+                                colour = G.C.GOLD,
+                                shadow = true,
+                                r = 0.08,
+                                func = 'can_slot_machine_bet',
+                                one_press = true,
+                                button = 'slot_machine_bet',
+                                hover = true,
+                                focus_args = {type = 'none'}
+                            }, nodes = {
+                                {n = G.UIT.R, config = {align = 'cr', minw = 1.15, minh = 1.0, padding = 0.08}, nodes = {
+                                    {n = G.UIT.C, config = {align = 'cm', maxw = 1.15}, nodes = {
+                                        {n = G.UIT.R, config = {align = 'cm'}, nodes = {
+                                            {n = G.UIT.T, config = {text = bet_text, colour = G.C.UI.TEXT_LIGHT, scale = 0.38, shadow = true}}
+                                        }},
+                                        {n = G.UIT.R, config = {align = 'cm'}, nodes = {
+                                            {n = G.UIT.T, config = {text = "$5", colour = G.C.WHITE, scale = 0.45, shadow = true}}
+                                        }}
+                                    }}
+                                }}
+                            }}
+                        }
+                    },
+                    config = {
+                        align = 'cr',
+                        offset = {x = (card_width or 0) - 0.17 - card.T.w/2, y = 0},
+                        parent = base_attach
+                    }
+                }
+            end
+
+            -- Injured Joker small button above card to view roster
+            if card_has_key(card, 'lesionado') or card_has_key(card, 'injured') then
+                local transforms_text = is_es and "Transformaciones" or "Transforms"
+                base_attach.children.injured_roster = UIBox{
+                    T = {card.VT.x, card.VT.y, 0, 0},
+                    definition = {
+                        n = G.UIT.ROOT, config = {align = 'tm', colour = G.C.CLEAR}, nodes = {
+                            {n = G.UIT.R, config = {
+                                ref_table = card,
+                                ref_parent = base_attach,
+                                align = 'cm',
+                                colour = G.C.BLUE,
+                                shadow = true,
+                                r = 0.08,
+                                button = 'injured_show_roster',
+                                hover = true,
+                                focus_args = {type = 'none'}
+                            }, nodes = {
+                                {n = G.UIT.R, config = {align = 'cm', minw = 1.8, minh = 0.45, padding = 0.05}, nodes = {
+                                    {n = G.UIT.T, config = {text = transforms_text, colour = G.C.WHITE, scale = 0.28, shadow = true}}
+                                }}
+                            }}
+                        }
+                    },
+                    config = {
+                        align = 'tm',
+                        offset = {x = 0, y = -card.T.h/2 - 0.35},
+                        parent = base_attach
+                    }
+                }
+            end
+        end
+
+        return base_background
+    end
+end
+
+-- Button callbacks
+if G and G.FUNCS then
+    G.FUNCS.can_slot_machine_bet = function(e)
+        local card = e.config.ref_table
+        if card and card.ability and card.ability.extra then
+            if card.ability.extra.bet_placed then
+                e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+                e.config.button = nil
+            elseif (G.GAME.dollars or 0) >= 5 and G.STATE == G.STATES.SELECTING_HAND then
+                e.config.colour = G.C.GOLD
+                e.config.button = 'slot_machine_bet'
+            else
+                e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+                e.config.button = nil
+            end
+        end
+    end
+
+    G.FUNCS.slot_machine_bet = function(e)
+        local card = e.config.ref_table
+        if card and card.ability and card.ability.extra and not card.ability.extra.bet_placed and (G.GAME.dollars or 0) >= 5 then
+            ease_dollars(-5)
+            card.ability.extra.bet_placed = true
+            card.ability.extra.bet_amount = 5
+            card.ability.extra.challenge_completed = false
+            card:juice_up(0.5, 0.5)
+            play_sound('coin1')
+            local bet_msg = (G.CRACKEDLATRO_SPANISH == true) and "¡Apostado $5!" or "Bet $5!"
+            attention_text({
+                text = bet_msg,
+                scale = 0.9,
+                hold = 1.0,
+                major = card,
+                backdrop_colour = G.C.GOLD,
+                align = 'cm',
+                silent = true
+            })
+            if e.UIBox then e.UIBox:recalculate(true) end
+        end
+    end
+
+    G.FUNCS.injured_show_roster = function(e)
+        if create_UIBox_generic_options and G.FUNCS.overlay_menu then
+            local is_es = (G.CRACKEDLATRO_SPANISH == true)
+            local title = is_es and "Transformaciones de Injured Joker" or "Injured Joker Transformations"
+            local subtitle = is_es and "Al final de la ronda (1 en 5 prob.) puede transformarse en:" or "At end of round (1 in 5 chance) can transform into:"
+            local quote_rock = is_es and " - \"A rockear!\"" or " - \"Let's rock!\""
+            local quote_curse = is_es and " - \"Maldito!\"" or " - \"Cursed!\""
+
+            local t = create_UIBox_generic_options({
+                back_func = 'exit_overlay_menu',
+                contents = {
+                    {n = G.UIT.R, config = {align = "cm", padding = 0.2}, nodes = {
+                        {n = G.UIT.T, config = {text = title, scale = 0.6, colour = G.C.GOLD, shadow = true}}
+                    }},
+                    {n = G.UIT.R, config = {align = "cm", padding = 0.1}, nodes = {
+                        {n = G.UIT.T, config = {text = subtitle, scale = 0.4, colour = G.C.WHITE}}
+                    }},
+                    {n = G.UIT.R, config = {align = "cm", padding = 0.15, colour = G.C.L_BLACK, r = 0.1}, nodes = {
+                        {n = G.UIT.C, config = {align = "cl", padding = 0.1}, nodes = {
+                            {n = G.UIT.R, config = {align = "cl", padding = 0.04}, nodes = {
+                                {n = G.UIT.T, config = {text = "• Motorized Joker", scale = 0.42, colour = G.C.ORANGE}},
+                                {n = G.UIT.T, config = {text = quote_rock, scale = 0.35, colour = G.C.UI.TEXT_INACTIVE}}
+                            }},
+                            {n = G.UIT.R, config = {align = "cl", padding = 0.04}, nodes = {
+                                {n = G.UIT.T, config = {text = "• Stuntman", scale = 0.42, colour = G.C.ORANGE}},
+                                {n = G.UIT.T, config = {text = quote_rock, scale = 0.35, colour = G.C.UI.TEXT_INACTIVE}}
+                            }},
+                            {n = G.UIT.R, config = {align = "cl", padding = 0.04}, nodes = {
+                                {n = G.UIT.T, config = {text = "• Invisible Joker", scale = 0.42, colour = G.C.RED}},
+                                {n = G.UIT.T, config = {text = quote_curse, scale = 0.35, colour = G.C.UI.TEXT_INACTIVE}}
+                            }},
+                            {n = G.UIT.R, config = {align = "cl", padding = 0.04}, nodes = {
+                                {n = G.UIT.T, config = {text = "• Mr. Bones", scale = 0.42, colour = G.C.RED}},
+                                {n = G.UIT.T, config = {text = quote_curse, scale = 0.35, colour = G.C.UI.TEXT_INACTIVE}}
+                            }},
+                            {n = G.UIT.R, config = {align = "cl", padding = 0.04}, nodes = {
+                                {n = G.UIT.T, config = {text = "• Vampire", scale = 0.42, colour = G.C.RED}},
+                                {n = G.UIT.T, config = {text = quote_curse, scale = 0.35, colour = G.C.UI.TEXT_INACTIVE}}
+                            }},
+                            {n = G.UIT.R, config = {align = "cl", padding = 0.04}, nodes = {
+                                {n = G.UIT.T, config = {text = "• Joker Stencil", scale = 0.42, colour = G.C.PURPLE}},
+                                {n = G.UIT.T, config = {text = " - \"?\"", scale = 0.35, colour = G.C.UI.TEXT_INACTIVE}}
+                            }},
+                        }}
+                    }}
+                }
+            })
+            G.FUNCS.overlay_menu{definition = t}
+        end
+    end
+end
+
+

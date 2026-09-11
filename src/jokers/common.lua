@@ -14,64 +14,34 @@ SMODS.Joker {
     loc_txt = {
         name = 'Masterful Joker',
         text = {
-            "Scores in {C:attention}4 or 5 of a Kind{} master that rank.",
-            "Cards of {C:attention}mastered ranks{} count as {C:attention}all suits{}.",
-            "{C:mult}+#1#{} Mult per mastered rank {C:inactive}(Currently {C:mult}+#2#{C:inactive}){}"
+            "If played hand contains a",
+            "{C:attention}Four of a Kind{}, creates a",
+            "random {C:tarot}Tarot{} card",
+            "{C:inactive}(Must have room){}"
         }
     },
-    config = { extra = { mult_per_rank = 10, bonus_mult = 0, mastered_ranks = {} } },
+    config = { extra = {} },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
     blueprint_compat = true,
-    loc_vars = function(self, info_queue, card)
-        local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        local count = 0
-        if ex.mastered_ranks then
-            for _ in pairs(ex.mastered_ranks) do count = count + 1 end
-        end
-        local current_mult = count * (ex.mult_per_rank or 10)
-        return { vars = { ex.mult_per_rank or 10, current_mult } }
-    end,
     calculate = function(self, card, context)
-        if context.before and not context.blueprint and context.poker_hands then
-            local has_poker_or_five = (context.poker_hands['Four of a Kind'] and next(context.poker_hands['Four of a Kind'])) or
-                                      (context.poker_hands['Five of a Kind'] and next(context.poker_hands['Five of a Kind'])) or
-                                      (context.poker_hands['Flush Five'] and next(context.poker_hands['Flush Five']))
-            if has_poker_or_five and context.scoring_hand then
-                local rank_counts = {}
-                local target_value = nil
-                for _, c in ipairs(context.scoring_hand) do
-                    local val = c.base and c.base.value
-                    if val then
-                        rank_counts[val] = (rank_counts[val] or 0) + 1
-                        if rank_counts[val] >= 4 then
-                            target_value = val
-                        end
+        if context.joker_main and context.poker_hands and context.poker_hands['Four of a Kind'] and next(context.poker_hands['Four of a Kind']) then
+            if #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
+                G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+                G.E_MANAGER:add_event(Event({
+                    func = function()
+                        local new_card = create_card('Tarot', G.consumeables, nil, nil, nil, nil, nil, 'mas')
+                        new_card:add_to_deck()
+                        G.consumeables:emplace(new_card)
+                        G.GAME.consumeable_buffer = 0
+                        return true
                     end
-                end
-                if target_value then
-                    card.ability.extra.mastered_ranks = card.ability.extra.mastered_ranks or {}
-                    if not card.ability.extra.mastered_ranks[target_value] then
-                        card.ability.extra.mastered_ranks[target_value] = true
-                        return {
-                            message = 'Mastered ' .. target_value .. '!',
-                            colour = G.C.PURPLE
-                        }
-                    end
-                end
-            end
-        end
-
-        if context.joker_main then
-            local count = 0
-            if card.ability.extra.mastered_ranks then
-                for _ in pairs(card.ability.extra.mastered_ranks) do count = count + 1 end
-            end
-            local total_mult = count * (card.ability.extra.mult_per_rank or 10)
-            if total_mult > 0 then
+                }))
                 return {
-                    mult = total_mult
+                    message = 'Tarot!',
+                    colour = G.C.PURPLE,
+                    card = card
                 }
             end
         end
@@ -319,20 +289,17 @@ SMODS.Joker {
         name = 'TTS',
         text = {
             "Scored cards give {C:chips}+#1#{} Chips and {C:mult}+#2#{} Mult",
-            "per letter in their English rank name.",
-            "Earn {C:money}$#5#{} every {C:attention}#3# letters{} played",
-            "{C:inactive}(#4#/#3# letters){}"
+            "per letter in their English rank name."
         }
     },
-    config = { extra = { chips_per_letter = 4, mult_per_letter = 1, letters_target = 50, donation = 10, letters_progress = 0 } },
+    config = { extra = { chips_per_letter = 4, mult_per_letter = 1 } },
     rarity = 1,
     pos = { x = 0, y = 0 },
     cost = 5,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
-        local progress = (card and card.ability and card.ability.extra and card.ability.extra.letters_progress) or 0
-        return { vars = { ex.chips_per_letter, ex.mult_per_letter, ex.letters_target, progress, ex.donation } }
+        return { vars = { ex.chips_per_letter or 4, ex.mult_per_letter or 1 } }
     end,
     calculate = function(self, card, context)
         local rank_names = {
@@ -351,32 +318,12 @@ SMODS.Joker {
             local name = rank_names[val] or tostring(val or 'Card')
             local letters = letter_counts[val] or #name
             return {
-                chips = letters * card.ability.extra.chips_per_letter,
-                mult = letters * card.ability.extra.mult_per_letter,
+                chips = letters * (card.ability.extra.chips_per_letter or 4),
+                mult = letters * (card.ability.extra.mult_per_letter or 1),
                 message = name,
                 colour = G.C.MULT,
                 card = card
             }
-        end
-
-        if context.before and not context.blueprint then
-            local played = context.full_hand or context.scoring_hand
-            if played then
-                local hand_letters = 0
-                for _, c in ipairs(played) do
-                    local val = c.base and c.base.value
-                    hand_letters = hand_letters + (letter_counts[val] or 4)
-                end
-                card.ability.extra.letters_progress = (card.ability.extra.letters_progress or 0) + hand_letters
-                if card.ability.extra.letters_progress >= card.ability.extra.letters_target then
-                    card.ability.extra.letters_progress = card.ability.extra.letters_progress - card.ability.extra.letters_target
-                    ease_dollars(card.ability.extra.donation)
-                    return {
-                        message = 'TTS DONATION! +$' .. card.ability.extra.donation,
-                        colour = G.C.MONEY
-                    }
-                end
-            end
         end
     end
 }

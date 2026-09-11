@@ -163,7 +163,7 @@ Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas,
 * **Miner**: Los Diamantes descienden **+5m** en la mina: 0-50m (Carbón: **+25 Fichas**), 50-120m (Oro: **+$2**), 120-300m (Diamante: **+X1.35 Multi**), 300m+ (Núcleo Magmático: **+X1.5 Multi**, **reactivación** y extrae una carta Espectral al final de la ronda).
 * **Joke Joker?**: No hace nada aparente... pero en secreto, si posees el Vale Blank, lo transforma inmediatamente en Antimatter (+1 espacio de Joker).
 * **Perfectionism**: Al derrotar una Ciega Grande o Ciega Jefe, aplica **Policromo** a un Joker aleatorio (1 en 5 de otorgar **Negativo** en su lugar).
-* **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker, genera un *Invisible Joker* (**1 vez por ronda**).
+* **Reaper Joker (Joker Parca)**: Al vender cualquier otro Joker (excepto *Invisible Joker*), genera un *Invisible Joker* (**1 vez por ronda**).
 * **Infostealer Joker**: Siempre es **Eterno**. Al salir de la tienda descuenta **$10** y gana **+X0.5 Multi**; si no tienes suficiente dinero, pierde **-X0.5 Multi** (mínimo X1).
 * **Supersaturated Joker (Joker Sobresaturado)**: Al puntuar, coloca una mejora faltante aleatoria (*Sello, Mejora o Edición*). Si la carta ya cuenta con Sello, Mejora y Edición simultáneamente, otorga **+$10**.
 

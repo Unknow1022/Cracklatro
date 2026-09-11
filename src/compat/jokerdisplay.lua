@@ -1,7 +1,7 @@
 --[[
     JokerDisplay Integration for Cracklatro
     Full Native Display Suite for all 44 Jokers
-    Author: Unknow102 & Antigravity
+    Minimalist & Clean Numbers-Only Edition
     Compatible with JokerDisplay >= 1.8.0 & SMODS
 --]]
 
@@ -9,7 +9,7 @@ if not JokerDisplay then return end
 
 local jd_def = JokerDisplay.Definitions
 
--- Helpers for compact card and suit formatting
+-- Helpers for compact card formatting
 local function format_short_card(c)
     if not c or not c.base then return "?" end
     local val = c.base.value or '?'
@@ -38,7 +38,7 @@ jd_def["j_Crackedlatro_masterful_joker"] = {
     text_config = { colour = G.C.MULT },
     reminder_text = {
         { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "mastered_text" },
+        { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
     calc_function = function(card)
@@ -48,56 +48,18 @@ jd_def["j_Crackedlatro_masterful_joker"] = {
         end
         local mult_per = (card.ability and card.ability.extra and card.ability.extra.mult_per_rank) or 10
         card.joker_display_values.mult = count * mult_per
-
-        local will_master = nil
-        local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
-        if text ~= 'Unknown' and poker_hands then
-            local has_poker = (poker_hands['Four of a Kind'] and next(poker_hands['Four of a Kind'])) or
-                              (poker_hands['Five of a Kind'] and next(poker_hands['Five of a Kind'])) or
-                              (poker_hands['Flush Five'] and next(poker_hands['Flush Five']))
-            if has_poker and scoring_hand then
-                local counts = {}
-                for _, c in ipairs(scoring_hand) do
-                    local v = c.base and c.base.value
-                    if v then
-                        counts[v] = (counts[v] or 0) + 1
-                        if counts[v] >= 4 and not (card.ability.extra.mastered_ranks and card.ability.extra.mastered_ranks[v]) then
-                            will_master = v
-                        end
-                    end
-                end
-            end
-        end
-
-        if will_master then
-            card.joker_display_values.mastered_text = "+" .. will_master
-            card.joker_display_values.active_master = true
-        else
-            card.joker_display_values.mastered_text = count > 0 and (count .. " M") or "-"
-            card.joker_display_values.active_master = false
-        end
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active_master and G.C.PURPLE or G.C.UI.TEXT_INACTIVE
-        end
+        card.joker_display_values.rem = count .. "/13"
     end
 }
 
 -- 2. Outstanding Joker
 jd_def["j_Crackedlatro_outstanding_joker"] = {
     text = {
-        {
-            ref_table = "card.joker_display_values",
-            ref_value = "retrigger_str"
-        }
+        { ref_table = "card.joker_display_values", ref_value = "retrigger_str" }
     },
     reminder_text = {
         { text = "(" },
-        {
-            ref_table = "card.joker_display_values",
-            ref_value = "card_str"
-        },
+        { ref_table = "card.joker_display_values", ref_value = "card_str" },
         { text = ")" }
     },
     calc_function = function(card)
@@ -113,13 +75,12 @@ jd_def["j_Crackedlatro_outstanding_joker"] = {
                     highest_card = c
                 end
             end
-
             if highest_card then
                 card.joker_display_values.retrigger_str = (1 * triggers) .. "x"
                 card.joker_display_values.card_str = format_short_card(highest_card)
                 card.joker_display_values.active = true
             else
-                card.joker_display_values.retrigger_str = "0x"
+                card.joker_display_values.retrigger_str = (1 * triggers) .. "x"
                 card.joker_display_values.card_str = "-"
                 card.joker_display_values.active = false
             end
@@ -132,9 +93,6 @@ jd_def["j_Crackedlatro_outstanding_joker"] = {
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.ORANGE or G.C.UI.TEXT_INACTIVE
         end
     end,
     retrigger_function = function(playing_card, scoring_hand, held_in_hand, joker_card)
@@ -168,13 +126,7 @@ jd_def["j_Crackedlatro_blueberry_joker"] = {
     },
     calc_function = function(card)
         local r = (card.ability and card.ability.extra and card.ability.extra.rounds_left) or 3
-        card.joker_display_values.rounds_left = r .. (r == 1 and " rnd" or " rnds")
-        card.joker_display_values.is_last = (r <= 1)
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.is_last and G.C.RED or G.C.FILTER
-        end
+        card.joker_display_values.rounds_left = r .. "/3"
     end
 }
 
@@ -190,26 +142,12 @@ jd_def["j_Crackedlatro_dj_joker"] = {
     },
     calc_function = function(card)
         local used = card.ability and card.ability.extra and card.ability.extra.used
-        if used then
-            card.joker_display_values.rem = "Used"
-            card.joker_display_values.active = false
-        else
-            local text, _, scoring_hand = JokerDisplay.evaluate_hand()
-            if text ~= 'Unknown' and scoring_hand and #scoring_hand == 1 then
-                card.joker_display_values.rem = format_short_card(scoring_hand[1])
-                card.joker_display_values.active = true
-            else
-                card.joker_display_values.rem = "1 Card"
-                card.joker_display_values.active = false
-            end
-        end
+        card.joker_display_values.rem = used and "0/1" or "1/1"
+        card.joker_display_values.active = not used
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.SECONDARY_SET.Enhanced or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -240,13 +178,7 @@ jd_def["j_Crackedlatro_disenador_joker"] = {
             end
         end
         card.joker_display_values.dollars = dollars
-        card.joker_display_values.rem = wild_count > 0 and (wild_count .. " Wild") or "Wild"
-        card.joker_display_values.active = (dollars > 0)
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.MONEY or G.C.UI.TEXT_INACTIVE
-        end
+        card.joker_display_values.rem = wild_count .. " Wild"
     end
 }
 
@@ -255,7 +187,7 @@ jd_def["j_Crackedlatro_tts_joker"] = {
     text = {
         { text = "+" },
         { ref_table = "card.joker_display_values", ref_value = "chips", colour = G.C.CHIPS, retrigger_type = "mult" },
-        { text = " +" },
+        { text = " / +" },
         { ref_table = "card.joker_display_values", ref_value = "mult", colour = G.C.MULT, retrigger_type = "mult" }
     },
     reminder_text = {
@@ -269,7 +201,6 @@ jd_def["j_Crackedlatro_tts_joker"] = {
             ['7'] = 5, ['8'] = 5, ['9'] = 4, ['10'] = 3,
             ['Jack'] = 4, ['Queen'] = 5, ['King'] = 4, ['Ace'] = 3
         }
-        local total_letters = 0
         local total_chips = 0
         local total_mult = 0
         local text, _, scoring_hand = JokerDisplay.evaluate_hand()
@@ -278,7 +209,6 @@ jd_def["j_Crackedlatro_tts_joker"] = {
                 local val = c.base and c.base.value
                 local l = letter_counts[val] or 4
                 local triggers = JokerDisplay.calculate_card_triggers(c, scoring_hand)
-                total_letters = total_letters + l
                 total_chips = total_chips + (l * (card.ability.extra.chips_per_letter or 4)) * triggers
                 total_mult = total_mult + (l * (card.ability.extra.mult_per_letter or 1)) * triggers
             end
@@ -302,28 +232,14 @@ jd_def["j_Crackedlatro_shareholder_joker"] = {
     },
     text_config = { colour = G.C.MULT },
     reminder_text = {
-        { text = "(Pays +$" },
+        { text = "(+$" },
         { ref_table = "card.ability.extra", ref_value = "current_price" },
-        { text = " at end)" }
+        { text = ")" }
     },
     reminder_text_config = { colour = G.C.MONEY },
-    extra = {
-        {
-            { text = "Market Trend: " },
-            { ref_table = "card.joker_display_values", ref_value = "trend_str" }
-        }
-    },
     calc_function = function(card)
         local price = (card.ability and card.ability.extra and card.ability.extra.current_price) or 8
         card.joker_display_values.mult = price * 2
-        local trend = (card.ability and card.ability.extra and card.ability.extra.market_trend) or 'Normal'
-        card.joker_display_values.trend_str = trend
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if extra and extra.children and extra.children[1] and extra.children[1].children and extra.children[1].children[2] then
-            local trend = card.joker_display_values.trend_str
-            extra.children[1].children[2].config.colour = trend == 'Bull' and G.C.GREEN or (trend == 'Bear' and G.C.RED or G.C.UI.TEXT_LIGHT)
-        end
     end
 }
 
@@ -342,11 +258,6 @@ jd_def["j_Crackedlatro_builder_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "4+ cards: +20 Perma Chips to highest", colour = G.C.CHIPS }
-        }
-    },
     calc_function = function(card)
         local text, _, scoring_hand = JokerDisplay.evaluate_hand()
         if text ~= 'Unknown' and scoring_hand and #scoring_hand >= 2 then
@@ -361,25 +272,22 @@ jd_def["j_Crackedlatro_builder_joker"] = {
             end
             if is_ascending then
                 card.joker_display_values.x_mult = 1 + (#scoring_hand * (card.ability.extra.xmult_per_card or 0.5))
-                card.joker_display_values.rem = "Ascending (" .. #scoring_hand .. " cards)"
+                card.joker_display_values.rem = #scoring_hand .. " cards"
                 card.joker_display_values.active = true
             else
                 card.joker_display_values.x_mult = 1
-                card.joker_display_values.rem = "Unstable (+10 Chips)"
+                card.joker_display_values.rem = "0"
                 card.joker_display_values.active = false
             end
         else
             card.joker_display_values.x_mult = 1
-            card.joker_display_values.rem = "Ascending Order (+X0.5/c)"
+            card.joker_display_values.rem = "0"
             card.joker_display_values.active = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -397,15 +305,7 @@ jd_def["j_Crackedlatro_banquet_joker"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "held_count" },
-        { text = "/7 Held)" }
-    },
-    extra = {
-        {
-            { text = "+2 Perma Chips per held card", colour = G.C.CHIPS }
-        },
-        {
-            { text = "Sell: +$15 & Negative Food", colour = G.C.SECONDARY_SET.Enhanced }
-        }
+        { text = "/7)" }
     },
     calc_function = function(card)
         local in_hand = (G.hand and G.hand.cards and #G.hand.cards) or 0
@@ -425,9 +325,6 @@ jd_def["j_Crackedlatro_banquet_joker"] = {
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
         end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
-        end
     end
 }
 
@@ -441,7 +338,7 @@ jd_def["j_Crackedlatro_appraiser_joker"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "count" },
-        { text = " Editions in deck)" }
+        { text = ")" }
     },
     calc_function = function(card)
         local count = 0
@@ -473,11 +370,6 @@ jd_def["j_Crackedlatro_runway_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "Defeating Blind transfers 1 trait to center", colour = G.C.DARK_EDITION }
-        }
-    },
     calc_function = function(card)
         local text, _, scoring_hand = JokerDisplay.evaluate_hand()
         if text ~= 'Unknown' and scoring_hand and #scoring_hand >= 1 then
@@ -501,20 +393,17 @@ jd_def["j_Crackedlatro_runway_joker"] = {
             for _ in pairs(traits) do trait_count = trait_count + 1 end
             local per = (card.ability and card.ability.extra and card.ability.extra.xmult_per_trait) or 0.5
             card.joker_display_values.x_mult = 1 + (trait_count * per)
-            card.joker_display_values.rem = trait_count .. " Unique Traits (" .. format_short_card(center_card) .. ")"
+            card.joker_display_values.rem = tostring(trait_count)
             card.joker_display_values.active = (trait_count > 0)
         else
             card.joker_display_values.x_mult = 1
-            card.joker_display_values.rem = "Center Card Model"
+            card.joker_display_values.rem = "0"
             card.joker_display_values.active = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -525,22 +414,6 @@ jd_def["j_Crackedlatro_slot_machine_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "reels_preview" }
     },
     text_config = { colour = G.C.GOLD },
-    reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
-    },
-    extra = {
-        {
-            { text = "Pair: +$3, +15 Mult", colour = G.C.MULT }
-        },
-        {
-            { text = "Triple: +$12, X2.5 Mult", colour = G.C.XMULT }
-        },
-        {
-            { text = "Jackpot 777: +$35, X4 Mult, Spectral", colour = G.C.GOLD }
-        }
-    },
     calc_function = function(card)
         local has_lucky = false
         local text, _, scoring_hand = JokerDisplay.evaluate_hand()
@@ -554,20 +427,8 @@ jd_def["j_Crackedlatro_slot_machine_joker"] = {
         end
         if has_lucky then
             card.joker_display_values.reels_preview = "[ 7 | ? | ? ]"
-            card.joker_display_values.rem = "Lucky Card: Reel 1 = 7"
-            card.joker_display_values.active = true
         else
             card.joker_display_values.reels_preview = "[ ? | ? | ? ]"
-            card.joker_display_values.rem = "Spin on Play"
-            card.joker_display_values.active = false
-        end
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if text and text.children and text.children[1] then
-            text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.UI.TEXT_LIGHT
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -587,11 +448,6 @@ jd_def["j_Crackedlatro_duel_of_value_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "Two Pair with exactly 2 Even, 2 Odd", colour = G.C.UI.TEXT_INACTIVE }
-        }
-    },
     calc_function = function(card)
         local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
         local is_two_pair = (poker_hands and poker_hands['Two Pair'] and next(poker_hands['Two Pair']))
@@ -605,21 +461,18 @@ jd_def["j_Crackedlatro_duel_of_value_joker"] = {
             end
             if evens == 2 and odds == 2 then
                 card.joker_display_values.x_mult = card.ability.extra.xmult or 3.0
-                card.joker_display_values.rem = "Duel Active!"
+                card.joker_display_values.rem = "2/2"
                 card.joker_display_values.active = true
                 return
             end
         end
         card.joker_display_values.x_mult = 1.0
-        card.joker_display_values.rem = "Two Pair (2 Even, 2 Odd)"
+        card.joker_display_values.rem = "0/2"
         card.joker_display_values.active = false
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -634,11 +487,6 @@ jd_def["j_Crackedlatro_falta_de_lectura_joker"] = {
             }
         }
     },
-    reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
-    },
     calc_function = function(card)
         local other_jokers = false
         if G.jokers and G.jokers.cards then
@@ -651,11 +499,9 @@ jd_def["j_Crackedlatro_falta_de_lectura_joker"] = {
         end
         if not other_jokers then
             card.joker_display_values.x_mult = card.ability.extra.xmult or 5.0
-            card.joker_display_values.rem = "Active (Alone)"
             card.joker_display_values.active = true
         else
-            card.joker_display_values.x_mult = card.ability.extra.xmult or 5.0
-            card.joker_display_values.rem = "No other Jokers may trigger"
+            card.joker_display_values.x_mult = 1.0
             card.joker_display_values.active = false
         end
     end,
@@ -663,21 +509,14 @@ jd_def["j_Crackedlatro_falta_de_lectura_joker"] = {
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
         end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
-        end
     end
 }
 
 -- 15. Chameleon Joker
 jd_def["j_Crackedlatro_chameleon_joker"] = {
     text = {
-        { text = "Needs " },
-        { ref_table = "card.ability.extra", ref_value = "required_rank", colour = G.C.ATTENTION }
-    },
-    reminder_text = {
-        { text = "(Copy Left: " },
-        { ref_table = "card.ability.extra", ref_value = "required_rank" },
+        { text = "(" },
+        { ref_table = "card.ability.extra", ref_value = "required_rank", colour = G.C.ATTENTION },
         { text = ")" }
     },
     calc_function = function(card)
@@ -717,10 +556,7 @@ jd_def["j_Crackedlatro_motorizado_joker"] = {
         { text = "+" },
         { ref_table = "card.ability.extra", ref_value = "mult", retrigger_type = "mult" }
     },
-    text_config = { colour = G.C.MULT },
-    reminder_text = {
-        { text = "(+2 on each Retrigger)" }
-    }
+    text_config = { colour = G.C.MULT }
 }
 
 -- 17. Hired Joker (Joker Contratado)
@@ -729,30 +565,8 @@ jd_def["j_Crackedlatro_contratado_joker"] = {
         { text = "Job Card", colour = HEX('5c1e11') }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
-    },
-    extra = {
-        {
-            { text = "Minero, Alquimista, Detective, Joyero...", colour = G.C.UI.TEXT_INACTIVE }
-        }
-    },
-    calc_function = function(card)
-        local is_full = G.consumeables and #G.consumeables.cards >= G.consumeables.config.card_limit
-        if is_full then
-            card.joker_display_values.rem = "Slots Full!"
-            card.joker_display_values.active = false
-        else
-            card.joker_display_values.rem = "1 in 3 Chance"
-            card.joker_display_values.active = true
-        end
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.RED
-        end
-    end
+        { text = "(1/3)" }
+    }
 }
 
 -- 18. Seal of Approval (Sello de Aprobación)
@@ -768,19 +582,16 @@ jd_def["j_Crackedlatro_sello_aprobacion_joker"] = {
     calc_function = function(card)
         local text, _, scoring_hand = JokerDisplay.evaluate_hand()
         if text ~= 'Unknown' and scoring_hand and #scoring_hand == 1 then
-            card.joker_display_values.rem = "Approves " .. format_short_card(scoring_hand[1])
+            card.joker_display_values.rem = "1/1"
             card.joker_display_values.active = true
         else
-            card.joker_display_values.rem = "Play exactly 1 Card"
+            card.joker_display_values.rem = "0/1"
             card.joker_display_values.active = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -795,12 +606,7 @@ jd_def["j_Crackedlatro_charco_pintura_joker"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.ability.extra", ref_value = "suit" },
-        { text = " / Wild)" }
-    },
-    extra = {
-        {
-            { text = "Suit: +25 Mult | Wild: +50 Mult", colour = G.C.UI.TEXT_INACTIVE }
-        }
+        { text = ")" }
     },
     calc_function = function(card)
         local suit = (card.ability and card.ability.extra and card.ability.extra.suit) or 'Hearts'
@@ -817,15 +623,6 @@ jd_def["j_Crackedlatro_charco_pintura_joker"] = {
             end
         end
         card.joker_display_values.mult = total_mult
-        card.joker_display_values.suit_name = suit
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            local suit = card.joker_display_values.suit_name or 'Hearts'
-            if G.C.SUITS and G.C.SUITS[suit] then
-                reminder_text.children[2].config.colour = lighten(G.C.SUITS[suit], 0.35)
-            end
-        end
     end
 }
 
@@ -843,14 +640,7 @@ jd_def["j_Crackedlatro_lesionado_joker"] = {
         }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
-    },
-    extra = {
-        {
-            { text = "1 in 5 chance to morph at end of round", colour = G.C.ORANGE }
-        }
+        { text = "(Straight)" }
     },
     calc_function = function(card)
         local text, poker_hands = JokerDisplay.evaluate_hand()
@@ -859,21 +649,16 @@ jd_def["j_Crackedlatro_lesionado_joker"] = {
         if text ~= 'Unknown' and is_straight then
             card.joker_display_values.chips = card.ability.extra.chips or 125
             card.joker_display_values.x_mult = card.ability.extra.xmult or 1.5
-            card.joker_display_values.rem = "Straight Active!"
             card.joker_display_values.active = true
         else
             card.joker_display_values.chips = 0
             card.joker_display_values.x_mult = 1.0
-            card.joker_display_values.rem = "Requires Straight"
             card.joker_display_values.active = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[4] then
             text.children[4].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -893,37 +678,26 @@ jd_def["j_Crackedlatro_doctor_jo_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "Stops Perishable & Reimburses $3/Rental", colour = G.C.MONEY }
-        },
-        {
-            { text = "Final hand: +1 Hand (X3) if short on chips", colour = G.C.RED }
-        }
-    },
     calc_function = function(card)
         local hands_left = (G.GAME and G.GAME.current_round and G.GAME.current_round.hands_left) or 0
         local used = card.ability and card.ability.extra and card.ability.extra.defibrillator_used
         if used then
-            card.joker_display_values.status = "Medical Insurance"
-            card.joker_display_values.rem = "Defibrillator Used"
+            card.joker_display_values.status = "Medical"
+            card.joker_display_values.rem = "0/1"
             card.joker_display_values.is_defib = false
         elseif hands_left <= 1 then
-            card.joker_display_values.status = "CLEAR! +1 Hand (X3)"
-            card.joker_display_values.rem = "Defibrillator Armed"
+            card.joker_display_values.status = "+1 Hand (X3)"
+            card.joker_display_values.rem = "1/1"
             card.joker_display_values.is_defib = true
         else
-            card.joker_display_values.status = "Medical Insurance"
-            card.joker_display_values.rem = "Defibrillator Standby"
+            card.joker_display_values.status = "Medical"
+            card.joker_display_values.rem = "1/1"
             card.joker_display_values.is_defib = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.is_defib and G.C.RED or G.C.GREEN
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.is_defib and G.C.RED or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -939,9 +713,7 @@ jd_def["j_Crackedlatro_symmetrical_joker"] = {
         }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
+        { text = "(Flush 4+)" }
     },
     calc_function = function(card)
         local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
@@ -959,21 +731,16 @@ jd_def["j_Crackedlatro_symmetrical_joker"] = {
             end
             if same then
                 card.joker_display_values.x_mult = card.ability.extra.xmult or 4.0
-                card.joker_display_values.rem = "Symmetrical Active!"
                 card.joker_display_values.active = true
                 return
             end
         end
         card.joker_display_values.x_mult = 1.0
-        card.joker_display_values.rem = "4+ of Kind, Same Suit"
         card.joker_display_values.active = false
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -984,9 +751,7 @@ jd_def["j_Crackedlatro_balance_joker"] = {
         { text = "+2 Spectrals", colour = G.C.SECONDARY_SET.Spectral }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
+        { text = "(Flush 4)" }
     },
     calc_function = function(card)
         local text, poker_hands, scoring_hand = JokerDisplay.evaluate_hand()
@@ -1001,20 +766,15 @@ jd_def["j_Crackedlatro_balance_joker"] = {
                 end
             end
             if same then
-                card.joker_display_values.rem = "Flush Four Active!"
                 card.joker_display_values.active = true
                 return
             end
         end
-        card.joker_display_values.rem = "Flush Four (1 Suit)"
         card.joker_display_values.active = false
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.SECONDARY_SET.Spectral or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1025,15 +785,7 @@ jd_def["j_Crackedlatro_merchant_joker"] = {
         { text = "-$" },
         { ref_table = "card.ability.extra", ref_value = "cost_per_shop" }
     },
-    text_config = { colour = G.C.RED },
-    reminder_text = {
-        { text = "(On Shop Exit)" }
-    },
-    extra = {
-        {
-            { text = "+1 Slot, +1 Pack, +1 Voucher, -25%", colour = G.C.GREEN }
-        }
-    }
+    text_config = { colour = G.C.RED }
 }
 
 -- 25. Lover (Soulmates)
@@ -1046,14 +798,6 @@ jd_def["j_Crackedlatro_lover_joker"] = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
-    },
-    extra = {
-        {
-            { text = "Both Soulmates: X3, +$6, +20 Perma Chips", colour = G.C.GOLD }
-        },
-        {
-            { text = "Scored Hearts: +10 Mult each", colour = G.C.MULT }
-        }
     },
     calc_function = function(card)
         local sm1, sm2 = (type(get_or_pick_soulmates) == 'function' and get_or_pick_soulmates()) or nil, nil
@@ -1074,7 +818,7 @@ jd_def["j_Crackedlatro_lover_joker"] = {
 
         if has_sm1 and has_sm2 then
             card.joker_display_values.main_text = "X3 Mult +$6"
-            card.joker_display_values.rem = "Soulmates Active!"
+            card.joker_display_values.rem = s1 .. " & " .. s2
             card.joker_display_values.active = true
         elseif heart_count > 0 then
             card.joker_display_values.main_text = "+" .. (heart_count * 10) .. " Mult"
@@ -1084,11 +828,6 @@ jd_def["j_Crackedlatro_lover_joker"] = {
             card.joker_display_values.main_text = "X3 +$6"
             card.joker_display_values.rem = s1 .. " & " .. s2
             card.joker_display_values.active = false
-        end
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1104,11 +843,6 @@ jd_def["j_Crackedlatro_blacksmith_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "At 300 Heat: 50% Silver Seal, 50% Steel", colour = HEX('bdc3c7') }
-        }
-    },
     calc_function = function(card)
         local cur = (card.ability and card.ability.extra and card.ability.extra.temp) or 0
         local projected = 0
@@ -1118,21 +852,18 @@ jd_def["j_Crackedlatro_blacksmith_joker"] = {
         end
         local total = cur + projected
         if total >= 300 then
-            card.joker_display_values.heat_status = "FORGE READY!"
-            card.joker_display_values.rem = "Strikes on Score"
+            card.joker_display_values.heat_status = "READY!"
+            card.joker_display_values.rem = "300/300"
             card.joker_display_values.active = true
         else
-            card.joker_display_values.heat_status = cur .. "/300 Heat"
-            card.joker_display_values.rem = projected > 0 and ("+" .. projected .. " Heat this hand") or "+5 Heat/card"
+            card.joker_display_values.heat_status = cur .. "/300"
+            card.joker_display_values.rem = projected > 0 and ("+" .. projected) or "+5/card"
             card.joker_display_values.active = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.ORANGE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1143,28 +874,18 @@ jd_def["j_Crackedlatro_lucky_one_joker"] = {
         {
             border_nodes = {
                 { text = "X" },
-                { ref_table = "card.joker_display_values", ref_value = "x_mult", retrigger_type = "exp" }
+                { ref_table = "card.ability.extra", ref_value = "xmult", retrigger_type = "exp" }
             }
         }
     },
     reminder_text = {
         { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
+        { ref_table = "card.joker_display_values", ref_value = "charges_str" },
         { text = ")" }
-    },
-    extra = {
-        {
-            { text = "Guaranteed: ", colour = G.C.UI.TEXT_INACTIVE },
-            { ref_table = "card.joker_display_values", ref_value = "charges_str", colour = G.C.GREEN }
-        }
     },
     calc_function = function(card)
         local ex = card.ability and card.ability.extra
-        local xmult = (ex and ex.xmult) or 1.5
         local charges = (ex and ex.charges) or 0
-        local clubs = (ex and ex.clubs_scored) or 0
-        card.joker_display_values.x_mult = xmult
-        card.joker_display_values.rem = clubs .. "/5 Clubs"
         card.joker_display_values.charges_str = charges .. "/5"
         card.joker_display_values.active = charges > 0
     end,
@@ -1189,17 +910,9 @@ jd_def["j_Crackedlatro_miner_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "depth_str" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "0-50m: +25C | 50-120m: +$2", colour = G.C.UI.TEXT_INACTIVE }
-        },
-        {
-            { text = "120-300m: X1.35 | 300m+: X1.5 & Retrigger", colour = G.C.UI.TEXT_INACTIVE }
-        }
-    },
     calc_function = function(card)
         local d = (card.ability and card.ability.extra and card.ability.extra.depth) or 0
-        card.joker_display_values.depth_str = d .. "m Depth"
+        card.joker_display_values.depth_str = d .. "m"
         if d >= 300 then
             card.joker_display_values.bonus_str = "X1.5 + Retrigger"
             card.joker_display_values.active = true
@@ -1207,19 +920,16 @@ jd_def["j_Crackedlatro_miner_joker"] = {
             card.joker_display_values.bonus_str = "X1.35 Mult"
             card.joker_display_values.active = true
         elseif d >= 50 then
-            card.joker_display_values.bonus_str = "+$2 / Diamond"
+            card.joker_display_values.bonus_str = "+$2"
             card.joker_display_values.active = true
         else
-            card.joker_display_values.bonus_str = "+25 Chips / Diamond"
+            card.joker_display_values.bonus_str = "+25 Chips"
             card.joker_display_values.active = false
         end
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.GOLD or G.C.CHIPS
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = lighten(G.C.SUITS["Diamonds"], 0.35)
         end
     end,
     retrigger_function = function(playing_card, scoring_hand, held_in_hand, joker_card)
@@ -1235,10 +945,7 @@ jd_def["j_Crackedlatro_miner_joker"] = {
 -- 29. Joke Joker
 jd_def["j_Crackedlatro_joke_joker"] = {
     text = {
-        { text = "Blank -> Antimatter", colour = G.C.SECONDARY_SET.Voucher }
-    },
-    reminder_text = {
-        { text = "(+1 Joker Slot)" }
+        { text = "+1 Slot", colour = G.C.SECONDARY_SET.Voucher }
     }
 }
 
@@ -1252,11 +959,6 @@ jd_def["j_Crackedlatro_perfectionism_joker"] = {
         { ref_table = "card.joker_display_values", ref_value = "rem" },
         { text = ")" }
     },
-    extra = {
-        {
-            { text = "1 in 5 chance for Negative", colour = G.C.PURPLE }
-        }
-    },
     calc_function = function(card)
         local is_big_or_boss = false
         if G.GAME and G.GAME.blind then
@@ -1264,15 +966,12 @@ jd_def["j_Crackedlatro_perfectionism_joker"] = {
                 is_big_or_boss = true
             end
         end
-        card.joker_display_values.rem = is_big_or_boss and "Active (Big/Boss)" or "Inactive (Small Blind)"
+        card.joker_display_values.rem = is_big_or_boss and "Active" or "Inactive"
         card.joker_display_values.active = is_big_or_boss
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.DARK_EDITION or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1280,7 +979,7 @@ jd_def["j_Crackedlatro_perfectionism_joker"] = {
 -- 31. Reaper Joker (Parca)
 jd_def["j_Crackedlatro_parca_joker"] = {
     text = {
-        { text = "+Invisible Joker", colour = G.C.PURPLE }
+        { text = "+Invisible", colour = G.C.PURPLE }
     },
     reminder_text = {
         { text = "(" },
@@ -1289,24 +988,12 @@ jd_def["j_Crackedlatro_parca_joker"] = {
     },
     calc_function = function(card)
         local used = card.ability and card.ability.extra and card.ability.extra.used
-        local has_room = G.jokers and #G.jokers.cards < G.jokers.config.card_limit
-        if used then
-            card.joker_display_values.rem = "Used this round"
-            card.joker_display_values.active = false
-        elseif not has_room then
-            card.joker_display_values.rem = "Joker Slots Full"
-            card.joker_display_values.active = false
-        else
-            card.joker_display_values.rem = "Sell other Joker"
-            card.joker_display_values.active = true
-        end
+        card.joker_display_values.rem = used and "0/1" or "1/1"
+        card.joker_display_values.active = not used
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.PURPLE or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1320,33 +1007,7 @@ jd_def["j_Crackedlatro_infostealer_joker"] = {
                 { ref_table = "card.ability.extra", ref_value = "xmult", retrigger_type = "exp" }
             }
         }
-    },
-    reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
-    },
-    extra = {
-        {
-            { text = "Leaves shop: pay $10 for +X0.5, else -X0.5", colour = G.C.MONEY }
-        }
-    },
-    calc_function = function(card)
-        local dollars = (G.GAME and G.GAME.dollars) or 0
-        local cost = (card.ability and card.ability.extra and card.ability.extra.cost) or 10
-        if dollars >= cost then
-            card.joker_display_values.rem = "Can afford: +X0.5"
-            card.joker_display_values.can_afford = true
-        else
-            card.joker_display_values.rem = "Can't afford: -X0.5!"
-            card.joker_display_values.can_afford = false
-        end
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.can_afford and G.C.GREEN or G.C.RED
-        end
-    end
+    }
 }
 
 -- 33. Supersaturated Joker (Sobresaturado)
@@ -1361,34 +1022,12 @@ jd_def["j_Crackedlatro_sobresaturado_joker"] = {
     },
     calc_function = function(card)
         local used = card.ability and card.ability.extra and card.ability.extra.used
-        if used then
-            card.joker_display_values.rem = "Used this round"
-            card.joker_display_values.active = false
-        else
-            local text, _, scoring_hand = JokerDisplay.evaluate_hand()
-            if text ~= 'Unknown' and scoring_hand and #scoring_hand > 0 then
-                local pcard = scoring_hand[1]
-                local has_enh = (pcard.config and pcard.config.center and pcard.config.center ~= G.P_CENTERS.c_base) or (pcard.ability and pcard.ability.effect and pcard.ability.effect ~= 'Base')
-                local has_seal = (pcard.seal ~= nil)
-                local has_edition = (pcard.edition ~= nil)
-                if has_enh and has_seal and has_edition then
-                    card.joker_display_values.rem = "1st Card: +$10 (Saturated)"
-                else
-                    card.joker_display_values.rem = "Improves " .. format_short_card(pcard)
-                end
-                card.joker_display_values.active = true
-            else
-                card.joker_display_values.rem = "1st Scored Card"
-                card.joker_display_values.active = true
-            end
-        end
+        card.joker_display_values.rem = used and "0/1" or "1/1"
+        card.joker_display_values.active = not used
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.SECONDARY_SET.Enhanced or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1408,11 +1047,7 @@ jd_def["j_Crackedlatro_esteban"] = {
         }
     },
     reminder_text = {
-        { text = "(" },
-        { text = "♠", colour = G.C.SUITS["Spades"] },
-        { text = " & " },
-        { text = "♣", colour = G.C.SUITS["Clubs"] },
-        { text = ": X2.5/c)" }
+        { text = "(♠ / ♣)" }
     },
     calc_function = function(card)
         local count = 0
@@ -1446,7 +1081,7 @@ jd_def["j_Crackedlatro_thiago"] = {
         }
     },
     reminder_text = {
-        { text = "(X1 per 20 Chips)" }
+        { text = "(/20 Chips)" }
     },
     calc_function = function(card)
         local current_chips = (hand_chips and hand_chips > 0 and hand_chips) or 0
@@ -1472,9 +1107,6 @@ jd_def["j_Crackedlatro_black_hole_joker"] = {
             },
             border_colour = G.C.DARK_EDITION
         }
-    },
-    reminder_text = {
-        { text = "(Chips & Mult)" }
     }
 }
 
@@ -1492,9 +1124,7 @@ jd_def["j_Crackedlatro_squele"] = {
         }
     },
     reminder_text = {
-        { text = "(" },
-        { text = "♥", colour = G.C.SUITS["Hearts"] },
-        { text = " | 1/10 Bloodstone)" }
+        { text = "(♥)" }
     },
     calc_function = function(card)
         local hearts = 0
@@ -1520,33 +1150,11 @@ jd_def["j_Crackedlatro_squele"] = {
 -- 38. Bluxdir
 jd_def["j_Crackedlatro_bluxdir"] = {
     text = {
-        { ref_table = "card.joker_display_values", ref_value = "hand_level" }
+        { text = "+1 Level", colour = G.C.ATTENTION }
     },
-    text_config = { colour = G.C.ATTENTION },
     reminder_text = {
-        { text = "(Levels Up on Discard)" }
-    },
-    calc_function = function(card)
-        local highlighted = (G.hand and G.hand.highlighted) or {}
-        if #highlighted > 0 and G.FUNCS and G.FUNCS.get_poker_hand_info then
-            local text = G.FUNCS.get_poker_hand_info(highlighted)
-            if text and text ~= 'NULL' and text ~= 'Unknown' then
-                card.joker_display_values.hand_level = "+1 " .. text
-                card.joker_display_values.active = true
-            else
-                card.joker_display_values.hand_level = "+1 Level"
-                card.joker_display_values.active = false
-            end
-        else
-            card.joker_display_values.hand_level = "+1 Level"
-            card.joker_display_values.active = false
-        end
-    end,
-    style_function = function(card, text, reminder_text, extra)
-        if text and text.children and text.children[1] then
-            text.children[1].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.ATTENTION
-        end
-    end
+        { text = "(Discard)" }
+    }
 }
 
 -- 39. Charles
@@ -1562,14 +1170,7 @@ jd_def["j_Crackedlatro_charles"] = {
         { ref_table = "card.joker_display_values", ref_value = "dollars", colour = G.C.MONEY, retrigger_type = "mult" }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
-    },
-    extra = {
-        {
-            { text = "With Mochi: 1x Retrigger & 2x Synergy!", colour = HEX('ff69b4') }
-        }
+        { text = "(♠ / ♥)" }
     },
     calc_function = function(card)
         local has_mochi = has_charles_and_mochi_jd()
@@ -1588,15 +1189,11 @@ jd_def["j_Crackedlatro_charles"] = {
         local dollars_per = (card.ability.extra.dollars or 5) * (has_mochi and 2 or 1)
         card.joker_display_values.dollars = card_count * dollars_per
         card.joker_display_values.x_mult = suit_count > 0 and ((card.ability.extra.xmult or 2) ^ suit_count) or 1.0
-        card.joker_display_values.rem = has_mochi and "Best Friends! (Retrigger)" or "♠ & ♥ (+ $5/c)"
         card.joker_display_values.active = (suit_count > 0 or card_count > 0)
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = has_charles_and_mochi_jd() and HEX('ff69b4') or G.C.UI.TEXT_INACTIVE
         end
     end,
     retrigger_function = function(playing_card, scoring_hand, held_in_hand, joker_card)
@@ -1621,12 +1218,7 @@ jd_def["j_Crackedlatro_mochi"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "wild_count" },
-        { text = " Wilds in deck)" }
-    },
-    extra = {
-        {
-            { text = "Scored cards become Wild Cards", colour = G.C.UI.TEXT_INACTIVE }
-        }
+        { text = " Wild)" }
     },
     calc_function = function(card)
         local wild_count = 0
@@ -1653,21 +1245,15 @@ jd_def["j_Crackedlatro_helin"] = {
         }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
+        { text = "(1st Hand)" }
     },
     calc_function = function(card)
         local is_first = G.GAME and G.GAME.current_round and G.GAME.current_round.hands_played == 0
-        card.joker_display_values.rem = is_first and "Active (1st Hand)" or "Inactive"
         card.joker_display_values.active = is_first
     end,
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.DARK_EDITION or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1678,7 +1264,7 @@ jd_def["j_Crackedlatro_raytracing"] = {
         { text = "+2 Spectrals", colour = G.C.DARK_EDITION }
     },
     reminder_text = {
-        { text = "(End of Round | Negative)" }
+        { text = "(Negative)" }
     }
 }
 
@@ -1695,7 +1281,7 @@ jd_def["j_Crackedlatro_paco"] = {
     reminder_text = {
         { text = "(" },
         { ref_table = "card.joker_display_values", ref_value = "discards" },
-        { text = " Discards left)" }
+        { text = " Discards)" }
     },
     calc_function = function(card)
         local discards = (G.GAME and G.GAME.current_round and G.GAME.current_round.discards_left) or 0
@@ -1707,9 +1293,6 @@ jd_def["j_Crackedlatro_paco"] = {
     style_function = function(card, text, reminder_text, extra)
         if text and text.children and text.children[1] then
             text.children[1].config.colour = card.joker_display_values.active and G.C.XMULT or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }
@@ -1734,9 +1317,7 @@ jd_def["j_Crackedlatro_yairo"] = {
         }
     },
     reminder_text = {
-        { text = "(" },
-        { ref_table = "card.joker_display_values", ref_value = "rem" },
-        { text = ")" }
+        { text = "(6 & 7)" }
     },
     calc_function = function(card)
         local count = 0
@@ -1754,7 +1335,6 @@ jd_def["j_Crackedlatro_yairo"] = {
         local chips_per = (card.ability and card.ability.extra and card.ability.extra.xchips) or 1.5
         card.joker_display_values.x_mult = count > 0 and (mult_per ^ count) or 1.0
         card.joker_display_values.x_chips = count > 0 and (chips_per ^ count) or 1.0
-        card.joker_display_values.rem = count > 0 and (count .. " scored (6s & 7s)") or "6s & 7s scored"
         card.joker_display_values.active = (count > 0)
     end,
     style_function = function(card, text, reminder_text, extra)
@@ -1763,9 +1343,6 @@ jd_def["j_Crackedlatro_yairo"] = {
         end
         if text and text.children and text.children[3] then
             text.children[3].config.colour = card.joker_display_values.active and G.C.CHIPS or G.C.UI.TEXT_INACTIVE
-        end
-        if reminder_text and reminder_text.children and reminder_text.children[2] then
-            reminder_text.children[2].config.colour = card.joker_display_values.active and G.C.GREEN or G.C.UI.TEXT_INACTIVE
         end
     end
 }

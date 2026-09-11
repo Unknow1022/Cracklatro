@@ -264,7 +264,7 @@ if eval_card then
             if G.GAME then G.GAME.lucky_hit_both = true end
             check_for_unlock({ type = 'lucky_both' })
         end
-        return ret, post_trig
+        return ret or {}, post_trig or {}
     end
 end
 
@@ -1319,9 +1319,10 @@ if eval_card then
     local eval_card_ref = eval_card
     function eval_card(card, context)
         if G.GAME and G.GAME.cracklatro_hand_debuffed and context and (context.after or context.joker_main or context.before) then
-            return {}
+            return {}, {}
         end
-        return eval_card_ref(card, context)
+        local ret, post_trig = eval_card_ref(card, context)
+        return ret or {}, post_trig or {}
     end
 end
 

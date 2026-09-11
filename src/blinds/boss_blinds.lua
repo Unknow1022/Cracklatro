@@ -246,18 +246,19 @@ SMODS.Blind {
         ease_custom_blind_background(self)
         if G.playing_cards then
             for _, c in ipairs(G.playing_cards) do
-                self:debuff_card(c)
+                if self.recalc_debuff and self:recalc_debuff(c) then
+                    c:set_debuff(true)
+                end
             end
         end
     end,
-    debuff_card = function(self, card, from_blind)
+    recalc_debuff = function(self, card, from_blind)
         if self.disabled then return false end
         if card and card.area ~= G.jokers then
             local is_enhanced = (card.ability and card.ability.set == 'Enhanced') or
                                (card.config and card.config.center and card.config.center.set == 'Enhanced') or
                                (card.config and card.config.center_key and G.P_CENTERS and G.P_CENTERS[card.config.center_key] and G.P_CENTERS[card.config.center_key].set == 'Enhanced')
             if is_enhanced then
-                card:set_debuff(true)
                 return true
             end
         end
@@ -609,8 +610,9 @@ SMODS.Blind {
             end
         end
     end,
-    debuff_card = function(self, card, from_blind)
-        if card.area == G.jokers and not G.GAME.pinza_card_destroyed then
+    recalc_debuff = function(self, card, from_blind)
+        if self.disabled then return false end
+        if card and card.area == G.jokers and not G.GAME.pinza_card_destroyed then
             local key = (card.config and card.config.center and card.config.center.key) or card.config.center_key or (card.ability and card.ability.name) or ''
             local destroys_cards = {
                 ['j_trading'] = true,

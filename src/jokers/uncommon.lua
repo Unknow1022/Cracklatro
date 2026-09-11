@@ -471,15 +471,17 @@ SMODS.Joker {
             local ex = card.ability.extra
 
             if r1 == '7' and r2 == '7' and r3 == '7' then
-                G.E_MANAGER:add_event(Event({
-                    func = function()
-                        local sc = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'slot_jackpot')
-                        sc:add_to_deck()
-                        G.consumeables:emplace(sc)
-                        sc:juice_up(0.6, 0.6)
-                        return true
-                    end
-                }))
+                if not context.blueprint then
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            local sc = create_card('Spectral', G.consumeables, nil, nil, nil, nil, nil, 'slot_jackpot')
+                            sc:add_to_deck()
+                            G.consumeables:emplace(sc)
+                            sc:juice_up(0.6, 0.6)
+                            return true
+                        end
+                    }))
+                end
                 return {
                     Xmult = ex.jackpot_xmult,
                     dollars = ex.jackpot_cash,
@@ -603,7 +605,7 @@ SMODS.Joker {
     rarity = 2,
     pos = { x = 0, y = 0 },
     cost = 6,
-    blueprint_compat = true,
+    blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
         return { vars = { card.ability.extra.xmult } }
     end,

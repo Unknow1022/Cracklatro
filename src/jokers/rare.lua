@@ -852,7 +852,7 @@ SMODS.Joker {
         name = 'Reaper Joker',
         text = {
             "Selling another Joker creates an {C:attention}Invisible Joker{}",
-            "{C:inactive}(Once per round, #1#){}"
+            "{C:inactive}(Except Invisible Joker. Once per round, #1#){}"
         }
     },
     config = { extra = { used = false } },
@@ -867,6 +867,13 @@ SMODS.Joker {
     end,
     calculate = function(self, card, context)
         if context.selling_card and context.card and context.card.ability and context.card.ability.set == 'Joker' and context.card ~= card and not context.blueprint then
+            local sold_card = context.card
+            local sold_key = (sold_card.config and sold_card.config.center and sold_card.config.center.key) or (sold_card.config and sold_card.config.center_key) or ''
+            local sold_name = (sold_card.ability and sold_card.ability.name) or ''
+            if sold_key == 'j_invisible' or sold_name == 'Invisible Joker' then
+                return
+            end
+
             card.ability.extra = card.ability.extra or {}
             if not card.ability.extra.used then
                 if G.jokers and #G.jokers.cards < G.jokers.config.card_limit then

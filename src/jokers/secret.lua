@@ -182,7 +182,7 @@ register_secret_joker {
             local odds = (card.ability and card.ability.extra and card.ability.extra.odds) or 10
             local does_project = pseudorandom('squele_project') < (norm / odds)
 
-            if does_project and G.jokers then
+            if does_project and not context.blueprint and G.jokers then
                 G.E_MANAGER:add_event(Event({
                     func = function()
                         local new_j = create_card('Joker', G.jokers, nil, nil, nil, nil, 'j_bloodstone', 'squele')

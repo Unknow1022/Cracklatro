@@ -1511,84 +1511,114 @@ if G and G.UIDEF and G.UIDEF.use_and_sell_buttons then
     local use_and_sell_buttons_ref = G.UIDEF.use_and_sell_buttons
     G.UIDEF.use_and_sell_buttons = function(card)
         local base_background = use_and_sell_buttons_ref(card)
-        if not base_background then return base_background end
-        local base_attach = base_background:get_UIE_by_ID('ATTACH_TO_ME')
-        if not base_attach then return base_background end
-        local card_width = card.T.w + (card.ability.consumeable and -0.1 or card.ability.set == 'Voucher' and -0.16 or 0)
+        if not base_background or not base_background.nodes or not base_background.nodes[1] or not base_background.nodes[1].nodes then
+            return base_background
+        end
 
         if card.area == G.jokers and G.STATE ~= G.STATES.TUTORIAL then
             local is_es = G.CRACKEDLATRO_SPANISH == true
             -- Slot Machine "Bet" button
             if card_has_key(card, 'slot_machine') then
                 local bet_text = is_es and "Apostar" or "Bet"
-                base_attach.children.slot_machine_bet = UIBox{
-                    T = {card.VT.x, card.VT.y, 0, 0},
-                    definition = {
-                        n = G.UIT.ROOT, config = {align = 'cr', colour = G.C.CLEAR}, nodes = {
-                            {n = G.UIT.R, config = {
-                                ref_table = card,
-                                ref_parent = base_attach,
-                                align = 'cr',
-                                colour = G.C.GOLD,
-                                shadow = true,
-                                r = 0.08,
-                                func = 'can_slot_machine_bet',
-                                one_press = true,
-                                button = 'slot_machine_bet',
-                                hover = true,
-                                focus_args = {type = 'none'}
-                            }, nodes = {
-                                {n = G.UIT.R, config = {align = 'cr', minw = 1.15, minh = 1.0, padding = 0.08}, nodes = {
-                                    {n = G.UIT.C, config = {align = 'cm', maxw = 1.15}, nodes = {
-                                        {n = G.UIT.R, config = {align = 'cm'}, nodes = {
-                                            {n = G.UIT.T, config = {text = bet_text, colour = G.C.UI.TEXT_LIGHT, scale = 0.38, shadow = true}}
-                                        }},
-                                        {n = G.UIT.R, config = {align = 'cm'}, nodes = {
-                                            {n = G.UIT.T, config = {text = "$5", colour = G.C.WHITE, scale = 0.45, shadow = true}}
-                                        }}
-                                    }}
-                                }}
-                            }}
+                table.insert(base_background.nodes[1].nodes, {
+                    n = G.UIT.R,
+                    config = { align = "cl" },
+                    nodes = {
+                        {
+                            n = G.UIT.C,
+                            config = { align = "cr" },
+                            nodes = {
+                                {
+                                    n = G.UIT.C,
+                                    config = {
+                                        ref_table = card,
+                                        align = "cr",
+                                        padding = 0.1,
+                                        r = 0.08,
+                                        minw = 1.25,
+                                        hover = true,
+                                        shadow = true,
+                                        colour = G.C.GOLD,
+                                        one_press = true,
+                                        button = 'slot_machine_bet',
+                                        func = 'can_slot_machine_bet'
+                                    },
+                                    nodes = {
+                                        { n = G.UIT.B, config = { w = 0.1, h = 0.6 } },
+                                        {
+                                            n = G.UIT.C,
+                                            config = { align = "tm" },
+                                            nodes = {
+                                                {
+                                                    n = G.UIT.R,
+                                                    config = { align = "cm", maxw = 1.25 },
+                                                    nodes = {
+                                                        { n = G.UIT.T, config = { text = bet_text, colour = G.C.UI.TEXT_LIGHT, scale = 0.4, shadow = true } }
+                                                    }
+                                                },
+                                                {
+                                                    n = G.UIT.R,
+                                                    config = { align = "cm" },
+                                                    nodes = {
+                                                        { n = G.UIT.T, config = { text = "$5", colour = G.C.WHITE, scale = 0.55, shadow = true } }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    },
-                    config = {
-                        align = 'cr',
-                        offset = {x = (card_width or 0) - 0.17 - card.T.w/2, y = 0},
-                        parent = base_attach
                     }
-                }
+                })
             end
 
-            -- Injured Joker small button above card to view roster
+            -- Injured Joker button to view roster
             if card_has_key(card, 'lesionado') or card_has_key(card, 'injured') then
                 local transforms_text = is_es and "Transformaciones" or "Transforms"
-                base_attach.children.injured_roster = UIBox{
-                    T = {card.VT.x, card.VT.y, 0, 0},
-                    definition = {
-                        n = G.UIT.ROOT, config = {align = 'tm', colour = G.C.CLEAR}, nodes = {
-                            {n = G.UIT.R, config = {
-                                ref_table = card,
-                                ref_parent = base_attach,
-                                align = 'cm',
-                                colour = G.C.BLUE,
-                                shadow = true,
-                                r = 0.08,
-                                button = 'injured_show_roster',
-                                hover = true,
-                                focus_args = {type = 'none'}
-                            }, nodes = {
-                                {n = G.UIT.R, config = {align = 'cm', minw = 1.8, minh = 0.45, padding = 0.05}, nodes = {
-                                    {n = G.UIT.T, config = {text = transforms_text, colour = G.C.WHITE, scale = 0.28, shadow = true}}
-                                }}
-                            }}
+                table.insert(base_background.nodes[1].nodes, {
+                    n = G.UIT.R,
+                    config = { align = "cl" },
+                    nodes = {
+                        {
+                            n = G.UIT.C,
+                            config = { align = "cr" },
+                            nodes = {
+                                {
+                                    n = G.UIT.C,
+                                    config = {
+                                        ref_table = card,
+                                        align = "cr",
+                                        padding = 0.1,
+                                        r = 0.08,
+                                        minw = 1.25,
+                                        hover = true,
+                                        shadow = true,
+                                        colour = G.C.BLUE,
+                                        one_press = true,
+                                        button = 'injured_show_roster'
+                                    },
+                                    nodes = {
+                                        { n = G.UIT.B, config = { w = 0.1, h = 0.6 } },
+                                        {
+                                            n = G.UIT.C,
+                                            config = { align = "tm" },
+                                            nodes = {
+                                                {
+                                                    n = G.UIT.R,
+                                                    config = { align = "cm", maxw = 1.25 },
+                                                    nodes = {
+                                                        { n = G.UIT.T, config = { text = transforms_text, colour = G.C.WHITE, scale = 0.32, shadow = true } }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    },
-                    config = {
-                        align = 'tm',
-                        offset = {x = 0, y = -card.T.h/2 - 0.35},
-                        parent = base_attach
                     }
-                }
+                })
             end
         end
 

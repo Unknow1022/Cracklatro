@@ -1,10 +1,15 @@
 -- Secret Jokers (Secret Rarity)
-
+SMODS.Atlas {
+    key = "secret_jokers",
+    path = "secret_jokers.png",
+    px = 71,
+    py = 95
+}
 -- Helper to register secret jokers with standard attributes and badges
 local function register_secret_joker(def)
     def.rarity = def.rarity or 4
     def.is_secret = true
-    def.soul_pos = def.soul_pos or { x = 1, y = 0 }
+    def.soul_pos = def.soul_pos or { x = 1, y = (def.pos and def.pos.y) or 0 }
     def.cost = def.cost or 20
     def.in_pool = def.in_pool or function(self, args)
         return false, { allow_duplicates = false }
@@ -21,17 +26,11 @@ local function register_secret_joker(def)
 end
 
 -- 1. Esteban
-SMODS.Atlas {
-    key = "esteban_joker",
-    path = "esteban_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'esteban',
-    atlas = 'esteban_joker',
+    atlas = 'secret_jokers',
     pos = { x = 0, y = 0 },
+    soul_pos = { x = 1, y = 0 },
     loc_txt = {
         name = 'Esteban',
         text = {
@@ -59,17 +58,11 @@ register_secret_joker {
 }
 
 -- 2. Thiago
-SMODS.Atlas {
-    key = "thiago_joker",
-    path = "thiago_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'thiago',
-    atlas = 'thiago_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 1 },
+    soul_pos = { x = 1, y = 1 },
     loc_txt = {
         name = 'Thiago',
         text = {
@@ -100,17 +93,11 @@ register_secret_joker {
 }
 
 -- 3. Black Hole
-SMODS.Atlas {
-    key = "black_hole_joker",
-    path = "black_hole_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'black_hole_joker',
-    atlas = 'black_hole_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 2 },
+    soul_pos = { x = 1, y = 2 },
     loc_txt = {
         name = 'Black Hole',
         text = {
@@ -147,17 +134,11 @@ register_secret_joker {
 }
 
 -- 4. Squele
-SMODS.Atlas {
-    key = "squele_joker",
-    path = "squele_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'squele',
-    atlas = 'squele_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 3 },
+    soul_pos = { x = 1, y = 3 },
     loc_txt = {
         name = 'Squele',
         text = {
@@ -205,17 +186,11 @@ register_secret_joker {
 }
 
 -- 5. Bluxdir
-SMODS.Atlas {
-    key = "bluxdir_joker",
-    path = "bluxdir_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'bluxdir',
-    atlas = 'bluxdir_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 4 },
+    soul_pos = { x = 1, y = 4 },
     loc_txt = {
         name = 'Bluxdir',
         text = {
@@ -237,17 +212,11 @@ register_secret_joker {
 }
 
 -- 6. Charles
-SMODS.Atlas {
-    key = "charles_joker",
-    path = "charles_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'charles',
-    atlas = 'charles_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 5 },
+    soul_pos = { x = 1, y = 5 },
     loc_txt = {
         name = 'Charles',
         text = {
@@ -310,17 +279,11 @@ register_secret_joker {
 }
 
 -- 7. Mochi
-SMODS.Atlas {
-    key = "mochi_joker",
-    path = "mochi_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'mochi',
-    atlas = 'mochi_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 6 },
+    soul_pos = { x = 1, y = 6 },
     loc_txt = {
         name = 'Mochi',
         text = {
@@ -375,17 +338,11 @@ register_secret_joker {
 }
 
 -- 8. Helin
-SMODS.Atlas {
-    key = "helin_joker",
-    path = "helin_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'helin',
-    atlas = 'helin_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 7 },
+    soul_pos = { x = 1, y = 7 },
     loc_txt = {
         name = 'Helin',
         text = {
@@ -420,17 +377,11 @@ register_secret_joker {
 }
 
 -- 9. RayTracing
-SMODS.Atlas {
-    key = "raytracing_joker",
-    path = "raytracing_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'raytracing',
-    atlas = 'raytracing_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 8 },
+    soul_pos = { x = 1, y = 8 },
     loc_txt = {
         name = 'RayTracing',
         text = {
@@ -473,17 +424,11 @@ register_secret_joker {
 }
 
 -- 10. Paco
-SMODS.Atlas {
-    key = "paco_joker",
-    path = "paco_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'paco',
-    atlas = 'paco_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 9 },
+    soul_pos = { x = 1, y = 9 },
     loc_txt = {
         name = 'Paco',
         text = {
@@ -516,17 +461,11 @@ register_secret_joker {
 }
 
 -- 11. Yairo
-SMODS.Atlas {
-    key = "yairo_joker",
-    path = "yairo_joker.png",
-    px = 71,
-    py = 95
-}
-
 register_secret_joker {
     key = 'yairo',
-    atlas = 'yairo_joker',
-    pos = { x = 0, y = 0 },
+    atlas = 'secret_jokers',
+    pos = { x = 0, y = 10 },
+    soul_pos = { x = 1, y = 10 },
     loc_txt = {
         name = 'Yairo',
         text = {

@@ -1,4 +1,10 @@
 -- Enhancements & Custom Seals
+SMODS.Atlas {
+    key = "enhancements",
+    path = "enhancements.png",
+    px = 71,
+    py = 95
+}
 
 -- Helper functions for Custom Enhancement Centers
 function get_custom_enhancement(name, fallback)
@@ -20,16 +26,9 @@ function get_lead_enhancement_center() return get_custom_enhancement('lead', G.P
 function get_jeweled_enhancement_center() return get_custom_enhancement('jeweled', G.P_CENTERS.m_lucky) end
 
 -- Seal 1: Dark Green Seal (Reworked)
-SMODS.Atlas {
-    key = "s_dark_green",
-    path = "s_dark_green.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Seal {
     key = 'dark_green',
-    atlas = 's_dark_green',
+    atlas = 'enhancements',
     pos = { x = 0, y = 0 },
     badge_colour = HEX('1b4d2e'),
     discovered = true,
@@ -64,17 +63,10 @@ SMODS.Seal {
 }
 
 -- Seal 2: White Seal
-SMODS.Atlas {
-    key = "s_white",
-    path = "s_white.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Seal {
     key = 'white',
-    atlas = 's_white',
-    pos = { x = 0, y = 0 },
+    atlas = 'enhancements',
+    pos = { x = 1, y = 0 },
     badge_colour = HEX('ffffff'),
     discovered = true,
     unlocked = true,
@@ -119,17 +111,10 @@ SMODS.Seal {
 }
 
 -- Seal 3: Silver Seal
-SMODS.Atlas {
-    key = "s_silver",
-    path = "s_silver.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Seal {
     key = 'silver',
-    atlas = 's_silver',
-    pos = { x = 0, y = 0 },
+    atlas = 'enhancements',
+    pos = { x = 2, y = 0 },
     badge_colour = HEX('bdc3c7'),
     discovered = true,
     unlocked = true,
@@ -176,17 +161,10 @@ SMODS.Seal {
 }
 
 -- Enhancement 1: Diamond Card
-SMODS.Atlas {
-    key = "m_diamond",
-    path = "m_diamond.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Enhancement {
     key = 'diamond',
-    atlas = 'm_diamond',
-    pos = { x = 0, y = 0 },
+    atlas = 'enhancements',
+    pos = { x = 3, y = 0 },
     discovered = true,
     unlocked = true,
     config = { extra = { x_mult = 1.5, dollars = 3 }, h_dollars = 3 },
@@ -221,17 +199,10 @@ SMODS.Enhancement {
 }
 
 -- Enhancement 2: Investment Card
-SMODS.Atlas {
-    key = "m_investment",
-    path = "m_investment.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Enhancement {
     key = 'investment',
-    atlas = 'm_investment',
-    pos = { x = 0, y = 0 },
+    atlas = 'enhancements',
+    pos = { x = 0, y = 1 },
     discovered = true,
     unlocked = true,
     config = { extra = { interest_pct = 10, max_interest = 10 } },
@@ -263,17 +234,10 @@ SMODS.Enhancement {
 }
 
 -- Enhancement 3: Lead Card
-SMODS.Atlas {
-    key = "m_lead",
-    path = "m_lead.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Enhancement {
     key = 'lead',
-    atlas = 'm_lead',
-    pos = { x = 0, y = 0 },
+    atlas = 'enhancements',
+    pos = { x = 1, y = 1 },
     discovered = true,
     unlocked = true,
     config = { extra = { chips = 10 } },
@@ -311,17 +275,10 @@ SMODS.Enhancement {
 }
 
 -- Enhancement 4: Jeweled Card
-SMODS.Atlas {
-    key = "m_jeweled",
-    path = "m_jeweled.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Enhancement {
     key = 'jeweled',
-    atlas = 'm_jeweled',
-    pos = { x = 0, y = 0 },
+    atlas = 'enhancements',
+    pos = { x = 2, y = 1 },
     discovered = true,
     unlocked = true,
     config = { extra = { x_mult = 1.25, dollars = 2 } },

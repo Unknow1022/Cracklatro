@@ -8,35 +8,13 @@
     - Overseer Sleeve (with Overseer Deck: 2 Spectrals at end of round, tripled tags, removes Joker markup, +$5, +1 Hand)
 --]]
 
--- Atlases for Custom Sleeves (using the deck card back arts)
+-- Atlases for Custom Sleeves
 SMODS.Atlas {
-    key = "sleeve_cavernicola",
-    path = "b_cavernicola.png",
-    px = 71,
+    key = "cracklatro_sleeves",
+    path = "sleeves.png",
+    px = 73,
     py = 95
 }
-
-SMODS.Atlas {
-    key = "sleeve_strategist",
-    path = "b_strategist.png",
-    px = 71,
-    py = 95
-}
-
-SMODS.Atlas {
-    key = "sleeve_overseer",
-    path = "b_hateful.png",
-    px = 71,
-    py = 95
-}
-
-SMODS.Atlas {
-    key = "sleeve_friendly",
-    path = "b_friendly.png",
-    px = 71,
-    py = 95
-}
-
 -- Helper to parse localization strings for Sleeve objects
 local function reparse_sleeve_entry(entry)
     if not entry then return end
@@ -281,8 +259,8 @@ function register_cracklatro_sleeves()
     CardSleeves.Sleeve {
         key = "friendly",
         name = "Friendly Sleeve",
-        atlas = "sleeve_friendly",
-        pos = { x = 0, y = 0 },
+        atlas = "cracklatro_sleeves",
+        pos = { x = 3, y = 0 },
         config = {},
         unlocked = true,
         discovered = true,
@@ -340,7 +318,7 @@ function register_cracklatro_sleeves()
     CardSleeves.Sleeve {
         key = "cavernicola",
         name = "Caveman Sleeve",
-        atlas = "sleeve_cavernicola",
+        atlas = "cracklatro_sleeves",
         pos = { x = 0, y = 0 },
         config = {},
         unlocked = true,
@@ -424,8 +402,8 @@ function register_cracklatro_sleeves()
     CardSleeves.Sleeve {
         key = "strategist",
         name = "Strategist Sleeve",
-        atlas = "sleeve_strategist",
-        pos = { x = 0, y = 0 },
+        atlas = "cracklatro_sleeves",
+        pos = { x = 1, y = 0 },
         config = {},
         unlocked = true,
         discovered = true,
@@ -493,8 +471,8 @@ function register_cracklatro_sleeves()
     CardSleeves.Sleeve {
         key = "overseer",
         name = "Overseer Sleeve",
-        atlas = "sleeve_overseer",
-        pos = { x = 0, y = 0 },
+        atlas = "cracklatro_sleeves",
+        pos = { x = 2, y = 0 },
         config = {},
         unlocked = true,
         discovered = true,

@@ -1,16 +1,15 @@
--- Tags
-
--- Discord Tag
+-- Tags Atlas
 SMODS.Atlas {
-    key = "tag_discord",
-    path = "tag_discord.png",
+    key = "cracklatro_tags",
+    path = "tags.png",
     px = 34,
     py = 34
 }
-
+-- Tags
+-- Discord Tag
 SMODS.Tag {
     key = 'discord',
-    atlas = 'tag_discord',
+    atlas = 'cracklatro_tags',
     pos = { x = 0, y = 0 },
     min_ante = 1,
     loc_txt = {
@@ -44,17 +43,10 @@ SMODS.Tag {
 }
 
 -- Witchcraft Tag (Tag de Brujería)
-SMODS.Atlas {
-    key = "tag_brujeria",
-    path = "tag_brujeria.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Tag {
     key = 'brujeria',
-    atlas = 'tag_brujeria',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_tags',
+    pos = { x = 1, y = 0 },
     min_ante = 1,
     loc_txt = {
         name = 'Witchcraft Tag',
@@ -90,17 +82,10 @@ SMODS.Tag {
 }
 
 -- Sale Tag (Tag de Oferta)
-SMODS.Atlas {
-    key = "tag_oferta",
-    path = "tag_oferta.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Tag {
     key = 'oferta',
-    atlas = 'tag_oferta',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_tags',
+    pos = { x = 2, y = 0 },
     min_ante = 1,
     loc_txt = {
         name = 'Sale Tag',

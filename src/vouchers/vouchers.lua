@@ -1,16 +1,15 @@
--- Vouchers
-
--- 1. Taster (Catador)
+-- Vouchers Atlas
 SMODS.Atlas {
-    key = "v_catador",
-    path = "v_catador.png",
+    key = "cracklatro_vouchers",
+    path = "vouchers.png",
     px = 71,
     py = 95
 }
-
+-- Vouchers
+-- 1. Taster (Catador)
 SMODS.Voucher {
     key = 'catador',
-    atlas = 'v_catador',
+    atlas = 'cracklatro_vouchers',
     pos = { x = 0, y = 0 },
     cost = 10,
     loc_txt = {
@@ -29,18 +28,11 @@ SMODS.Voucher {
 }
 
 -- 2. Critic (Crítico)
-SMODS.Atlas {
-    key = "v_critico",
-    path = "v_critico.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Voucher {
     key = 'critico',
-    atlas = 'v_critico',
+    atlas = 'cracklatro_vouchers',
     requires = { 'v_Crackedlatro_catador', 'v_catador' },
-    pos = { x = 0, y = 0 },
+    pos = { x = 1, y = 0 },
     cost = 10,
     loc_txt = {
         name = 'Critic',

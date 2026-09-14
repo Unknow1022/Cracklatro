@@ -1,3 +1,10 @@
+-- Decks Atlas
+SMODS.Atlas {
+    key = "cracklatro_decks",
+    path = "decks.png",
+    px = 71,
+    py = 95
+}
 -- Custom Decks (Barajas)
 
 -- Helper to parse localization strings for Back objects
@@ -28,17 +35,10 @@ local function reparse_deck_entry(entry)
 end
 
 -- 1. Caveman Deck
-SMODS.Atlas {
-    key = "b_cavernicola",
-    path = "b_cavernicola.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Back {
     name = 'Caveman Deck',
     key = 'cavernicola',
-    atlas = 'b_cavernicola',
+    atlas = 'cracklatro_decks',
     pos = { x = 0, y = 0 },
     config = {},
     unlocked = true,
@@ -84,18 +84,11 @@ SMODS.Back {
 }
 
 -- 2. Strategist Deck
-SMODS.Atlas {
-    key = "b_strategist",
-    path = "b_strategist.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Back {
     name = 'Strategist Deck',
     key = 'strategist',
-    atlas = 'b_strategist',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_decks',
+    pos = { x = 1, y = 0 },
     config = {},
     unlocked = true,
     discovered = true,
@@ -166,18 +159,11 @@ SMODS.Back {
 }
 
 -- 3. Overseer Deck
-SMODS.Atlas {
-    key = "b_overseer",
-    path = "b_hateful.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Back {
     name = 'Overseer Deck',
     key = 'overseer',
-    atlas = 'b_overseer',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_decks',
+    pos = { x = 2, y = 0 },
     config = {},
     unlocked = true,
     discovered = true,
@@ -244,18 +230,11 @@ SMODS.Back {
 }
 
 -- 4. Friendly Deck (Baraja Amistosa)
-SMODS.Atlas {
-    key = "b_friendly",
-    path = "b_friendly.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Back {
     name = 'Friendly Deck',
     key = 'friendly',
-    atlas = 'b_friendly',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_decks',
+    pos = { x = 3, y = 0 },
     config = {},
     unlocked = true,
     discovered = true,

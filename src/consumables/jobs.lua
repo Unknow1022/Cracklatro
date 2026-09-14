@@ -267,18 +267,19 @@ SMODS.Sticker {
     end
 }
 
--- Job Consumable 1: The Miner
+-- Job Cards Atlas
 SMODS.Atlas {
-    key = "c_minero",
-    path = "c_minero.png",
+    key = "c_jobs",
+    path = "c_jobs.png",
     px = 71,
     py = 95
 }
 
+-- Job Consumable 1: The Miner
 SMODS.Consumable {
     key = 'minero_job',
     set = 'Job',
-    atlas = 'c_minero',
+    atlas = 'c_jobs',
     pos = { x = 0, y = 0 },
     loc_txt = {
         name = 'The Miner',
@@ -326,18 +327,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 2: The Gardener
-SMODS.Atlas {
-    key = "c_gardener",
-    path = "c_gardener.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'gardener_job',
     set = 'Job',
-    atlas = 'c_gardener',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 1, y = 0 },
     loc_txt = {
         name = 'The Gardener',
         text = {
@@ -380,18 +374,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 3: The Banker
-SMODS.Atlas {
-    key = "c_banker",
-    path = "c_banker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'banker_job',
     set = 'Job',
-    atlas = 'c_banker',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 2, y = 0 },
     loc_txt = {
         name = 'The Banker',
         text = {
@@ -438,18 +425,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 4: The Surgeon
-SMODS.Atlas {
-    key = "c_surgeon",
-    path = "c_surgeon.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'surgeon_job',
     set = 'Job',
-    atlas = 'c_surgeon',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 3, y = 0 },
     loc_txt = {
         name = 'The Surgeon',
         text = {
@@ -516,18 +496,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 5: The Alchemist
-SMODS.Atlas {
-    key = "c_alchemist",
-    path = "c_alchemist.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'alchemist_job',
     set = 'Job',
-    atlas = 'c_alchemist',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 4, y = 0 },
     loc_txt = {
         name = 'The Alchemist',
         text = {
@@ -574,18 +547,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 6: The Butcher
-SMODS.Atlas {
-    key = "c_butcher",
-    path = "c_butcher.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'butcher_job',
     set = 'Job',
-    atlas = 'c_butcher',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 0, y = 1 },
     loc_txt = {
         name = 'The Butcher',
         text = {
@@ -661,18 +627,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 7: The Detective
-SMODS.Atlas {
-    key = "c_detective",
-    path = "c_detective.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'detective_job',
     set = 'Job',
-    atlas = 'c_detective',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 1, y = 1 },
     loc_txt = {
         name = 'The Detective',
         text = {
@@ -731,18 +690,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 8: The Chef
-SMODS.Atlas {
-    key = "c_chef",
-    path = "c_chef.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'chef_job',
     set = 'Job',
-    atlas = 'c_chef',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 2, y = 1 },
     loc_txt = {
         name = 'The Chef',
         text = {
@@ -791,18 +743,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 9: The Archaeologist
-SMODS.Atlas {
-    key = "c_archaeologist",
-    path = "c_archaeologist.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'archaeologist_job',
     set = 'Job',
-    atlas = 'c_archaeologist',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 3, y = 1 },
     loc_txt = {
         name = 'The Archaeologist',
         text = {
@@ -854,18 +799,11 @@ SMODS.Consumable {
 }
 
 -- Job Consumable 10: The Jeweler
-SMODS.Atlas {
-    key = "c_jeweler",
-    path = "c_jeweler.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'jeweler_job',
     set = 'Job',
-    atlas = 'c_jeweler',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_jobs',
+    pos = { x = 4, y = 1 },
     loc_txt = {
         name = 'The Jeweler',
         text = {
@@ -911,31 +849,17 @@ SMODS.Consumable {
     end
 }
 
+-- Job Packs Atlas
+SMODS.Atlas {
+    key = "c_packs",
+    path = "packs.png",
+    px = 71,
+    py = 95
+}
 -- Booster Packs: Job Applications
-SMODS.Atlas {
-    key = "p_job_1",
-    path = "p_job_1.png",
-    px = 71,
-    py = 95
-}
-
-SMODS.Atlas {
-    key = "p_job_2",
-    path = "p_job_2.png",
-    px = 71,
-    py = 95
-}
-
-SMODS.Atlas {
-    key = "p_job_3",
-    path = "p_job_3.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Booster {
     key = 'job_pack_1',
-    atlas = 'p_job_1',
+    atlas = 'c_packs',
     pos = { x = 0, y = 0 },
     config = { extra = 3, choose = 1 },
     cost = 4,
@@ -970,8 +894,8 @@ SMODS.Booster {
 
 SMODS.Booster {
     key = 'job_pack_2',
-    atlas = 'p_job_2',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_packs',
+    pos = { x = 1, y = 0 },
     config = { extra = 5, choose = 1 },
     cost = 6,
     weight = 0.5,
@@ -1005,8 +929,8 @@ SMODS.Booster {
 
 SMODS.Booster {
     key = 'job_pack_3',
-    atlas = 'p_job_3',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_packs',
+    pos = { x = 2, y = 0 },
     config = { extra = 5, choose = 2 },
     cost = 8,
     weight = 0.25,

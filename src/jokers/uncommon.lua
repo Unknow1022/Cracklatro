@@ -1,16 +1,9 @@
 -- Uncommon Jokers
 
 -- Shareholder Joker
-SMODS.Atlas {
-    key = "shareholder_joker",
-    path = "shareholder_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'shareholder_joker',
-    atlas = 'shareholder_joker',
+    atlas = 'cracklatro_jokers',
     unlocked = false,
     loc_txt = {
         name = 'Shareholder Joker',
@@ -27,7 +20,7 @@ SMODS.Joker {
     },
     config = { extra = { current_price = 8, min_price = 2, max_price = 15, market_trend = 'Normal' } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 0, y = 1 },
     cost = 6,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -91,16 +84,9 @@ SMODS.Joker {
 }
 
 -- Builder Joker
-SMODS.Atlas {
-    key = "builder_joker",
-    path = "builder_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'builder_joker',
-    atlas = 'builder_joker',
+    atlas = 'cracklatro_jokers',
     unlocked = false,
     loc_txt = {
         name = 'Builder Joker',
@@ -117,7 +103,7 @@ SMODS.Joker {
     },
     config = { extra = { xmult_per_card = 0.5, bonus_chips = 20 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 1, y = 1 },
     blueprint_compat = true,
     cost = 6,
     loc_vars = function(self, info_queue, card)
@@ -175,16 +161,9 @@ SMODS.Joker {
 }
 
 -- Banquet
-SMODS.Atlas {
-    key = "banquet_joker",
-    path = "banquet_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'banquet_joker',
-    atlas = 'banquet_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Banquet',
         text = {
@@ -195,7 +174,7 @@ SMODS.Joker {
     },
     config = { extra = { perma_chips = 2, hand_threshold = 7, xmult = 2.5, sell_cash = 15 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 2, y = 1 },
     cost = 6,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -245,16 +224,9 @@ SMODS.Joker {
 }
 
 -- Appraiser
-SMODS.Atlas {
-    key = "appraiser_joker",
-    path = "appraiser_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'appraiser_joker',
-    atlas = 'appraiser_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Appraiser',
         text = {
@@ -264,7 +236,7 @@ SMODS.Joker {
     },
     config = { extra = { dollars_per_edition = 1 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 3, y = 1 },
     cost = 6,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -293,16 +265,9 @@ SMODS.Joker {
 }
 
 -- Runway
-SMODS.Atlas {
-    key = "runway_joker",
-    path = "runway_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'runway_joker',
-    atlas = 'runway_joker',
+    atlas = 'cracklatro_jokers',
     unlocked = false,
     loc_txt = {
         name = 'Runway',
@@ -318,7 +283,7 @@ SMODS.Joker {
     },
     config = { extra = { xmult = 1.0, xmult_gain = 0.1 } },
     rarity = 3,
-    pos = { x = 0, y = 0 },
+    pos = { x = 4, y = 1 },
     cost = 8,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
@@ -348,13 +313,6 @@ SMODS.Joker {
 }
 
 -- Slot Machine
-SMODS.Atlas {
-    key = "slot_machine_joker",
-    path = "slot_machine_joker.png",
-    px = 71,
-    py = 95
-}
-
 local SLOT_CHALLENGES = {
     { id = 'flush', desc = "Play a Flush", check = function(ctx) return ctx.poker_hands and ctx.poker_hands['Flush'] and next(ctx.poker_hands['Flush']) end },
     { id = 'straight', desc = "Play a Straight", check = function(ctx) return ctx.poker_hands and ctx.poker_hands['Straight'] and next(ctx.poker_hands['Straight']) end },
@@ -387,7 +345,7 @@ end
 
 SMODS.Joker {
     key = 'slot_machine_joker',
-    atlas = 'slot_machine_joker',
+    atlas = 'cracklatro_jokers',
     unlocked = false,
     loc_txt = {
         name = 'Slot Machine',
@@ -407,7 +365,7 @@ SMODS.Joker {
     },
     config = { extra = { pair_cash = 3, pair_mult = 15, triple_cash = 12, triple_xmult = 2.5, jackpot_cash = 35, jackpot_xmult = 4.0, challenge_idx = 1, bet_placed = false, bet_amount = 0, challenge_completed = false, last_payout_text = "" } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 5, y = 1 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
@@ -527,16 +485,9 @@ SMODS.Joker {
 }
 
 -- Duel of Value
-SMODS.Atlas {
-    key = "duel_of_value_joker",
-    path = "duel_of_value_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'duel_of_value_joker',
-    atlas = 'duel_of_value_joker',
+    atlas = 'cracklatro_jokers',
     unlocked = false,
     loc_txt = {
         name = 'Duel of Value',
@@ -551,7 +502,7 @@ SMODS.Joker {
     },
     config = { extra = { xmult = 3.0 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 6, y = 1 },
     cost = 8,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
@@ -598,16 +549,9 @@ SMODS.Joker {
 }
 
 -- Falta de Lectura
-SMODS.Atlas {
-    key = "falta_de_lectura_joker",
-    path = "falta_de_lectura_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'falta_de_lectura_joker',
-    atlas = 'falta_de_lectura_joker',
+    atlas = 'cracklatro_jokers',
     unlocked = false,
     loc_txt = {
         name = 'Reading Deficiency',
@@ -622,7 +566,7 @@ SMODS.Joker {
     },
     config = { extra = { xmult = 5.0 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 0, y = 2 },
     cost = 6,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -675,13 +619,6 @@ SMODS.Joker {
 }
 
 -- Chameleon Joker
-SMODS.Atlas {
-    key = "chameleon_joker",
-    path = "chameleon_joker.png",
-    px = 71,
-    py = 95
-}
-
 local function get_available_deck_ranks()
     local ranks = {}
     local seen = {}
@@ -719,7 +656,7 @@ end
 
 SMODS.Joker {
     key = 'chameleon_joker',
-    atlas = 'chameleon_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Chameleon',
         text = {
@@ -730,7 +667,7 @@ SMODS.Joker {
     },
     config = { extra = { required_rank = 'Ace' } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 1, y = 2 },
     cost = 8,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -783,16 +720,9 @@ SMODS.Joker {
 }
 
 -- Motorized Joker (Joker Motorizado)
-SMODS.Atlas {
-    key = "motorizado_joker",
-    path = "motorizado_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'motorizado_joker',
-    atlas = 'motorizado_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Motorized Joker',
         text = {
@@ -803,7 +733,7 @@ SMODS.Joker {
     },
     config = { extra = { mult = 0, mult_gain = 2 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 2, y = 2 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
@@ -846,16 +776,9 @@ SMODS.Joker {
 }
 
 -- Hired Joker (Joker Contratado)
-SMODS.Atlas {
-    key = "contratado_joker",
-    path = "contratado_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'contratado_joker',
-    atlas = 'contratado_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Hired Joker',
         text = {
@@ -866,7 +789,7 @@ SMODS.Joker {
     },
     config = { extra = { odds = 3 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 3, y = 2 },
     cost = 6,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -903,16 +826,9 @@ SMODS.Joker {
 }
 
 -- Seal of Approval (Sello de Aprobación)
-SMODS.Atlas {
-    key = "sello_aprobacion_joker",
-    path = "sello_aprobacion_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'sello_aprobacion_joker',
-    atlas = 'sello_aprobacion_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Seal of Approval',
         text = {
@@ -922,7 +838,7 @@ SMODS.Joker {
     },
     config = {},
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 4, y = 2 },
     cost = 7,
     blueprint_compat = false,
     calculate = function(self, card, context)
@@ -950,13 +866,6 @@ SMODS.Joker {
 }
 
 -- Paint Puddle (Charco de Pintura)
-SMODS.Atlas {
-    key = "charco_pintura_joker",
-    path = "charco_pintura_joker.png",
-    px = 71,
-    py = 95
-}
-
 local function ensure_charco_suit(card)
     card.ability = card.ability or {}
     card.ability.extra = card.ability.extra or {}
@@ -968,7 +877,7 @@ end
 
 SMODS.Joker {
     key = 'charco_pintura_joker',
-    atlas = 'charco_pintura_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Paint Puddle',
         text = {
@@ -979,7 +888,7 @@ SMODS.Joker {
     },
     config = { extra = { mult_suit = 25, mult_wild = 50, suit = 'Hearts' } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 5, y = 2 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
@@ -1023,16 +932,9 @@ SMODS.Joker {
 }
 
 -- Injured Joker (Joker Lesionado)
-SMODS.Atlas {
-    key = "lesionado_joker",
-    path = "lesionado_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'lesionado_joker',
-    atlas = 'lesionado_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Injured Joker',
         text = {
@@ -1043,7 +945,7 @@ SMODS.Joker {
     },
     config = { extra = { odds = 5 } },
     rarity = 2,
-    pos = { x = 0, y = 0 },
+    pos = { x = 6, y = 2 },
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)

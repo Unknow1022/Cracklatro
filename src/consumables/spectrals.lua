@@ -1,17 +1,15 @@
 -- Spectral Cards
-
--- 1. Hierarchy
 SMODS.Atlas {
-    key = "c_hierarchy",
-    path = "c_hierarchy.png",
+    key = "c_spectrals",
+    path = "c_spectrals.png",
     px = 71,
     py = 95
 }
-
+-- 1. Hierarchy
 SMODS.Consumable {
     key = 'hierarchy',
     set = 'Spectral',
-    atlas = 'c_hierarchy',
+    atlas = 'c_spectrals',
     pos = { x = 0, y = 0 },
     in_pool = function(self, args)
         return is_cracklatro_spectrals_jobs_enabled()
@@ -95,18 +93,11 @@ SMODS.Consumable {
 }
 
 -- 2. Order
-SMODS.Atlas {
-    key = "c_order",
-    path = "c_order.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'order',
     set = 'Spectral',
-    atlas = 'c_order',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_spectrals',
+    pos = { x = 1, y = 0 },
     in_pool = function(self, args)
         return is_cracklatro_spectrals_jobs_enabled()
     end,
@@ -154,18 +145,11 @@ SMODS.Consumable {
 }
 
 -- 3. Rot
-SMODS.Atlas {
-    key = "c_rot",
-    path = "c_rot.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'rot',
     set = 'Spectral',
-    atlas = 'c_rot',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_spectrals',
+    pos = { x = 2, y = 0 },
     in_pool = function(self, args)
         return is_cracklatro_spectrals_jobs_enabled()
     end,
@@ -225,13 +209,6 @@ SMODS.Consumable {
 }
 
 -- 4. Catastrophic
-SMODS.Atlas {
-    key = "c_catastrophic",
-    path = "c_catastrophic.png",
-    px = 71,
-    py = 95
-}
-
 local function get_most_played_hands()
     local hands_by_count = {}
     local counts = {}
@@ -293,8 +270,8 @@ local hand_to_planet = {
 SMODS.Consumable {
     key = 'catastrophic',
     set = 'Spectral',
-    atlas = 'c_catastrophic',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_spectrals',
+    pos = { x = 3, y = 0 },
     in_pool = function(self, args)
         return is_cracklatro_spectrals_jobs_enabled()
     end,
@@ -351,18 +328,11 @@ SMODS.Consumable {
 }
 
 -- 5. Intensity
-SMODS.Atlas {
-    key = "c_intensity",
-    path = "c_intensity.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'intensity',
     set = 'Spectral',
-    atlas = 'c_intensity',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_spectrals',
+    pos = { x = 0, y = 1 },
     in_pool = function(self, args)
         return is_cracklatro_spectrals_jobs_enabled()
     end,
@@ -447,18 +417,11 @@ SMODS.Consumable {
 }
 
 -- 6. La Muchachada
-SMODS.Atlas {
-    key = "c_la_muchachada",
-    path = "la_muchachada_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'la_muchachada',
     set = 'Spectral',
-    atlas = 'c_la_muchachada',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_spectrals',
+    pos = { x = 1, y = 1 },
     soul_pos = { x = 1, y = 0 },
     loc_txt = {
         name = 'La Muchachada',
@@ -513,18 +476,11 @@ SMODS.Consumable {
 }
 
 -- 7. Refuerzo
-SMODS.Atlas {
-    key = "c_refuerzo",
-    path = "c_refuerzo.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'refuerzo',
     set = 'Spectral',
-    atlas = 'c_refuerzo',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_spectrals',
+    pos = { x = 2, y = 1 },
     in_pool = function(self, args)
         return is_cracklatro_spectrals_jobs_enabled()
     end,
@@ -573,18 +529,11 @@ SMODS.Consumable {
 }
 
 -- 8. Supernova
-SMODS.Atlas {
-    key = "c_supernova",
-    path = "c_supernova.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Consumable {
     key = 'supernova',
     set = 'Spectral',
-    atlas = 'c_supernova',
-    pos = { x = 0, y = 0 },
+    atlas = 'c_spectrals',
+    pos = { x = 3, y = 1 },
     in_pool = function(self, args)
         return is_cracklatro_spectrals_jobs_enabled()
     end,

@@ -1,5 +1,11 @@
+-- Boss Blinds Atlas
+SMODS.Atlas {
+    key = "cracklatro_blinds",
+    path = "blinds.png",
+    px = 34,
+    py = 34
+}
 -- Boss Blinds
-
 G.CRACKEDLATRO_BLIND_THEMES = {
     ['pole'] = {
         name = 'The Pole',
@@ -147,16 +153,9 @@ local function sync_cracklatro_blind_colours()
 end
 
 -- 1. The Pole
-SMODS.Atlas {
-    key = "b_pole",
-    path = "b_pole.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'pole',
-    atlas = 'b_pole',
+    atlas = 'cracklatro_blinds',
     pos = { x = 0, y = 0 },
     dollars = 5,
     mult = 2,
@@ -184,17 +183,10 @@ SMODS.Blind {
 }
 
 -- 2. The Rod
-SMODS.Atlas {
-    key = "b_stick",
-    path = "b_stick.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'stick',
-    atlas = 'b_stick',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 1, y = 0 },
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
@@ -217,17 +209,10 @@ SMODS.Blind {
 }
 
 -- 3. The Magician
-SMODS.Atlas {
-    key = "b_wizard",
-    path = "b_wizard.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'wizard',
-    atlas = 'b_wizard',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 2, y = 0 },
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
@@ -281,17 +266,10 @@ SMODS.Blind {
 }
 
 -- 4. The Mountain
-SMODS.Atlas {
-    key = "b_mountain",
-    path = "b_mountain.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'mountain',
-    atlas = 'b_mountain',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 3, y = 0 },
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
@@ -323,17 +301,10 @@ SMODS.Blind {
 }
 
 -- 5. The Door
-SMODS.Atlas {
-    key = "b_door",
-    path = "b_door.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'door',
-    atlas = 'b_door',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 4, y = 0 },
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
@@ -356,17 +327,10 @@ SMODS.Blind {
 }
 
 -- 6. The Triangle
-SMODS.Atlas {
-    key = "b_triangle",
-    path = "b_triangle.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'triangle',
-    atlas = 'b_triangle',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 5, y = 0 },
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
@@ -389,17 +353,10 @@ SMODS.Blind {
 }
 
 -- 7. The Cube
-SMODS.Atlas {
-    key = "b_cube",
-    path = "b_cube.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'cube',
-    atlas = 'b_cube',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 0, y = 1 },
     dollars = 5,
     mult = 2,
     boss = { min = 1, max = 10 },
@@ -437,17 +394,10 @@ SMODS.Blind {
 }
 
 -- 8. The Void (Showdown)
-SMODS.Atlas {
-    key = "b_void",
-    path = "b_void.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'void',
-    atlas = 'b_void',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 1, y = 1 },
     dollars = 8,
     mult = 2,
     boss = { min = 8, max = 10, showdown = true },
@@ -479,17 +429,10 @@ SMODS.Blind {
 }
 
 -- 9. The Guitar (La Guitarra)
-SMODS.Atlas {
-    key = "b_guitar",
-    path = "b_guitar.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'guitar',
-    atlas = 'b_guitar',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 2, y = 1 },
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
@@ -512,17 +455,10 @@ SMODS.Blind {
 }
 
 -- 10. The Phone (El Teléfono)
-SMODS.Atlas {
-    key = "b_phone",
-    path = "b_phone.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'phone',
-    atlas = 'b_phone',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 3, y = 1 },
     dollars = 5,
     mult = 2,
     boss = { min = 3, max = 10 },
@@ -566,17 +502,10 @@ SMODS.Blind {
 }
 
 -- 11. The Pincer (La Pinza - Showdown Boss)
-SMODS.Atlas {
-    key = "b_pinza",
-    path = "b_pinza.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'pinza',
-    atlas = 'b_pinza',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 4, y = 1 },
     dollars = 8,
     mult = 2,
     boss = { min = 8, max = 10, showdown = true },
@@ -628,17 +557,10 @@ SMODS.Blind {
 }
 
 -- 12. The Doppelgänger (El Doppelgänger - Showdown Boss)
-SMODS.Atlas {
-    key = "b_doppelganger",
-    path = "b_doppelganger.png",
-    px = 34,
-    py = 34
-}
-
 SMODS.Blind {
     key = 'doppelganger',
-    atlas = 'b_doppelganger',
-    pos = { x = 0, y = 0 },
+    atlas = 'cracklatro_blinds',
+    pos = { x = 5, y = 1 },
     dollars = 8,
     mult = 2,
     boss = { min = 8, max = 10, showdown = true },
@@ -775,13 +697,10 @@ SMODS.Blind {
 }
 
 local function sync_blind_atlases()
-    local blind_atlases = {'b_pole', 'b_stick', 'b_wizard', 'b_mountain', 'b_door', 'b_triangle', 'b_cube', 'b_void', 'b_guitar', 'b_phone', 'b_pinza', 'b_doppelganger'}
-    for _, key in ipairs(blind_atlases) do
-        local atlas_obj = (SMODS and SMODS.Atlases and SMODS.Atlases[key]) or (G.ASSET_ATLAS and G.ASSET_ATLAS[key]) or (G.ANIMATION_ATLAS and G.ANIMATION_ATLAS[key])
-        if atlas_obj then
-            if G.ASSET_ATLAS and not G.ASSET_ATLAS[key] then G.ASSET_ATLAS[key] = atlas_obj end
-            if G.ANIMATION_ATLAS and not G.ANIMATION_ATLAS[key] then G.ANIMATION_ATLAS[key] = atlas_obj end
-        end
+    local atlas_obj = (SMODS and SMODS.Atlases and SMODS.Atlases['cracklatro_blinds']) or (G.ASSET_ATLAS and G.ASSET_ATLAS['cracklatro_blinds']) or (G.ANIMATION_ATLAS and G.ANIMATION_ATLAS['cracklatro_blinds'])
+    if atlas_obj then
+        if G.ASSET_ATLAS and not G.ASSET_ATLAS['cracklatro_blinds'] then G.ASSET_ATLAS['cracklatro_blinds'] = atlas_obj end
+        if G.ANIMATION_ATLAS and not G.ANIMATION_ATLAS['cracklatro_blinds'] then G.ANIMATION_ATLAS['cracklatro_blinds'] = atlas_obj end
     end
     sync_cracklatro_blind_colours()
 end

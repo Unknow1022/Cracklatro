@@ -1,16 +1,14 @@
 -- Common Jokers
-
--- Masterful Joker
 SMODS.Atlas {
-    key = "masterful_joker",
-    path = "masterful_joker.png",
+    key = "cracklatro_jokers",
+    path = "jokers.png",
     px = 71,
     py = 95
 }
-
+-- Masterful Joker
 SMODS.Joker {
     key = 'masterful_joker',
-    atlas = 'masterful_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Masterful Joker',
         text = {
@@ -49,16 +47,9 @@ SMODS.Joker {
 }
 
 -- Outstanding Joker
-SMODS.Atlas {
-    key = "outstanding_joker",
-    path = "outstanding_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'outstanding_joker',
-    atlas = 'outstanding_joker',
+    atlas = 'cracklatro_jokers',
     unlocked = false,
     loc_txt = {
         name = 'Outstanding Joker',
@@ -74,7 +65,7 @@ SMODS.Joker {
     },
     config = { extra = { repetitions = 1 } },
     rarity = 1,
-    pos = { x = 0, y = 0 },
+    pos = { x = 1, y = 0 },
     cost = 5,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
@@ -112,16 +103,9 @@ SMODS.Joker {
 }
 
 -- Blueberry
-SMODS.Atlas {
-    key = "blueberry_joker",
-    path = "blueberry_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'blueberry_joker',
-    atlas = 'blueberry_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Blueberry',
         text = {
@@ -132,7 +116,7 @@ SMODS.Joker {
     },
     config = { extra = { hands = 1, rounds_left = 3 } },
     rarity = 1,
-    pos = { x = 0, y = 0 },
+    pos = { x = 2, y = 0 },
     cost = 4,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -173,16 +157,9 @@ SMODS.Joker {
 }
 
 -- DJ Joker
-SMODS.Atlas {
-    key = "dj_joker",
-    path = "dj_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'dj_joker',
-    atlas = 'dj_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'DJ Joker',
         text = {
@@ -194,7 +171,7 @@ SMODS.Joker {
     },
     config = { extra = { used = false } },
     rarity = 1,
-    pos = { x = 0, y = 0 },
+    pos = { x = 3, y = 0 },
     cost = 5,
     blueprint_compat = false,
     loc_vars = function(self, info_queue, card)
@@ -236,16 +213,9 @@ SMODS.Joker {
 }
 
 -- Designer Joker (Joker Diseñador)
-SMODS.Atlas {
-    key = "disenador_joker",
-    path = "disenador_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'disenador_joker',
-    atlas = 'disenador_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'Designer Joker',
         text = {
@@ -254,7 +224,7 @@ SMODS.Joker {
     },
     config = { extra = { dollars = 1 } },
     rarity = 1,
-    pos = { x = 0, y = 0 },
+    pos = { x = 4, y = 0 },
     cost = 4,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
@@ -275,16 +245,9 @@ SMODS.Joker {
 }
 
 -- TTS Joker
-SMODS.Atlas {
-    key = "tts_joker",
-    path = "tts_joker.png",
-    px = 71,
-    py = 95
-}
-
 SMODS.Joker {
     key = 'tts_joker',
-    atlas = 'tts_joker',
+    atlas = 'cracklatro_jokers',
     loc_txt = {
         name = 'TTS',
         text = {
@@ -294,7 +257,7 @@ SMODS.Joker {
     },
     config = { extra = { chips_per_letter = 4, mult_per_letter = 1 } },
     rarity = 1,
-    pos = { x = 0, y = 0 },
+    pos = { x = 5, y = 0 },
     cost = 5,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)

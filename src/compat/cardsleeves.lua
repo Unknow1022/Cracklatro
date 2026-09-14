@@ -37,42 +37,72 @@ SMODS.Atlas {
     py = 95
 }
 
+-- Helper to parse localization strings for Sleeve objects
+local function reparse_sleeve_entry(entry)
+    if not entry then return end
+    if loc_parse_string then
+        if entry.text then
+            entry.text_parsed = {}
+            for _, line in ipairs(entry.text) do
+                entry.text_parsed[#entry.text_parsed + 1] = loc_parse_string(line)
+            end
+        else
+            entry.text_parsed = entry.text_parsed or {}
+        end
+        if entry.name then
+            entry.name_parsed = {}
+            local names = (type(entry.name) == 'table') and entry.name or { entry.name }
+            for _, line in ipairs(names) do
+                entry.name_parsed[#entry.name_parsed + 1] = loc_parse_string(line)
+            end
+        else
+            entry.name_parsed = entry.name_parsed or {}
+        end
+    else
+        entry.text_parsed = entry.text_parsed or {}
+        entry.name_parsed = entry.name_parsed or {}
+    end
+end
+
 -- Check if current selected deck matches target key
 local function is_deck_matching(target_key)
     if not target_key then return false end
-    if CardSleeves and CardSleeves.Sleeve and CardSleeves.Sleeve.get_current_deck_key then
-        local current = CardSleeves.Sleeve.get_current_deck_key() or ""
-        current = tostring(current)
-        if current == target_key
-            or current == "b_" .. target_key
-            or current == "b_Crackedlatro_" .. target_key
-            or string.find(current, target_key, 1, true) ~= nil then
-            return true
-        end
-    end
-    if CardSleeves and CardSleeves.current_deck then
-        local current = tostring(CardSleeves.current_deck)
-        if string.find(current, target_key, 1, true) ~= nil then
-            return true
-        end
-    end
-    if G and G.GAME then
-        local b = G.GAME.selected_back or G.GAME.viewed_back
-        if b then
-            local k = b.name or (b.effect and b.effect.center and b.effect.center.key) or b.key or ""
-            k = tostring(k)
-            if k == target_key or string.find(k, target_key, 1, true) ~= nil then
+    local ok, res = pcall(function()
+        if CardSleeves and CardSleeves.Sleeve and CardSleeves.Sleeve.get_current_deck_key then
+            local current = CardSleeves.Sleeve.get_current_deck_key() or ""
+            current = tostring(current)
+            if current == target_key
+                or current == "b_" .. target_key
+                or current == "b_Crackedlatro_" .. target_key
+                or string.find(current, target_key, 1, true) ~= nil then
                 return true
             end
         end
-    end
-    if G and G.deck and G.deck.name then
-        local d = tostring(G.deck.name)
-        if string.find(d, target_key, 1, true) ~= nil then
-            return true
+        if CardSleeves and CardSleeves.current_deck then
+            local current = tostring(CardSleeves.current_deck)
+            if string.find(current, target_key, 1, true) ~= nil then
+                return true
+            end
         end
-    end
-    return false
+        if G and G.GAME then
+            local b = G.GAME.selected_back or G.GAME.viewed_back
+            if b then
+                local k = b.name or (b.effect and b.effect.center and b.effect.center.key) or b.key or ""
+                k = tostring(k)
+                if k == target_key or string.find(k, target_key, 1, true) ~= nil then
+                    return true
+                end
+            end
+        end
+        if G and G.deck and G.deck.name then
+            local d = tostring(G.deck.name)
+            if string.find(d, target_key, 1, true) ~= nil then
+                return true
+            end
+        end
+        return false
+    end)
+    return ok and res or false
 end
 
 -- Inject localization for Sleeves into G.localization.descriptions.Sleeve
@@ -195,12 +225,47 @@ local function inject_sleeve_localization()
             "Crackedlatro_" .. key
         }
         for _, k in ipairs(keys_to_set) do
-            G.localization.descriptions.Sleeve[k] = {
-                name = data.name,
-                text = data.text
-            }
+            local entry = G.localization.descriptions.Sleeve[k] or {}
+            entry.name = data.name
+            entry.text = copy_table(data.text)
+            reparse_sleeve_entry(entry)
+            G.localization.descriptions.Sleeve[k] = entry
+
+            if SMODS and SMODS.process_loc_text then
+                pcall(function()
+                    SMODS.process_loc_text(G.localization.descriptions.Sleeve, k, {
+                        name = data.name,
+                        text = data.text
+                    })
+                end)
+            end
         end
     end
+
+    -- Safeguard all entries in G.localization.descriptions.Sleeve
+    for _, s_entry in pairs(G.localization.descriptions.Sleeve) do
+        if type(s_entry) == 'table' then
+            if not s_entry.text_parsed then reparse_sleeve_entry(s_entry) end
+        end
+    end
+
+    -- Metatable protection so no nil text_parsed can EVER occur
+    local sleeve_mt = getmetatable(G.localization.descriptions.Sleeve) or {}
+    local orig_index = sleeve_mt.__index
+    sleeve_mt.__index = function(t, k)
+        local val = rawget(t, k)
+        if val == nil and type(orig_index) == 'function' then
+            val = orig_index(t, k)
+        elseif val == nil and type(orig_index) == 'table' then
+            val = orig_index[k]
+        end
+        if type(val) == 'table' then
+            if not val.text_parsed then val.text_parsed = {} end
+            if not val.name_parsed then val.name_parsed = {} end
+        end
+        return val
+    end
+    setmetatable(G.localization.descriptions.Sleeve, sleeve_mt)
 end
 
 -- Register CardSleeves objects
@@ -218,7 +283,9 @@ function register_cracklatro_sleeves()
         name = "Friendly Sleeve",
         atlas = "sleeve_friendly",
         pos = { x = 0, y = 0 },
+        config = {},
         unlocked = true,
+        discovered = true,
         loc_txt = {
             name = "Friendly Sleeve",
             text = {
@@ -275,7 +342,9 @@ function register_cracklatro_sleeves()
         name = "Caveman Sleeve",
         atlas = "sleeve_cavernicola",
         pos = { x = 0, y = 0 },
+        config = {},
         unlocked = true,
+        discovered = true,
         loc_txt = {
             name = "Caveman Sleeve",
             text = {
@@ -357,7 +426,9 @@ function register_cracklatro_sleeves()
         name = "Strategist Sleeve",
         atlas = "sleeve_strategist",
         pos = { x = 0, y = 0 },
+        config = {},
         unlocked = true,
+        discovered = true,
         loc_txt = {
             name = "Strategist Sleeve",
             text = {
@@ -424,7 +495,9 @@ function register_cracklatro_sleeves()
         name = "Overseer Sleeve",
         atlas = "sleeve_overseer",
         pos = { x = 0, y = 0 },
+        config = {},
         unlocked = true,
+        discovered = true,
         loc_txt = {
             name = "Overseer Sleeve",
             text = {
@@ -534,4 +607,19 @@ function Game:start_run(args)
     end
     inject_sleeve_localization()
     return orig_game_start_run(self, args)
+end
+
+-- Defensive hook for Card.hover to guarantee sleeve entries have text_parsed
+if Card and Card.hover then
+    local orig_card_hover = Card.hover
+    function Card:hover()
+        if G.localization and G.localization.descriptions and G.localization.descriptions.Sleeve then
+            for _, s_entry in pairs(G.localization.descriptions.Sleeve) do
+                if type(s_entry) == 'table' and not s_entry.text_parsed then
+                    reparse_sleeve_entry(s_entry)
+                end
+            end
+        end
+        return orig_card_hover(self)
+    end
 end

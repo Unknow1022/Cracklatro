@@ -1,5 +1,32 @@
 -- Custom Decks (Barajas)
 
+-- Helper to parse localization strings for Back objects
+local function reparse_deck_entry(entry)
+    if not entry then return end
+    if loc_parse_string then
+        if entry.text then
+            entry.text_parsed = {}
+            for _, line in ipairs(entry.text) do
+                entry.text_parsed[#entry.text_parsed + 1] = loc_parse_string(line)
+            end
+        else
+            entry.text_parsed = entry.text_parsed or {}
+        end
+        if entry.name then
+            entry.name_parsed = {}
+            local names = (type(entry.name) == 'table') and entry.name or { entry.name }
+            for _, line in ipairs(names) do
+                entry.name_parsed[#entry.name_parsed + 1] = loc_parse_string(line)
+            end
+        else
+            entry.name_parsed = entry.name_parsed or {}
+        end
+    else
+        entry.text_parsed = entry.text_parsed or {}
+        entry.name_parsed = entry.name_parsed or {}
+    end
+end
+
 -- 1. Caveman Deck
 SMODS.Atlas {
     key = "b_cavernicola",
@@ -9,9 +36,13 @@ SMODS.Atlas {
 }
 
 SMODS.Back {
+    name = 'Caveman Deck',
     key = 'cavernicola',
     atlas = 'b_cavernicola',
     pos = { x = 0, y = 0 },
+    config = {},
+    unlocked = true,
+    discovered = true,
     loc_txt = {
         name = 'Caveman Deck',
         text = {
@@ -20,6 +51,9 @@ SMODS.Back {
             "{C:red}-1{} Hand"
         }
     },
+    loc_vars = function(self, info_queue)
+        return { vars = {} }
+    end,
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
@@ -58,9 +92,13 @@ SMODS.Atlas {
 }
 
 SMODS.Back {
+    name = 'Strategist Deck',
     key = 'strategist',
     atlas = 'b_strategist',
     pos = { x = 0, y = 0 },
+    config = {},
+    unlocked = true,
+    discovered = true,
     loc_txt = {
         name = 'Strategist Deck',
         text = {
@@ -71,6 +109,9 @@ SMODS.Back {
             "Blind score targets are {C:attention}X1.2{}"
         }
     },
+    loc_vars = function(self, info_queue)
+        return { vars = {} }
+    end,
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
@@ -133,9 +174,13 @@ SMODS.Atlas {
 }
 
 SMODS.Back {
+    name = 'Overseer Deck',
     key = 'overseer',
     atlas = 'b_overseer',
     pos = { x = 0, y = 0 },
+    config = {},
+    unlocked = true,
+    discovered = true,
     loc_txt = {
         name = 'Overseer Deck',
         text = {
@@ -146,6 +191,9 @@ SMODS.Back {
             "Start with {C:money}$2{}, {C:red}-1{} hand, {C:red}-1{} discard"
         }
     },
+    loc_vars = function(self, info_queue)
+        return { vars = {} }
+    end,
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
@@ -204,9 +252,13 @@ SMODS.Atlas {
 }
 
 SMODS.Back {
+    name = 'Friendly Deck',
     key = 'friendly',
     atlas = 'b_friendly',
     pos = { x = 0, y = 0 },
+    config = {},
+    unlocked = true,
+    discovered = true,
     loc_txt = {
         name = 'Friendly Deck',
         text = {
@@ -216,6 +268,9 @@ SMODS.Back {
             "{C:red}-1{} Discard"
         }
     },
+    loc_vars = function(self, info_queue)
+        return { vars = {} }
+    end,
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
@@ -294,5 +349,139 @@ SMODS.Back {
         }))
     end
 }
+
+-- Inject Deck localizations into G.localization.descriptions.Back with parsed entries
+function inject_cracklatro_deck_localization()
+    if not (G.localization and G.localization.descriptions) then return end
+    G.localization.descriptions.Back = G.localization.descriptions.Back or {}
+
+    local is_es = (G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or (G.CRACKEDLATRO_SPANISH == true)
+
+    local deck_locs = {
+        cavernicola = {
+            name = is_es and "Baraja Cavernícola" or "Caveman Deck",
+            text = is_es and {
+                "Inicia con solo {C:attention}A, 2, 3, 4, 6, 8{} de cada palo en tu baraja completa,",
+                "todas las demás cartas iniciales son {C:attention}Cartas de Piedra{},",
+                "{C:red}-1{} Mano"
+            } or {
+                "Start with only {C:attention}A, 2, 3, 4, 6, 8{} of each suit in your full deck,",
+                "all other starting cards are {C:attention}Stone Cards{},",
+                "{C:red}-1{} Hand"
+            }
+        },
+        strategist = {
+            name = is_es and "Baraja Estratega" or "Strategist Deck",
+            text = is_es and {
+                "Inicia con una baraja de {C:attention}24 cartas{}",
+                "{C:inactive}(Ases, Reyes, Reinas, Jotas, 10s, 9s){}",
+                "Inicia con el vale {C:attention}Truco de Magia{},",
+                "Inicia con {C:money}$0{}, {C:red}-1{} mano, {C:red}-2{} descartes,",
+                "El objetivo de puntos de las Ciegas es {C:attention}X1.2{}"
+            } or {
+                "Start with a {C:attention}24-card deck{}",
+                "{C:inactive}(Aces, Kings, Queens, Jacks, 10s, 9s){}",
+                "Start with {C:attention}Magic Trick{} voucher,",
+                "Start with {C:money}$0{}, {C:red}-1{} hand, {C:red}-2{} discards,",
+                "Blind score targets are {C:attention}X1.2{}"
+            }
+        },
+        overseer = {
+            name = is_es and "Baraja Supervisora" or "Overseer Deck",
+            text = is_es and {
+                "Crea una carta {C:spectral}Espectral{} aleatoria",
+                "al final de la ronda {C:inactive}(excepto Podredumbre y Alma){},",
+                "Las {C:attention}Etiquetas se duplican{} siempre,",
+                "Los precios de Jokers son {C:red}X1.5{},",
+                "Inicia con {C:money}$2{}, {C:red}-1{} mano, {C:red}-1{} descarte"
+            } or {
+                "Creates a random {C:spectral}Spectral card{}",
+                "at the end of round {C:inactive}(except Rot and Soul){},",
+                "{C:attention}Tags are always doubled{},",
+                "Joker prices are {C:red}X1.5{},",
+                "Start with {C:money}$2{}, {C:red}-1{} hand, {C:red}-1{} discard"
+            }
+        },
+        friendly = {
+            name = is_es and "Baraja Amistosa" or "Friendly Deck",
+            text = is_es and {
+                "Inicia la partida con {C:attention}2 Jokers Negativos Eternos{} aleatorios,",
+                "{C:inactive}(Excepto Legendario o Secreto){},",
+                "{C:red}-1{} Espacio de Joker,",
+                "{C:red}-1{} Descarte"
+            } or {
+                "Start run with {C:attention}2 random Negative Eternal Jokers{},",
+                "{C:inactive}(Except Legendary or Secret){},",
+                "{C:red}-1{} Joker slot,",
+                "{C:red}-1{} Discard"
+            }
+        }
+    }
+
+    for key, data in pairs(deck_locs) do
+        local keys_to_set = {
+            "b_" .. key,
+            "b_Crackedlatro_" .. key,
+            key,
+            "Crackedlatro_" .. key
+        }
+        for _, k in ipairs(keys_to_set) do
+            local entry = G.localization.descriptions.Back[k] or {}
+            entry.name = data.name
+            entry.text = copy_table(data.text)
+            reparse_deck_entry(entry)
+            G.localization.descriptions.Back[k] = entry
+
+            if SMODS and SMODS.process_loc_text then
+                pcall(function()
+                    SMODS.process_loc_text(G.localization.descriptions.Back, k, {
+                        name = data.name,
+                        text = data.text
+                    })
+                end)
+            end
+        end
+    end
+
+    for _, b_entry in pairs(G.localization.descriptions.Back) do
+        if type(b_entry) == 'table' then
+            if not b_entry.text_parsed then reparse_deck_entry(b_entry) end
+        end
+    end
+end
+
+inject_cracklatro_deck_localization()
+
+-- Hook init_localization to ensure decks are kept synchronized and parsed
+local orig_init_loc_decks = init_localization
+function init_localization()
+    if orig_init_loc_decks then orig_init_loc_decks() end
+    inject_cracklatro_deck_localization()
+end
+
+-- Defensive hooks for Back:init and Back:generate_UI
+if Back then
+    if Back.init then
+        local orig_back_init = Back.init
+        function Back:init(selected_back)
+            orig_back_init(self, selected_back)
+            if self.effect and not self.effect.config then
+                self.effect.config = {}
+            end
+        end
+    end
+    if Back.generate_UI then
+        local orig_back_generate_ui = Back.generate_UI
+        function Back:generate_UI(other, ui_scale, min_dims, challenge)
+            if other and not other.config then
+                other.config = {}
+            end
+            if self and self.effect and not self.effect.config then
+                self.effect.config = {}
+            end
+            return orig_back_generate_ui(self, other, ui_scale, min_dims, challenge)
+        end
+    end
+end
 
 

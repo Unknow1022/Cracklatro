@@ -813,6 +813,45 @@ local SPANISH_DESCRIPTIONS = {
             }
         }
     },
+    Back = {
+        cavernicola = {
+            name = 'Baraja Cavernícola',
+            text = {
+                "Inicia con solo {C:attention}A, 2, 3, 4, 6, 8{} de cada palo en tu baraja completa,",
+                "todas las demás cartas iniciales son {C:attention}Cartas de Piedra{},",
+                "{C:red}-1{} Mano"
+            }
+        },
+        strategist = {
+            name = 'Baraja Estratega',
+            text = {
+                "Inicia con una baraja de {C:attention}24 cartas{}",
+                "{C:inactive}(Ases, Reyes, Reinas, Jotas, 10s, 9s){}",
+                "Inicia con el vale {C:attention}Truco de Magia{},",
+                "Inicia con {C:money}$0{}, {C:red}-1{} mano, {C:red}-2{} descartes,",
+                "El objetivo de puntos de las Ciegas es {C:attention}X1.2{}"
+            }
+        },
+        overseer = {
+            name = 'Baraja Supervisora',
+            text = {
+                "Crea una carta {C:spectral}Espectral{} aleatoria",
+                "al final de la ronda {C:inactive}(excepto Podredumbre y Alma){},",
+                "Las {C:attention}Etiquetas se duplican{} siempre,",
+                "Los precios de Jokers son {C:red}X1.5{},",
+                "Inicia con {C:money}$2{}, {C:red}-1{} mano, {C:red}-1{} descarte"
+            }
+        },
+        friendly = {
+            name = 'Baraja Amistosa',
+            text = {
+                "Inicia la partida con {C:attention}2 Jokers Negativos Eternos{} aleatorios,",
+                "{C:inactive}(Excepto Legendario o Secreto){},",
+                "{C:red}-1{} Espacio de Joker,",
+                "{C:red}-1{} Descarte"
+            }
+        }
+    },
     Sleeve = {
         friendly = {
             name = 'Funda Amistosa',
@@ -893,6 +932,33 @@ local function record_english_entry(set, key, target)
     end
 end
 
+-- Helper to parse localization strings
+local function reparse_localization_entry(entry)
+    if not entry then return end
+    if loc_parse_string then
+        if entry.text then
+            entry.text_parsed = {}
+            for _, line in ipairs(entry.text) do
+                entry.text_parsed[#entry.text_parsed + 1] = loc_parse_string(line)
+            end
+        else
+            entry.text_parsed = entry.text_parsed or {}
+        end
+        if entry.name then
+            entry.name_parsed = {}
+            local names = (type(entry.name) == 'table') and entry.name or { entry.name }
+            for _, line in ipairs(names) do
+                entry.name_parsed[#entry.name_parsed + 1] = loc_parse_string(line)
+            end
+        else
+            entry.name_parsed = entry.name_parsed or {}
+        end
+    else
+        entry.text_parsed = entry.text_parsed or {}
+        entry.name_parsed = entry.name_parsed or {}
+    end
+end
+
 -- =========================================================================
 -- LIVE LANGUAGE SWITCHER
 -- =========================================================================
@@ -947,8 +1013,25 @@ function apply_cracklatro_language(use_spanish)
                                 end
                             end
                         end
+                        reparse_localization_entry(target_set[k])
                     end
                 end
+            end
+        end
+    end
+
+    -- Safeguard all Sleeve and Back entries
+    if G.localization.descriptions.Sleeve then
+        for _, s_entry in pairs(G.localization.descriptions.Sleeve) do
+            if type(s_entry) == 'table' and not s_entry.text_parsed then
+                reparse_localization_entry(s_entry)
+            end
+        end
+    end
+    if G.localization.descriptions.Back then
+        for _, b_entry in pairs(G.localization.descriptions.Back) do
+            if type(b_entry) == 'table' and not b_entry.text_parsed then
+                reparse_localization_entry(b_entry)
             end
         end
     end
@@ -958,9 +1041,8 @@ end
 local original_init_loc = init_localization
 function init_localization()
     if original_init_loc then original_init_loc() end
-    if G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES') then
-        apply_cracklatro_language(true)
-    end
+    local is_es = (G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or (G.CRACKEDLATRO_SPANISH == true)
+    apply_cracklatro_language(is_es)
 end
 
 -- =========================================================================

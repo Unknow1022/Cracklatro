@@ -1680,10 +1680,12 @@ function is_cracklatro_spectrals_jobs_enabled()
         return G.GAME.cracklatro_spectrals_jobs
     end
     -- Fallback to mod config
-    if SMODS and SMODS.current_mod and SMODS.current_mod.config then
-        if SMODS.current_mod.config.new_spectrals_and_jobs ~= nil then
-            return SMODS.current_mod.config.new_spectrals_and_jobs
-        end
+    local cfg = (get_cracklatro_config and get_cracklatro_config())
+        or (SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'] and SMODS.Mods['Crackedlatro'].config)
+        or (SMODS and SMODS.current_mod and SMODS.current_mod.config)
+        or {}
+    if cfg.new_spectrals_and_jobs ~= nil then
+        return cfg.new_spectrals_and_jobs
     end
     return true
 end
@@ -1693,7 +1695,10 @@ if Game and Game.init_game_object then
     local orig_game_init_game_object = Game.init_game_object
     function Game:init_game_object(args)
         local ret = orig_game_init_game_object(self, args)
-        local cfg = (SMODS and SMODS.current_mod and SMODS.current_mod.config) or {}
+        local cfg = (get_cracklatro_config and get_cracklatro_config())
+            or (SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'] and SMODS.Mods['Crackedlatro'].config)
+            or (SMODS and SMODS.current_mod and SMODS.current_mod.config)
+            or {}
 
         -- Lock in spectrals & jobs setting for this run (does not affect runs in progress)
         if self.GAME and self.GAME.cracklatro_spectrals_jobs == nil then

@@ -10,28 +10,74 @@ SMODS.Atlas {
 -- Helper to parse localization strings for Back objects
 local function reparse_deck_entry(entry)
     if not entry then return end
-    if loc_parse_string then
-        if entry.text then
-            entry.text_parsed = {}
-            for _, line in ipairs(entry.text) do
-                entry.text_parsed[#entry.text_parsed + 1] = loc_parse_string(line)
+    local parse_fn = loc_parse_string or function(s) return { { strings = { s }, control = {} } } end
+
+    if entry.text then
+        entry.text_parsed = {}
+        for _, line in ipairs(entry.text) do
+            if type(line) == 'table' then
+                local sub = {}
+                for _, sub_line in ipairs(line) do
+                    sub[#sub + 1] = parse_fn(sub_line) or { { strings = { tostring(sub_line) }, control = {} } }
+                end
+                entry.text_parsed[#entry.text_parsed + 1] = sub
+            else
+                entry.text_parsed[#entry.text_parsed + 1] = parse_fn(line) or { { strings = { tostring(line) }, control = {} } }
             end
-        else
-            entry.text_parsed = entry.text_parsed or {}
-        end
-        if entry.name then
-            entry.name_parsed = {}
-            local names = (type(entry.name) == 'table') and entry.name or { entry.name }
-            for _, line in ipairs(names) do
-                entry.name_parsed[#entry.name_parsed + 1] = loc_parse_string(line)
-            end
-        else
-            entry.name_parsed = entry.name_parsed or {}
         end
     else
         entry.text_parsed = entry.text_parsed or {}
+    end
+
+    if entry.name then
+        entry.name_parsed = {}
+        local names = (type(entry.name) == 'table') and entry.name or { entry.name }
+        for _, line in ipairs(names) do
+            entry.name_parsed[#entry.name_parsed + 1] = parse_fn(line) or { { strings = { tostring(line) }, control = {} } }
+        end
+    else
         entry.name_parsed = entry.name_parsed or {}
     end
+
+    local mt = getmetatable(entry) or {}
+    local old_idx = mt.__index
+    mt.__index = function(t, field)
+        if field == 'text_parsed' then
+            local parsed = {}
+            local raw_text = rawget(t, 'text')
+            if raw_text and loc_parse_string then
+                for _, line in ipairs(raw_text) do
+                    if type(line) == 'table' then
+                        local sub = {}
+                        for _, sub_line in ipairs(line) do
+                            sub[#sub + 1] = loc_parse_string(sub_line) or { { strings = { tostring(sub_line) }, control = {} } }
+                        end
+                        parsed[#parsed + 1] = sub
+                    else
+                        parsed[#parsed + 1] = loc_parse_string(line) or { { strings = { tostring(line) }, control = {} } }
+                    end
+                end
+            end
+            rawset(t, 'text_parsed', parsed)
+            return parsed
+        elseif field == 'name_parsed' then
+            local parsed = {}
+            local raw_name = rawget(t, 'name')
+            if raw_name and loc_parse_string then
+                local names = (type(raw_name) == 'table') and raw_name or { raw_name }
+                for _, line in ipairs(names) do
+                    parsed[#parsed + 1] = loc_parse_string(line) or { { strings = { tostring(line) }, control = {} } }
+                end
+            end
+            rawset(t, 'name_parsed', parsed)
+            return parsed
+        elseif type(old_idx) == 'function' then
+            return old_idx(t, field)
+        elseif type(old_idx) == 'table' then
+            return old_idx[field]
+        end
+    end
+    setmetatable(entry, mt)
 end
 
 -- 1. Caveman Deck
@@ -410,23 +456,42 @@ function inject_cracklatro_deck_localization()
             entry.text = copy_table(data.text)
             reparse_deck_entry(entry)
             G.localization.descriptions.Back[k] = entry
-
-            if SMODS and SMODS.process_loc_text then
-                pcall(function()
-                    SMODS.process_loc_text(G.localization.descriptions.Back, k, {
-                        name = data.name,
-                        text = data.text
-                    })
-                end)
-            end
         end
     end
 
     for _, b_entry in pairs(G.localization.descriptions.Back) do
         if type(b_entry) == 'table' then
-            if not b_entry.text_parsed then reparse_deck_entry(b_entry) end
+            reparse_deck_entry(b_entry)
         end
     end
+
+    local back_mt = getmetatable(G.localization.descriptions.Back) or {}
+    local orig_back_idx = back_mt.__index
+    back_mt.__index = function(t, k)
+        local val = rawget(t, k)
+        if val == nil and type(orig_back_idx) == 'function' then
+            val = orig_back_idx(t, k)
+        elseif val == nil and type(orig_back_idx) == 'table' then
+            val = orig_back_idx[k]
+        end
+        if type(val) == 'table' then
+            if not val.text_parsed or not next(val.text_parsed) then
+                reparse_deck_entry(val)
+            end
+        elseif val == nil then
+            local dummy = { text = {}, text_parsed = {}, name = "", name_parsed = {} }
+            reparse_deck_entry(dummy)
+            return dummy
+        end
+        return val
+    end
+    back_mt.__newindex = function(t, k, val)
+        if type(val) == 'table' then
+            reparse_deck_entry(val)
+        end
+        rawset(t, k, val)
+    end
+    setmetatable(G.localization.descriptions.Back, back_mt)
 end
 
 inject_cracklatro_deck_localization()

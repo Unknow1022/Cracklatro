@@ -4,18 +4,40 @@
     Provides live in-game toggle for Spanish / English descriptions
 --]]
 
-local function get_mod_config()
-    if SMODS and SMODS.current_mod and SMODS.current_mod.config then
-        return SMODS.current_mod.config
+function get_cracklatro_mod()
+    if SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'] then
+        return SMODS.Mods['Crackedlatro']
+    end
+    if SMODS and SMODS.findMod then
+        local found = SMODS.findMod('Crackedlatro')
+        if found and found[1] then return found[1] end
+    end
+    if CRACKEDLATRO_MOD then
+        return CRACKEDLATRO_MOD
+    end
+    if SMODS and SMODS.current_mod then
+        return SMODS.current_mod
+    end
+    return nil
+end
+
+function get_cracklatro_config()
+    local mod = get_cracklatro_mod()
+    if mod and mod.config then
+        return mod.config
+    end
+    if SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'] and SMODS.Mods['Crackedlatro'].config then
+        return SMODS.Mods['Crackedlatro'].config
     end
     return {}
 end
 
 function save_cracklatro_config()
-    if SMODS and SMODS.save_mod_config and SMODS.current_mod then
-        pcall(function() SMODS.save_mod_config(SMODS.current_mod) end)
+    local mod = get_cracklatro_mod()
+    if SMODS and SMODS.save_mod_config and mod then
+        pcall(function() SMODS.save_mod_config(mod) end)
     end
-    local cfg = get_mod_config()
+    local cfg = get_cracklatro_config()
     local new_runs = cfg.new_runs == true
     local new_challenges = cfg.new_challenges ~= false
     local new_spectrals_and_jobs = cfg.new_spectrals_and_jobs ~= false
@@ -24,7 +46,7 @@ function save_cracklatro_config()
         "    [\"new_challenges\"] = " .. tostring(new_challenges) .. ",\n" ..
         "    [\"new_spectrals_and_jobs\"] = " .. tostring(new_spectrals_and_jobs) .. ",\n" ..
         "}\n"
-    local mod_path = (SMODS and SMODS.current_mod and SMODS.current_mod.path) or ""
+    local mod_path = (mod and mod.path) or ""
     if SMODS and SMODS.NFS and SMODS.NFS.write and mod_path ~= "" then
         pcall(function() SMODS.NFS.write(mod_path .. "config.lua", config_str) end)
     elseif NFS and NFS.write and mod_path ~= "" then
@@ -1049,182 +1071,182 @@ end
 -- SMODS MOD CONFIG TAB REGISTRATION
 -- =========================================================================
 
-if SMODS and SMODS.current_mod then
-    SMODS.current_mod.config = SMODS.current_mod.config or {}
-    if SMODS.current_mod.config.new_runs == nil then
-        SMODS.current_mod.config.new_runs = false
-    end
-    if SMODS.current_mod.config.new_challenges == nil then
-        SMODS.current_mod.config.new_challenges = true
-    end
-    if SMODS.current_mod.config.new_spectrals_and_jobs == nil then
-        SMODS.current_mod.config.new_spectrals_and_jobs = true
-    end
-
-    SMODS.current_mod.config_tab = function()
-        return {
-            n = G.UIT.ROOT,
-            config = {
-                align = "cm",
-                padding = 0.15,
-                colour = G.C.CLEAR
+local function build_cracklatro_config_tab()
+    local cfg = get_cracklatro_config()
+    return {
+        n = G.UIT.ROOT,
+        config = {
+            align = "cm",
+            padding = 0.15,
+            colour = G.C.CLEAR
+        },
+        nodes = {
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.08 },
+                nodes = {
+                    {
+                        n = G.UIT.T,
+                        config = {
+                            text = "The Cracked Balatro (Cracklatro)",
+                            scale = 0.50,
+                            colour = G.C.GOLD,
+                            shadow = true
+                        }
+                    }
+                }
             },
-            nodes = {
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.08 },
-                    nodes = {
-                        {
-                            n = G.UIT.T,
-                            config = {
-                                text = "The Cracked Balatro (Cracklatro)",
-                                scale = 0.50,
-                                colour = G.C.GOLD,
-                                shadow = true
-                            }
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.04 },
+                nodes = {
+                    {
+                        n = G.UIT.T,
+                        config = {
+                            text = "Configuración del Mod / Mod Settings",
+                            scale = 0.34,
+                            colour = G.C.UI.TEXT_LIGHT
                         }
                     }
-                },
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.04 },
-                    nodes = {
-                        {
-                            n = G.UIT.T,
-                            config = {
-                                text = "Configuración del Mod / Mod Settings",
-                                scale = 0.34,
-                                colour = G.C.UI.TEXT_LIGHT
-                            }
+                }
+            },
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.04 },
+                nodes = {
+                    {
+                        n = G.UIT.T,
+                        config = {
+                            text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
+                                and "\"Este mod está hecho, no para ser injusto pero tampoco regalar partidas,"
+                                or "\"This mod is designed not to be unfair, but not to hand out free wins either;",
+                            scale = 0.25,
+                            colour = G.C.UI.TEXT_INACTIVE
                         }
                     }
-                },
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.04 },
-                    nodes = {
-                        {
-                            n = G.UIT.T,
-                            config = {
-                                text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
-                                    and "\"Este mod está hecho, no para ser injusto pero tampoco regalar partidas,"
-                                    or "\"This mod is designed not to be unfair, but not to hand out free wins either;",
-                                scale = 0.25,
-                                colour = G.C.UI.TEXT_INACTIVE
-                            }
+                }
+            },
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.02 },
+                nodes = {
+                    {
+                        n = G.UIT.T,
+                        config = {
+                            text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
+                                and "está más concentrado en partidas largas y en Jokers divertidos de jugar,"
+                                or "it is focused on long runs and fun Jokers to play.",
+                            scale = 0.25,
+                            colour = G.C.UI.TEXT_INACTIVE
                         }
                     }
-                },
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.02 },
-                    nodes = {
-                        {
-                            n = G.UIT.T,
-                            config = {
-                                text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
-                                    and "está más concentrado en partidas largas y en Jokers divertidos de jugar,"
-                                    or "it is focused on long runs and fun Jokers to play.",
-                                scale = 0.25,
-                                colour = G.C.UI.TEXT_INACTIVE
-                            }
+                }
+            },
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.05 },
+                nodes = {
+                    {
+                        n = G.UIT.T,
+                        config = {
+                            text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
+                                and "recomendable leer, y si no te gusta leer, pues que mal XD\""
+                                or "Reading is recommended, and if you don't like to read, well too bad XD!\"",
+                            scale = 0.25,
+                            colour = G.C.GOLD
                         }
                     }
-                },
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.05 },
-                    nodes = {
-                        {
-                            n = G.UIT.T,
-                            config = {
-                                text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
-                                    and "recomendable leer, y si no te gusta leer, pues que mal XD\""
-                                    or "Reading is recommended, and if you don't like to read, well too bad XD!\"",
-                                scale = 0.25,
-                                colour = G.C.GOLD
-                            }
+                }
+            },
+            -- Toggle 1: New Runs
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.08 },
+                nodes = {
+                    create_toggle({
+                        label = "New Runs",
+                        ref_table = cfg,
+                        ref_value = "new_runs",
+                        callback = function(val)
+                            save_cracklatro_config()
+                        end,
+                        info = {
+                            "Opcional. Cuando esta configuración está activa, las semillas",
+                            "generan variaciones distintas entre el mod y el juego vainilla.",
+                            "(Seeds vary between the mod and vanilla Balatro)."
                         }
-                    }
-                },
-                -- Toggle 1: New Runs
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.08 },
-                    nodes = {
-                        create_toggle({
-                            label = "New Runs",
-                            ref_table = SMODS.current_mod.config,
-                            ref_value = "new_runs",
-                            callback = function(val)
-                                save_cracklatro_config()
-                            end,
-                            info = {
-                                "Opcional. Cuando esta configuración está activa, las semillas",
-                                "generan variaciones distintas entre el mod y el juego vainilla.",
-                                "(Seeds vary between the mod and vanilla Balatro)."
-                            }
-                        })
-                    }
-                },
-                -- Toggle 2: New Challenges
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.08 },
-                    nodes = {
-                        create_toggle({
-                            label = "New Challenges",
-                            ref_table = SMODS.current_mod.config,
-                            ref_value = "new_challenges",
-                            callback = function(val)
-                                save_cracklatro_config()
-                                if cracklatro_sync_challenges then
-                                    cracklatro_sync_challenges(SMODS.current_mod.config.new_challenges)
-                                end
-                            end,
-                            info = {
-                                "Opcional. Al activarlo añade 10 desafíos especiales los cuales",
-                                "son muy difíciles de completar ya que se basan en sinergias específicas.",
-                                "(Adds 10 special high-difficulty synergy-based challenges)."
-                            }
-                        })
-                    }
-                },
-                -- Toggle 3: New Spectrals Y Job Cards
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.08 },
-                    nodes = {
-                        create_toggle({
-                            label = "New Spectrals Y Job Cards",
-                            ref_table = SMODS.current_mod.config,
-                            ref_value = "new_spectrals_and_jobs",
-                            callback = function(val)
-                                save_cracklatro_config()
-                            end,
-                            info = {
-                                "Habilita las job cards y espectrales del mod a las runs.",
-                                "No afecta a runs ya en progreso.",
-                                "(Enables Job cards & Spectrals in runs. Does not affect runs in progress)."
-                            }
-                        })
-                    }
-                },
-                {
-                    n = G.UIT.R,
-                    config = { align = "cm", padding = 0.06 },
-                    nodes = {
-                        {
-                            n = G.UIT.T,
-                            config = {
-                                text = "Configuración guardada en tiempo real",
-                                scale = 0.26,
-                                colour = G.C.GREEN
-                            }
+                    })
+                }
+            },
+            -- Toggle 2: New Challenges
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.08 },
+                nodes = {
+                    create_toggle({
+                        label = "New Challenges",
+                        ref_table = cfg,
+                        ref_value = "new_challenges",
+                        callback = function(val)
+                            save_cracklatro_config()
+                            if cracklatro_sync_challenges then
+                                cracklatro_sync_challenges(cfg.new_challenges)
+                            end
+                        end,
+                        info = {
+                            "Opcional. Al activarlo añade 10 desafíos especiales los cuales",
+                            "son muy difíciles de completar ya que se basan en sinergias específicas.",
+                            "(Adds 10 special high-difficulty synergy-based challenges)."
+                        }
+                    })
+                }
+            },
+            -- Toggle 3: New Spectrals Y Job Cards
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.08 },
+                nodes = {
+                    create_toggle({
+                        label = "New Spectrals Y Job Cards",
+                        ref_table = cfg,
+                        ref_value = "new_spectrals_and_jobs",
+                        callback = function(val)
+                            save_cracklatro_config()
+                        end,
+                        info = {
+                            "Habilita las job cards y espectrales del mod a las runs.",
+                            "No afecta a runs ya en progreso.",
+                            "(Enables Job cards & Spectrals in runs. Does not affect runs in progress)."
+                        }
+                    })
+                }
+            },
+            {
+                n = G.UIT.R,
+                config = { align = "cm", padding = 0.06 },
+                nodes = {
+                    {
+                        n = G.UIT.T,
+                        config = {
+                            text = "Configuración guardada en tiempo real",
+                            scale = 0.26,
+                            colour = G.C.GREEN
                         }
                     }
                 }
             }
         }
-    end
+    }
+end
+
+local mod_init = get_cracklatro_mod()
+if mod_init then
+    mod_init.config = mod_init.config or {}
+    if mod_init.config.new_runs == nil then mod_init.config.new_runs = false end
+    if mod_init.config.new_challenges == nil then mod_init.config.new_challenges = true end
+    if mod_init.config.new_spectrals_and_jobs == nil then mod_init.config.new_spectrals_and_jobs = true end
+    mod_init.config_tab = build_cracklatro_config_tab
+end
+if SMODS and SMODS.current_mod then
+    SMODS.current_mod.config_tab = build_cracklatro_config_tab
 end

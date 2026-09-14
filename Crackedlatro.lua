@@ -15,6 +15,8 @@
     - Full JokerDisplay Suite integration
 --]]
 
+CRACKEDLATRO_MOD = SMODS.current_mod
+
 local files = {
     -- Core & Engine Hooks
     "src/core/utils.lua",

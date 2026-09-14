@@ -601,7 +601,10 @@ end
 -- Ensure challenges are properly synced according to current mod config
 local original_init_game_challenges = Game.init_game_object
 if original_init_game_challenges then
-    local cfg = (SMODS and SMODS.current_mod and SMODS.current_mod.config) or {}
+    local cfg = (get_cracklatro_config and get_cracklatro_config())
+        or (SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'] and SMODS.Mods['Crackedlatro'].config)
+        or (SMODS and SMODS.current_mod and SMODS.current_mod.config)
+        or {}
     if cfg.new_challenges == false then
         cracklatro_sync_challenges(false)
     end

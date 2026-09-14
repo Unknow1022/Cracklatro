@@ -18,28 +18,74 @@ SMODS.Atlas {
 -- Helper to parse localization strings for Sleeve objects
 local function reparse_sleeve_entry(entry)
     if not entry then return end
-    if loc_parse_string then
-        if entry.text then
-            entry.text_parsed = {}
-            for _, line in ipairs(entry.text) do
-                entry.text_parsed[#entry.text_parsed + 1] = loc_parse_string(line)
+    local parse_fn = loc_parse_string or function(s) return { { strings = { s }, control = {} } } end
+
+    if entry.text then
+        entry.text_parsed = {}
+        for _, line in ipairs(entry.text) do
+            if type(line) == 'table' then
+                local sub = {}
+                for _, sub_line in ipairs(line) do
+                    sub[#sub + 1] = parse_fn(sub_line) or { { strings = { tostring(sub_line) }, control = {} } }
+                end
+                entry.text_parsed[#entry.text_parsed + 1] = sub
+            else
+                entry.text_parsed[#entry.text_parsed + 1] = parse_fn(line) or { { strings = { tostring(line) }, control = {} } }
             end
-        else
-            entry.text_parsed = entry.text_parsed or {}
-        end
-        if entry.name then
-            entry.name_parsed = {}
-            local names = (type(entry.name) == 'table') and entry.name or { entry.name }
-            for _, line in ipairs(names) do
-                entry.name_parsed[#entry.name_parsed + 1] = loc_parse_string(line)
-            end
-        else
-            entry.name_parsed = entry.name_parsed or {}
         end
     else
         entry.text_parsed = entry.text_parsed or {}
+    end
+
+    if entry.name then
+        entry.name_parsed = {}
+        local names = (type(entry.name) == 'table') and entry.name or { entry.name }
+        for _, line in ipairs(names) do
+            entry.name_parsed[#entry.name_parsed + 1] = parse_fn(line) or { { strings = { tostring(line) }, control = {} } }
+        end
+    else
         entry.name_parsed = entry.name_parsed or {}
     end
+
+    local mt = getmetatable(entry) or {}
+    local old_idx = mt.__index
+    mt.__index = function(t, field)
+        if field == 'text_parsed' then
+            local parsed = {}
+            local raw_text = rawget(t, 'text')
+            if raw_text and loc_parse_string then
+                for _, line in ipairs(raw_text) do
+                    if type(line) == 'table' then
+                        local sub = {}
+                        for _, sub_line in ipairs(line) do
+                            sub[#sub + 1] = loc_parse_string(sub_line) or { { strings = { tostring(sub_line) }, control = {} } }
+                        end
+                        parsed[#parsed + 1] = sub
+                    else
+                        parsed[#parsed + 1] = loc_parse_string(line) or { { strings = { tostring(line) }, control = {} } }
+                    end
+                end
+            end
+            rawset(t, 'text_parsed', parsed)
+            return parsed
+        elseif field == 'name_parsed' then
+            local parsed = {}
+            local raw_name = rawget(t, 'name')
+            if raw_name and loc_parse_string then
+                local names = (type(raw_name) == 'table') and raw_name or { raw_name }
+                for _, line in ipairs(names) do
+                    parsed[#parsed + 1] = loc_parse_string(line) or { { strings = { tostring(line) }, control = {} } }
+                end
+            end
+            rawset(t, 'name_parsed', parsed)
+            return parsed
+        elseif type(old_idx) == 'function' then
+            return old_idx(t, field)
+        elseif type(old_idx) == 'table' then
+            return old_idx[field]
+        end
+    end
+    setmetatable(entry, mt)
 end
 
 -- Check if current selected deck matches target key
@@ -208,22 +254,13 @@ local function inject_sleeve_localization()
             entry.text = copy_table(data.text)
             reparse_sleeve_entry(entry)
             G.localization.descriptions.Sleeve[k] = entry
-
-            if SMODS and SMODS.process_loc_text then
-                pcall(function()
-                    SMODS.process_loc_text(G.localization.descriptions.Sleeve, k, {
-                        name = data.name,
-                        text = data.text
-                    })
-                end)
-            end
         end
     end
 
     -- Safeguard all entries in G.localization.descriptions.Sleeve
     for _, s_entry in pairs(G.localization.descriptions.Sleeve) do
         if type(s_entry) == 'table' then
-            if not s_entry.text_parsed then reparse_sleeve_entry(s_entry) end
+            reparse_sleeve_entry(s_entry)
         end
     end
 
@@ -238,10 +275,21 @@ local function inject_sleeve_localization()
             val = orig_index[k]
         end
         if type(val) == 'table' then
-            if not val.text_parsed then val.text_parsed = {} end
-            if not val.name_parsed then val.name_parsed = {} end
+            if not val.text_parsed or not next(val.text_parsed) then
+                reparse_sleeve_entry(val)
+            end
+        elseif val == nil then
+            local dummy = { text = {}, text_parsed = {}, name = "", name_parsed = {} }
+            reparse_sleeve_entry(dummy)
+            return dummy
         end
         return val
+    end
+    sleeve_mt.__newindex = function(t, k, val)
+        if type(val) == 'table' then
+            reparse_sleeve_entry(val)
+        end
+        rawset(t, k, val)
     end
     setmetatable(G.localization.descriptions.Sleeve, sleeve_mt)
 end
@@ -253,11 +301,21 @@ function register_cracklatro_sleeves()
     if not (CardSleeves and CardSleeves.Sleeve) then return end
     registered_sleeves = true
 
+    local mod_obj = (get_cracklatro_mod and get_cracklatro_mod())
+        or (SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'])
+        or CRACKEDLATRO_MOD
+        or SMODS.current_mod
+    local prev_current_mod = SMODS.current_mod
+    if not SMODS.current_mod and mod_obj then
+        SMODS.current_mod = mod_obj
+    end
+
     inject_sleeve_localization()
 
     -- 1. Friendly Sleeve
     CardSleeves.Sleeve {
         key = "friendly",
+        mod = mod_obj,
         name = "Friendly Sleeve",
         atlas = "cracklatro_sleeves",
         pos = { x = 3, y = 0 },
@@ -274,7 +332,10 @@ function register_cracklatro_sleeves()
         },
         loc_vars = function(self, info_queue, card)
             local is_combo = is_deck_matching("friendly")
-            local key = is_combo and (self.key .. "_alt") or self.key
+            local raw_k = (self.original_key or self.key or "friendly")
+            local base_key = string.gsub(string.gsub(raw_k, "^sleeve_Crackedlatro_", ""), "^sleeve_", "")
+            base_key = string.gsub(base_key, "_alt$", "")
+            local key = is_combo and ("sleeve_Crackedlatro_" .. base_key .. "_alt") or ("sleeve_Crackedlatro_" .. base_key)
             return { key = key, vars = {} }
         end,
         apply = function(self, sleeve)
@@ -317,6 +378,7 @@ function register_cracklatro_sleeves()
     -- 2. Caveman Sleeve
     CardSleeves.Sleeve {
         key = "cavernicola",
+        mod = mod_obj,
         name = "Caveman Sleeve",
         atlas = "cracklatro_sleeves",
         pos = { x = 0, y = 0 },
@@ -333,7 +395,10 @@ function register_cracklatro_sleeves()
         },
         loc_vars = function(self, info_queue, card)
             local is_combo = is_deck_matching("cavernicola")
-            local key = is_combo and (self.key .. "_alt") or self.key
+            local raw_k = (self.original_key or self.key or "cavernicola")
+            local base_key = string.gsub(string.gsub(raw_k, "^sleeve_Crackedlatro_", ""), "^sleeve_", "")
+            base_key = string.gsub(base_key, "_alt$", "")
+            local key = is_combo and ("sleeve_Crackedlatro_" .. base_key .. "_alt") or ("sleeve_Crackedlatro_" .. base_key)
             return { key = key, vars = {} }
         end,
         apply = function(self, sleeve)
@@ -401,6 +466,7 @@ function register_cracklatro_sleeves()
     -- 3. Strategist Sleeve
     CardSleeves.Sleeve {
         key = "strategist",
+        mod = mod_obj,
         name = "Strategist Sleeve",
         atlas = "cracklatro_sleeves",
         pos = { x = 1, y = 0 },
@@ -416,7 +482,10 @@ function register_cracklatro_sleeves()
         },
         loc_vars = function(self, info_queue, card)
             local is_combo = is_deck_matching("strategist")
-            local key = is_combo and (self.key .. "_alt") or self.key
+            local raw_k = (self.original_key or self.key or "strategist")
+            local base_key = string.gsub(string.gsub(raw_k, "^sleeve_Crackedlatro_", ""), "^sleeve_", "")
+            base_key = string.gsub(base_key, "_alt$", "")
+            local key = is_combo and ("sleeve_Crackedlatro_" .. base_key .. "_alt") or ("sleeve_Crackedlatro_" .. base_key)
             return { key = key, vars = {} }
         end,
         apply = function(self, sleeve)
@@ -470,6 +539,7 @@ function register_cracklatro_sleeves()
     -- 4. Overseer Sleeve
     CardSleeves.Sleeve {
         key = "overseer",
+        mod = mod_obj,
         name = "Overseer Sleeve",
         atlas = "cracklatro_sleeves",
         pos = { x = 2, y = 0 },
@@ -485,7 +555,10 @@ function register_cracklatro_sleeves()
         },
         loc_vars = function(self, info_queue, card)
             local is_combo = is_deck_matching("overseer")
-            local key = is_combo and (self.key .. "_alt") or self.key
+            local raw_k = (self.original_key or self.key or "overseer")
+            local base_key = string.gsub(string.gsub(raw_k, "^sleeve_Crackedlatro_", ""), "^sleeve_", "")
+            base_key = string.gsub(base_key, "_alt$", "")
+            local key = is_combo and ("sleeve_Crackedlatro_" .. base_key .. "_alt") or ("sleeve_Crackedlatro_" .. base_key)
             return { key = key, vars = {} }
         end,
         apply = function(self, sleeve)
@@ -560,6 +633,10 @@ function register_cracklatro_sleeves()
             end
         end
     }
+    if prev_current_mod ~= nil then
+        SMODS.current_mod = prev_current_mod
+    end
+    inject_sleeve_localization()
 end
 
 -- Try initial registration
@@ -593,7 +670,7 @@ if Card and Card.hover then
     function Card:hover()
         if G.localization and G.localization.descriptions and G.localization.descriptions.Sleeve then
             for _, s_entry in pairs(G.localization.descriptions.Sleeve) do
-                if type(s_entry) == 'table' and not s_entry.text_parsed then
+                if type(s_entry) == 'table' and (not s_entry.text_parsed or not next(s_entry.text_parsed)) then
                     reparse_sleeve_entry(s_entry)
                 end
             end

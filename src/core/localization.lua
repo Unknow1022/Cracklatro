@@ -938,11 +938,164 @@ local SPANISH_DESCRIPTIONS = {
                 "Elimina el sobrecoste de Jokers, inicia con {C:money}+$5{} y {C:blue}+1{} Mano"
             }
         }
+    },
+    Other = {
+        gardener_job = {
+            name = "Jardinero",
+            text = {
+                "Al descartar esta carta, añade permanentemente",
+                "{C:chips}+2{} Fichas base a todas las cartas",
+                "de su mismo palo en tu baraja completa"
+            }
+        },
+        detective_job = {
+            name = "Detective",
+            text = {
+                "En la mano inicial de la ronda,",
+                "revela las siguientes 3 cartas robadas y",
+                "les otorga {C:gold}Sello Dorado{} o {C:blue}Sello Azul{}"
+            }
+        },
+        chef_job = {
+            name = "Chef",
+            text = {
+                "Al puntuar cartas de figura (J, Q, K),",
+                "convierte todas las demás cartas puntuadas",
+                "en {C:mult}Cartas Multi{}"
+            }
+        },
+        archaeologist_job = {
+            name = "Arqueólogo",
+            text = {
+                "Al puntuar en la mano final de la ronda,",
+                "recupera 1 carta descartada con",
+                "una edición ({C:dark_edition}Foil{}, {C:dark_edition}Holo{}, {C:dark_edition}Poly{})"
+            }
+        }
+    },
+    Booster = {
+        job_pack_1 = {
+            name = "Solicitud de Empleo",
+            group_name = "Solicitud de Empleo",
+            text = {
+                "Elige {C:attention}#1#{} de hasta",
+                "{C:attention}#2# cartas de Oficio{} para",
+                "darle un oficio a una carta"
+            }
+        },
+        job_pack_2 = {
+            name = "Solicitud de Empleo Jumbo",
+            group_name = "Solicitud de Empleo",
+            text = {
+                "Elige {C:attention}#1#{} de hasta",
+                "{C:attention}#2# cartas de Oficio{} para",
+                "darle un oficio a una carta"
+            }
+        },
+        job_pack_3 = {
+            name = "Solicitud de Empleo Mega",
+            group_name = "Solicitud de Empleo",
+            text = {
+                "Elige {C:attention}#1#{} de hasta",
+                "{C:attention}#2# cartas de Oficio{} para",
+                "darle un oficio a una carta"
+            }
+        }
     }
 }
 
 -- Backup English definitions for instant live restoration
 local ENGLISH_CACHE = {}
+
+local SPANISH_CHALLENGE_NAMES = {
+    -- Desafíos de Cracklatro
+    ['c_Crackedlatro_casino_roller'] = 'Ruleta Rusa de Negocios',
+    ['casino_roller'] = 'Ruleta Rusa de Negocios',
+    ['c_Crackedlatro_silencio_absoluto'] = 'Silencio Absoluto',
+    ['silencio_absoluto'] = 'Silencio Absoluto',
+    ['c_Crackedlatro_geometria_sagrada'] = 'Geometría Sagrada',
+    ['geometria_sagrada'] = 'Geometría Sagrada',
+    ['c_Crackedlatro_deuda_extrema'] = 'Deuda Extrema',
+    ['deuda_extrema'] = 'Deuda Extrema',
+    ['c_Crackedlatro_forja_y_mina'] = 'La Forja y la Mina',
+    ['forja_y_mina'] = 'La Forja y la Mina',
+    ['c_Crackedlatro_duelo_numerico'] = 'Duelo Numérico',
+    ['duelo_numerico'] = 'Duelo Numérico',
+    ['c_Crackedlatro_lienzo_vivo'] = 'El Lienzo Vivo',
+    ['lienzo_vivo'] = 'El Lienzo Vivo',
+    ['c_Crackedlatro_coleccionista_brillos'] = 'Coleccionista de Brillos',
+    ['coleccionista_brillos'] = 'Coleccionista de Brillos',
+    ['c_Crackedlatro_urgencias_medicas'] = 'Urgencias Médicas',
+    ['urgencias_medicas'] = 'Urgencias Médicas',
+    ['c_Crackedlatro_sobresaturacion'] = 'Sobresaturación Singular',
+    ['sobresaturacion'] = 'Sobresaturación Singular',
+
+    -- Desafíos Vainilla de Balatro
+    ['c_omelette_1'] = 'La Tortilla',
+    ['c_city_1'] = 'Ciudad de 15 Minutos',
+    ['c_rich_1'] = 'Los Ricos se Vuelven Más Ricos',
+    ['c_knife_1'] = 'Al Filo de la Navaja',
+    ['c_xray_1'] = 'Visión de Rayos X',
+    ['c_mad_world_1'] = 'Mundo Loco',
+    ['c_luxury_1'] = 'Impuesto al Lujo',
+    ['c_non_perishable_1'] = 'No Perecedero',
+    ['c_medusa_1'] = 'Medusa',
+    ['c_double_nothing_1'] = 'Doble o Nada',
+    ['c_typecast_1'] = 'Encasillamiento',
+    ['c_inflation_1'] = 'Inflación',
+    ['c_bram_poker_1'] = 'Bram Poker',
+    ['c_fragile_1'] = 'Frágil',
+    ['c_monolith_1'] = 'Monolito',
+    ['c_blast_off_1'] = 'Despegue',
+    ['c_five_card_1'] = 'Descarte de Cinco Cartas',
+    ['c_golden_needle_1'] = 'Aguja de Oro',
+    ['c_cruelty_1'] = 'Crueldad',
+    ['c_jokerless_1'] = 'Sin Jokers',
+}
+
+local ENGLISH_CHALLENGE_NAMES = {
+    ['c_Crackedlatro_casino_roller'] = "High Roller's Casino",
+    ['casino_roller'] = "High Roller's Casino",
+    ['c_Crackedlatro_silencio_absoluto'] = 'Absolute Silence',
+    ['silencio_absoluto'] = 'Absolute Silence',
+    ['c_Crackedlatro_geometria_sagrada'] = 'Sacred Symmetry',
+    ['geometria_sagrada'] = 'Sacred Symmetry',
+    ['c_Crackedlatro_deuda_extrema'] = 'Predatory Loan',
+    ['deuda_extrema'] = 'Predatory Loan',
+    ['c_Crackedlatro_forja_y_mina'] = 'The Forge & The Mine',
+    ['forja_y_mina'] = 'The Forge & The Mine',
+    ['c_Crackedlatro_duelo_numerico'] = 'Parity Duel',
+    ['duelo_numerico'] = 'Parity Duel',
+    ['c_Crackedlatro_lienzo_vivo'] = 'The Living Canvas',
+    ['lienzo_vivo'] = 'The Living Canvas',
+    ['c_Crackedlatro_coleccionista_brillos'] = 'Edition Tycoon',
+    ['coleccionista_brillos'] = 'Edition Tycoon',
+    ['c_Crackedlatro_urgencias_medicas'] = 'Code Red ER',
+    ['urgencias_medicas'] = 'Code Red ER',
+    ['c_Crackedlatro_sobresaturacion'] = 'Singular Saturation',
+    ['sobresaturacion'] = 'Singular Saturation',
+
+    ['c_omelette_1'] = 'The Omelette',
+    ['c_city_1'] = '15 Minute City',
+    ['c_rich_1'] = 'Rich get Richer',
+    ['c_knife_1'] = "On a Knife's Edge",
+    ['c_xray_1'] = 'X-ray Vision',
+    ['c_mad_world_1'] = 'Mad World',
+    ['c_luxury_1'] = 'Luxury Tax',
+    ['c_non_perishable_1'] = 'Non-Perishable',
+    ['c_medusa_1'] = 'Medusa',
+    ['c_double_nothing_1'] = 'Double or Nothing',
+    ['c_typecast_1'] = 'Typecast',
+    ['c_inflation_1'] = 'Inflation',
+    ['c_bram_poker_1'] = 'Bram Poker',
+    ['c_fragile_1'] = 'Fragile',
+    ['c_monolith_1'] = 'Monolith',
+    ['c_blast_off_1'] = 'Blast Off',
+    ['c_five_card_1'] = 'Five-Card Draw',
+    ['c_golden_needle_1'] = 'Golden Needle',
+    ['c_cruelty_1'] = 'Cruelty',
+    ['c_jokerless_1'] = 'Jokerless',
+}
 
 local function record_english_entry(set, key, target)
     if not ENGLISH_CACHE[set] then ENGLISH_CACHE[set] = {} end
@@ -1014,6 +1167,8 @@ function apply_cracklatro_language(use_spanish)
                     'm_' .. short_key,
                     'sleeve_Crackedlatro_' .. short_key,
                     'sleeve_' .. short_key,
+                    'p_Crackedlatro_' .. short_key,
+                    'p_' .. short_key,
                     'Crackedlatro_' .. short_key,
                     'smods_' .. short_key
                 }
@@ -1054,6 +1209,53 @@ function apply_cracklatro_language(use_spanish)
         for _, b_entry in pairs(G.localization.descriptions.Back) do
             if type(b_entry) == 'table' and not b_entry.text_parsed then
                 reparse_localization_entry(b_entry)
+            end
+        end
+    end
+
+    -- Sincronizar nombres de desafíos en G.localization.misc.challenge_names
+    if G.localization and G.localization.misc then
+        if not G.localization.misc.challenge_names then
+            G.localization.misc.challenge_names = {}
+        end
+        local ch_dict = use_spanish and SPANISH_CHALLENGE_NAMES or ENGLISH_CHALLENGE_NAMES
+        for k, v in pairs(ch_dict) do
+            G.localization.misc.challenge_names[k] = v
+        end
+
+        -- Textos de reglas personalizadas de desafíos en español e inglés
+        if G.localization.misc.v_dictionary then
+            if use_spanish then
+                G.localization.misc.v_dictionary['ch_c_single_random_suit'] = 'Toda la baraja es de un único palo aleatorio'
+                G.localization.misc.v_dictionary['ch_c_all_perishable'] = 'Todos los Jokers son perecederos'
+            else
+                G.localization.misc.v_dictionary['ch_c_single_random_suit'] = 'Deck consists of a single random suit'
+                G.localization.misc.v_dictionary['ch_c_all_perishable'] = 'All Jokers are perishable'
+            end
+        end
+        if G.localization.misc.dictionary then
+            if use_spanish then
+                G.localization.misc.dictionary['ch_c_single_random_suit'] = 'Toda la baraja es de un único palo aleatorio'
+                G.localization.misc.dictionary['ch_c_all_perishable'] = 'Todos los Jokers son perecederos'
+                G.localization.misc.dictionary['k_job'] = 'Oficio'
+                G.localization.misc.dictionary['b_job_cards'] = 'Cartas de Oficio'
+                G.localization.misc.dictionary['k_job_pack'] = 'Solicitudes de Empleo'
+            else
+                G.localization.misc.dictionary['ch_c_single_random_suit'] = 'Deck consists of a single random suit'
+                G.localization.misc.dictionary['ch_c_all_perishable'] = 'All Jokers are perishable'
+                G.localization.misc.dictionary['k_job'] = 'Job'
+                G.localization.misc.dictionary['b_job_cards'] = 'Job Cards'
+                G.localization.misc.dictionary['k_job_pack'] = 'Job Application'
+            end
+        end
+    end
+
+    -- Actualizar nombres en tiempo real en G.CHALLENGES
+    if G.CHALLENGES then
+        local ch_dict = use_spanish and SPANISH_CHALLENGE_NAMES or ENGLISH_CHALLENGE_NAMES
+        for _, ch in ipairs(G.CHALLENGES) do
+            if ch and ch.id and ch_dict[ch.id] then
+                ch.name = ch_dict[ch.id]
             end
         end
     end
@@ -1103,7 +1305,7 @@ local function build_cracklatro_config_tab()
                     {
                         n = G.UIT.T,
                         config = {
-                            text = "Configuración del Mod / Mod Settings",
+                            text = "Configuración del Mod",
                             scale = 0.34,
                             colour = G.C.UI.TEXT_LIGHT
                         }
@@ -1117,9 +1319,7 @@ local function build_cracklatro_config_tab()
                     {
                         n = G.UIT.T,
                         config = {
-                            text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
-                                and "\"Este mod está hecho, no para ser injusto pero tampoco regalar partidas,"
-                                or "\"This mod is designed not to be unfair, but not to hand out free wins either;",
+                            text = "\"Este mod está hecho, no para ser injusto pero tampoco regalar partidas,",
                             scale = 0.25,
                             colour = G.C.UI.TEXT_INACTIVE
                         }
@@ -1133,9 +1333,7 @@ local function build_cracklatro_config_tab()
                     {
                         n = G.UIT.T,
                         config = {
-                            text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
-                                and "está más concentrado en partidas largas y en Jokers divertidos de jugar,"
-                                or "it is focused on long runs and fun Jokers to play.",
+                            text = "está más concentrado en partidas largas y en Jokers divertidos de jugar,",
                             scale = 0.25,
                             colour = G.C.UI.TEXT_INACTIVE
                         }
@@ -1149,42 +1347,39 @@ local function build_cracklatro_config_tab()
                     {
                         n = G.UIT.T,
                         config = {
-                            text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
-                                and "recomendable leer, y si no te gusta leer, pues que mal XD\""
-                                or "Reading is recommended, and if you don't like to read, well too bad XD!\"",
+                            text = "recomendable leer, y si no te gusta leer, pues que mal XD\"",
                             scale = 0.25,
                             colour = G.C.GOLD
                         }
                     }
                 }
             },
-            -- Toggle 1: New Runs
+            -- Toggle 1: Nuevas Partidas (New Runs)
             {
                 n = G.UIT.R,
                 config = { align = "cm", padding = 0.08 },
                 nodes = {
                     create_toggle({
-                        label = "New Runs",
+                        label = "Nuevas Partidas",
                         ref_table = cfg,
                         ref_value = "new_runs",
                         callback = function(val)
                             save_cracklatro_config()
                         end,
                         info = {
-                            "Opcional. Cuando esta configuración está activa, las semillas",
-                            "generan variaciones distintas entre el mod y el juego vainilla.",
-                            "(Seeds vary between the mod and vanilla Balatro)."
+                            "Opcional. Al activarse, las semillas generan",
+                            "variaciones distintas entre el mod y el juego base."
                         }
                     })
                 }
             },
-            -- Toggle 2: New Challenges
+            -- Toggle 2: Nuevos Desafíos (New Challenges)
             {
                 n = G.UIT.R,
                 config = { align = "cm", padding = 0.08 },
                 nodes = {
                     create_toggle({
-                        label = "New Challenges",
+                        label = "Nuevos Desafíos",
                         ref_table = cfg,
                         ref_value = "new_challenges",
                         callback = function(val)
@@ -1194,29 +1389,27 @@ local function build_cracklatro_config_tab()
                             end
                         end,
                         info = {
-                            "Opcional. Al activarlo añade 10 desafíos especiales los cuales",
-                            "son muy difíciles de completar ya que se basan en sinergias específicas.",
-                            "(Adds 10 special high-difficulty synergy-based challenges)."
+                            "Opcional. Añade 10 desafíos especiales de alta dificultad",
+                            "basados en sinergias únicas de Cracklatro."
                         }
                     })
                 }
             },
-            -- Toggle 3: New Spectrals Y Job Cards
+            -- Toggle 3: Nuevas Espectrales y Oficios (New Spectrals & Job Cards)
             {
                 n = G.UIT.R,
                 config = { align = "cm", padding = 0.08 },
                 nodes = {
                     create_toggle({
-                        label = "New Spectrals Y Job Cards",
+                        label = "Nuevas Espectrales y Oficios",
                         ref_table = cfg,
                         ref_value = "new_spectrals_and_jobs",
                         callback = function(val)
                             save_cracklatro_config()
                         end,
                         info = {
-                            "Habilita las job cards y espectrales del mod a las runs.",
-                            "No afecta a runs ya en progreso.",
-                            "(Enables Job cards & Spectrals in runs. Does not affect runs in progress)."
+                            "Habilita las cartas de Oficio y cartas Espectrales del mod en tus partidas.",
+                            "No afecta a partidas que ya estén en progreso."
                         }
                     })
                 }

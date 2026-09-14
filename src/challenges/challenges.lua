@@ -85,7 +85,7 @@ local challenge_definitions = {
                 { id = 'j_supernova' },
                 { id = 'j_green_joker' },
                 { id = 'j_bull' },
-                { id = 'j_boots' },
+                { id = 'j_bootstraps' },
                 { id = 'j_swashbuckler' },
                 { id = 'j_stone' },
                 { id = 'j_stuntman' },
@@ -578,6 +578,10 @@ function cracklatro_sync_challenges(enable)
                 deck = ch.deck or { type = 'Challenge Deck' },
                 restrictions = ch.restrictions or {}
             })
+            if G.localization and G.localization.misc and G.localization.misc.challenge_names then
+                G.localization.misc.challenge_names[ch_id] = ch_name
+                G.localization.misc.challenge_names[ch.key] = ch_name
+            end
         end
     end
 end

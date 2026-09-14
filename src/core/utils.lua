@@ -414,6 +414,25 @@ function Card:use_consumeable(area, copier)
     return use_card_ref(self, area, copier)
 end
 
+-- Safety guard for Card:update_alert when ability is nil or card is uninitialized
+local card_update_alert_ref = Card.update_alert
+function Card:update_alert()
+    if not self or not self.ability then return end
+    return card_update_alert_ref(self)
+end
+
+-- Safety guard for Card:set_ability when center is nil or missing
+local card_set_ability_ref = Card.set_ability
+function Card:set_ability(center, initial, delay_sprites)
+    if not center then
+        center = (G.P_CENTERS and G.P_CENTERS.c_base) or { name = 'Default', set = 'Default', config = {} }
+    end
+    card_set_ability_ref(self, center, initial, delay_sprites)
+    if not self.ability then
+        self.ability = { name = 'Default', set = 'Default', mult = 0, chips = 0, x_mult = 1 }
+    end
+end
+
 -- Overseer Deck & CardSleeves Hooks
 local add_tag_ref = add_tag
 function add_tag(tag)

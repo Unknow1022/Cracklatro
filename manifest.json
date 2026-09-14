@@ -4,8 +4,12 @@
     "author": [
         "Unknow102"
     ],
-    "description": "Version 2.0 - La \"Display\" Update. Unique Balatro expansion featuring custom Jokers, Secret Rarity cards, full native JokerDisplay suite for all 44 Jokers, Job Consumables, Boss Blinds, Decks, Vouchers, Enhancements, and Seals.",
+    "description": "This mod is designed not to be unfair, but not to hand out free wins either—focused on long runs and fun Jokers to play. Reading is recommended, and if you don't like to read, well too bad XD! Features CardSleeves compatibility with 4 custom sleeves & deck fusion powers, 10 synergy challenges, seed variance for new runs, Job & Spectral toggles, and full JokerDisplay support.",
     "prefix": "Crackedlatro",
     "main_file": "Crackedlatro.lua",
-    "version": "2.0"
+    "version": "2.0",
+    "optional_dependencies": [
+        "CardSleeves",
+        "JokerDisplay"
+    ]
 }

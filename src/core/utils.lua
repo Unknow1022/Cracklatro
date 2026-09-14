@@ -43,6 +43,38 @@ function is_secret_card(card)
     return false
 end
 
+function is_sleeve_matching(target_key)
+    if not target_key then return false end
+    if G and G.GAME then
+        if G.GAME[target_key .. "_sleeve_combo"] then return true end
+        if G.GAME[target_key .. "_sleeve_active"] then return true end
+        if G.GAME[target_key .. "_sleeve_selected"] then return true end
+        if G.GAME.selected_sleeve then
+            local s = tostring(G.GAME.selected_sleeve.key or G.GAME.selected_sleeve.name or G.GAME.selected_sleeve)
+            if string.find(s, target_key, 1, true) ~= nil then return true end
+        end
+        if G.GAME.sleeve then
+            local s = tostring(G.GAME.sleeve.key or G.GAME.sleeve.name or G.GAME.sleeve)
+            if string.find(s, target_key, 1, true) ~= nil then return true end
+        end
+    end
+    if CardSleeves then
+        if CardSleeves.get_current_sleeve then
+            local s = tostring(CardSleeves.get_current_sleeve() or "")
+            if string.find(s, target_key, 1, true) ~= nil then return true end
+        end
+        if CardSleeves.Sleeve and CardSleeves.Sleeve.get_current_sleeve_key then
+            local s = tostring(CardSleeves.Sleeve.get_current_sleeve_key() or "")
+            if string.find(s, target_key, 1, true) ~= nil then return true end
+        end
+        if CardSleeves.current_sleeve then
+            local s = tostring(CardSleeves.current_sleeve)
+            if string.find(s, target_key, 1, true) ~= nil then return true end
+        end
+    end
+    return false
+end
+
 function is_wild_card(pcard)
     if not pcard then return false end
     if SMODS and SMODS.has_enhancement and SMODS.has_enhancement(pcard, 'm_wild') then
@@ -382,20 +414,37 @@ function Card:use_consumeable(area, copier)
     return use_card_ref(self, area, copier)
 end
 
--- Overseer Deck Hooks
+-- Overseer Deck & CardSleeves Hooks
 local add_tag_ref = add_tag
 function add_tag(tag)
     local ret = add_tag_ref(tag)
-    if G.GAME and G.GAME.overseer_deck and not G.GAME.overseer_duplicating_tag and tag then
-        G.GAME.overseer_duplicating_tag = true
-        G.E_MANAGER:add_event(Event({
-            func = function()
-                local new_tag = Tag(tag.key)
-                add_tag_ref(new_tag)
-                G.GAME.overseer_duplicating_tag = nil
-                return true
-            end
-        }))
+    if G.GAME and not G.GAME.overseer_duplicating_tag and tag then
+        local is_combo = G.GAME.overseer_sleeve_combo or (G.GAME.overseer_deck and is_sleeve_matching("overseer"))
+        if is_combo then
+            -- Tripled tags (add 2 additional copies)
+            G.GAME.overseer_duplicating_tag = true
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    local new_tag1 = Tag(tag.key)
+                    add_tag_ref(new_tag1)
+                    local new_tag2 = Tag(tag.key)
+                    add_tag_ref(new_tag2)
+                    G.GAME.overseer_duplicating_tag = nil
+                    return true
+                end
+            }))
+        elseif G.GAME.overseer_deck or G.GAME.overseer_sleeve_active or is_sleeve_matching("overseer") then
+            -- Doubled tags (add 1 additional copy)
+            G.GAME.overseer_duplicating_tag = true
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    local new_tag = Tag(tag.key)
+                    add_tag_ref(new_tag)
+                    G.GAME.overseer_duplicating_tag = nil
+                    return true
+                end
+            }))
+        end
     end
     return ret
 end
@@ -403,7 +452,8 @@ end
 local set_cost_ref = Card.set_cost
 function Card:set_cost()
     set_cost_ref(self)
-    if G.GAME and G.GAME.overseer_deck and self.ability and self.ability.set == 'Joker' then
+    local no_markup = G.GAME and (G.GAME.overseer_no_markup or G.GAME.overseer_sleeve_combo)
+    if G.GAME and G.GAME.overseer_deck and not no_markup and self.ability and self.ability.set == 'Joker' then
         self.cost = math.max(1, math.floor(self.cost * 1.5))
     end
     if G.GAME and G.GAME.sale_tag_active then
@@ -1619,5 +1669,56 @@ if G and G.FUNCS then
         end
     end
 end
+
+-- =========================================================================
+-- CONFIG SYSTEM INTEGRATION & ENGINE HOOKS
+-- =========================================================================
+
+function is_cracklatro_spectrals_jobs_enabled()
+    -- Check run-specific variable so ongoing runs are NOT affected by mid-run config changes
+    if G and G.GAME and G.GAME.cracklatro_spectrals_jobs ~= nil then
+        return G.GAME.cracklatro_spectrals_jobs
+    end
+    -- Fallback to mod config
+    if SMODS and SMODS.current_mod and SMODS.current_mod.config then
+        if SMODS.current_mod.config.new_spectrals_and_jobs ~= nil then
+            return SMODS.current_mod.config.new_spectrals_and_jobs
+        end
+    end
+    return true
+end
+
+-- Hook Game:init_game_object for "New Runs" seed variation and "New Spectrals Y Job Cards" run-lock
+if Game and Game.init_game_object then
+    local orig_game_init_game_object = Game.init_game_object
+    function Game:init_game_object(args)
+        local ret = orig_game_init_game_object(self, args)
+        local cfg = (SMODS and SMODS.current_mod and SMODS.current_mod.config) or {}
+
+        -- Lock in spectrals & jobs setting for this run (does not affect runs in progress)
+        if self.GAME and self.GAME.cracklatro_spectrals_jobs == nil then
+            self.GAME.cracklatro_spectrals_jobs = (cfg.new_spectrals_and_jobs ~= false)
+        end
+
+        -- New Runs: when active, seeds generate different outcomes/variations between mod and vanilla Balatro
+        if cfg.new_runs and self.GAME and self.GAME.pseudorandom and self.GAME.pseudorandom.seed then
+            local mod_salt = "_CRK"
+            if not string.find(self.GAME.pseudorandom.seed, mod_salt, 1, true) then
+                self.GAME.pseudorandom.seed = self.GAME.pseudorandom.seed .. mod_salt
+                if pseudohash then
+                    self.GAME.pseudorandom.hashed_seed = pseudohash(self.GAME.pseudorandom.seed)
+                    for k, _ in pairs(self.GAME.pseudorandom) do
+                        if k ~= 'seed' and k ~= 'hashed_seed' then
+                            self.GAME.pseudorandom[k] = pseudohash(k .. self.GAME.pseudorandom.seed)
+                        end
+                    end
+                end
+            end
+        end
+
+        return ret
+    end
+end
+
 
 

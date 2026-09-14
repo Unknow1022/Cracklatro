@@ -16,8 +16,14 @@ function save_cracklatro_config()
         pcall(function() SMODS.save_mod_config(SMODS.current_mod) end)
     end
     local cfg = get_mod_config()
-    local is_es = cfg.spanish_descriptions == true
-    local config_str = "return {\n    [\"spanish_descriptions\"] = " .. tostring(is_es) .. ",\n}\n"
+    local new_runs = cfg.new_runs == true
+    local new_challenges = cfg.new_challenges ~= false
+    local new_spectrals_and_jobs = cfg.new_spectrals_and_jobs ~= false
+    local config_str = "return {\n" ..
+        "    [\"new_runs\"] = " .. tostring(new_runs) .. ",\n" ..
+        "    [\"new_challenges\"] = " .. tostring(new_challenges) .. ",\n" ..
+        "    [\"new_spectrals_and_jobs\"] = " .. tostring(new_spectrals_and_jobs) .. ",\n" ..
+        "}\n"
     local mod_path = (SMODS and SMODS.current_mod and SMODS.current_mod.path) or ""
     if SMODS and SMODS.NFS and SMODS.NFS.write and mod_path ~= "" then
         pcall(function() SMODS.NFS.write(mod_path .. "config.lua", config_str) end)
@@ -806,6 +812,71 @@ local SPANISH_DESCRIPTIONS = {
                 "a {C:attention}1 carta seleccionada{}"
             }
         }
+    },
+    Sleeve = {
+        friendly = {
+            name = 'Funda Amistosa',
+            text = {
+                "Inicia la partida con {C:attention}1 Joker Negativo Eterno{} aleatorio",
+                "{C:inactive}(Excepto Legendario o Secreto){},",
+                "{C:red}-1{} Descarte"
+            }
+        },
+        friendly_alt = {
+            name = 'Funda Amistosa (Fusión)',
+            text = {
+                "{C:attention}Fusión Amistosa{}: Genera {C:attention}3 Jokers Negativos Eternos{},",
+                "con posibilidad de hasta {C:legendary}1 Joker Legendario{},",
+                "pierdes {C:red}-2{} Espacios de Joker y {C:red}-1{} Descarte"
+            }
+        },
+        cavernicola = {
+            name = 'Funda Cavernícola',
+            text = {
+                "Todas las {C:attention}Figuras{} iniciales (J, Q, K)",
+                "se convierten en {C:attention}Cartas de Piedra{},",
+                "{C:blue}+1{} Mano"
+            }
+        },
+        cavernicola_alt = {
+            name = 'Funda Cavernícola (Fusión)',
+            text = {
+                "{C:attention}Fusión Prehistórica{}: Todas las {C:attention}Cartas de Piedra{}",
+                "iniciales reciben un {C:chips}Sello de Plata{},",
+                "las Cartas de Piedra otorgan {C:mult}+3{} Mult y {C:chips}+20{} Fichas al anotar,",
+                "{C:blue}+1{} Mano"
+            }
+        },
+        strategist = {
+            name = 'Funda Estratega',
+            text = {
+                "Inicia con el vale {C:attention}Truco de Magia{},",
+                "Inicia con {C:money}$5{}, {C:red}-1{} Descarte"
+            }
+        },
+        strategist_alt = {
+            name = 'Funda Estratega (Fusión)',
+            text = {
+                "{C:attention}Fusión Estratégica{}: Mazo inicial condensado a {C:attention}20 cartas{} (10 al As),",
+                "Inicia con los vales {C:attention}Truco de Magia{} y {C:attention}Mercader de Tarot{},",
+                "{C:attention}+1{} Espacio de carta en tienda, manos jugadas dan {C:money}+$1{}"
+            }
+        },
+        overseer = {
+            name = 'Funda Supervisora',
+            text = {
+                "Las {C:attention}Etiquetas se duplican{} siempre,",
+                "Vencer una Ciega Jefe crea una carta {C:spectral}Espectral{} aleatoria"
+            }
+        },
+        overseer_alt = {
+            name = 'Funda Supervisora (Fusión)',
+            text = {
+                "{C:attention}Fusión Supervisora{}: Crea {C:spectral}2 cartas Espectrales{} al final de ronda,",
+                "Las Etiquetas se {C:attention}triplican{} (X3),",
+                "Elimina el sobrecoste de Jokers, inicia con {C:money}+$5{} y {C:blue}+1{} Mano"
+            }
+        }
     }
 }
 
@@ -853,6 +924,8 @@ function apply_cracklatro_language(use_spanish)
                     'c_' .. short_key,
                     'm_Crackedlatro_' .. short_key,
                     'm_' .. short_key,
+                    'sleeve_Crackedlatro_' .. short_key,
+                    'sleeve_' .. short_key,
                     'Crackedlatro_' .. short_key,
                     'smods_' .. short_key
                 }
@@ -881,12 +954,11 @@ function apply_cracklatro_language(use_spanish)
     end
 end
 
--- Hook init_localization to automatically apply configured language
+-- Hook init_localization to automatically apply configured language if Balatro is set to Spanish
 local original_init_loc = init_localization
 function init_localization()
     if original_init_loc then original_init_loc() end
-    local cfg = get_mod_config()
-    if cfg and cfg.spanish_descriptions then
+    if G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES') then
         apply_cracklatro_language(true)
     end
 end
@@ -897,8 +969,14 @@ end
 
 if SMODS and SMODS.current_mod then
     SMODS.current_mod.config = SMODS.current_mod.config or {}
-    if SMODS.current_mod.config.spanish_descriptions == nil then
-        SMODS.current_mod.config.spanish_descriptions = false
+    if SMODS.current_mod.config.new_runs == nil then
+        SMODS.current_mod.config.new_runs = false
+    end
+    if SMODS.current_mod.config.new_challenges == nil then
+        SMODS.current_mod.config.new_challenges = true
+    end
+    if SMODS.current_mod.config.new_spectrals_and_jobs == nil then
+        SMODS.current_mod.config.new_spectrals_and_jobs = true
     end
 
     SMODS.current_mod.config_tab = function()
@@ -912,15 +990,61 @@ if SMODS and SMODS.current_mod then
             nodes = {
                 {
                     n = G.UIT.R,
-                    config = { align = "cm", padding = 0.1 },
+                    config = { align = "cm", padding = 0.08 },
                     nodes = {
                         {
                             n = G.UIT.T,
                             config = {
                                 text = "The Cracked Balatro (Cracklatro)",
-                                scale = 0.52,
+                                scale = 0.50,
                                 colour = G.C.GOLD,
                                 shadow = true
+                            }
+                        }
+                    }
+                },
+                {
+                    n = G.UIT.R,
+                    config = { align = "cm", padding = 0.04 },
+                    nodes = {
+                        {
+                            n = G.UIT.T,
+                            config = {
+                                text = "Configuración del Mod / Mod Settings",
+                                scale = 0.34,
+                                colour = G.C.UI.TEXT_LIGHT
+                            }
+                        }
+                    }
+                },
+                {
+                    n = G.UIT.R,
+                    config = { align = "cm", padding = 0.04 },
+                    nodes = {
+                        {
+                            n = G.UIT.T,
+                            config = {
+                                text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
+                                    and "\"Este mod está hecho, no para ser injusto pero tampoco regalar partidas,"
+                                    or "\"This mod is designed not to be unfair, but not to hand out free wins either;",
+                                scale = 0.25,
+                                colour = G.C.UI.TEXT_INACTIVE
+                            }
+                        }
+                    }
+                },
+                {
+                    n = G.UIT.R,
+                    config = { align = "cm", padding = 0.02 },
+                    nodes = {
+                        {
+                            n = G.UIT.T,
+                            config = {
+                                text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
+                                    and "está más concentrado en partidas largas y en Jokers divertidos de jugar,"
+                                    or "it is focused on long runs and fun Jokers to play.",
+                                scale = 0.25,
+                                colour = G.C.UI.TEXT_INACTIVE
                             }
                         }
                     }
@@ -932,42 +1056,87 @@ if SMODS and SMODS.current_mod then
                         {
                             n = G.UIT.T,
                             config = {
-                                text = "Configuración de Idioma / Language Settings",
-                                scale = 0.36,
-                                colour = G.C.UI.TEXT_LIGHT
+                                text = ((G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or G.CRACKEDLATRO_SPANISH)
+                                    and "recomendable leer, y si no te gusta leer, pues que mal XD\""
+                                    or "Reading is recommended, and if you don't like to read, well too bad XD!\"",
+                                scale = 0.25,
+                                colour = G.C.GOLD
                             }
                         }
                     }
                 },
+                -- Toggle 1: New Runs
                 {
                     n = G.UIT.R,
-                    config = { align = "cm", padding = 0.15 },
+                    config = { align = "cm", padding = 0.08 },
                     nodes = {
                         create_toggle({
-                            label = "Descripciones en Español",
+                            label = "New Runs",
                             ref_table = SMODS.current_mod.config,
-                            ref_value = "spanish_descriptions",
+                            ref_value = "new_runs",
                             callback = function(val)
                                 save_cracklatro_config()
-                                apply_cracklatro_language(SMODS.current_mod.config.spanish_descriptions)
                             end,
                             info = {
-                                "Traduce los nombres y descripciones de todos los Jokers,",
-                                "Cartas de Oficio, Ciegas, Barajas y Vouchers al Español.",
-                                "Translates all card names and descriptions to Spanish."
+                                "Opcional. Cuando esta configuración está activa, las semillas",
+                                "generan variaciones distintas entre el mod y el juego vainilla.",
+                                "(Seeds vary between the mod and vanilla Balatro)."
+                            }
+                        })
+                    }
+                },
+                -- Toggle 2: New Challenges
+                {
+                    n = G.UIT.R,
+                    config = { align = "cm", padding = 0.08 },
+                    nodes = {
+                        create_toggle({
+                            label = "New Challenges",
+                            ref_table = SMODS.current_mod.config,
+                            ref_value = "new_challenges",
+                            callback = function(val)
+                                save_cracklatro_config()
+                                if cracklatro_sync_challenges then
+                                    cracklatro_sync_challenges(SMODS.current_mod.config.new_challenges)
+                                end
+                            end,
+                            info = {
+                                "Opcional. Al activarlo añade 10 desafíos especiales los cuales",
+                                "son muy difíciles de completar ya que se basan en sinergias específicas.",
+                                "(Adds 10 special high-difficulty synergy-based challenges)."
+                            }
+                        })
+                    }
+                },
+                -- Toggle 3: New Spectrals Y Job Cards
+                {
+                    n = G.UIT.R,
+                    config = { align = "cm", padding = 0.08 },
+                    nodes = {
+                        create_toggle({
+                            label = "New Spectrals Y Job Cards",
+                            ref_table = SMODS.current_mod.config,
+                            ref_value = "new_spectrals_and_jobs",
+                            callback = function(val)
+                                save_cracklatro_config()
+                            end,
+                            info = {
+                                "Habilita las job cards y espectrales del mod a las runs.",
+                                "No afecta a runs ya en progreso.",
+                                "(Enables Job cards & Spectrals in runs. Does not affect runs in progress)."
                             }
                         })
                     }
                 },
                 {
                     n = G.UIT.R,
-                    config = { align = "cm", padding = 0.08 },
+                    config = { align = "cm", padding = 0.06 },
                     nodes = {
                         {
                             n = G.UIT.T,
                             config = {
-                                text = "Cambio en tiempo real • No requiere reiniciar el juego",
-                                scale = 0.28,
+                                text = "Configuración guardada en tiempo real",
+                                scale = 0.26,
                                 colour = G.C.GREEN
                             }
                         }
@@ -975,17 +1144,5 @@ if SMODS and SMODS.current_mod then
                 }
             }
         }
-    end
-
-    -- Initial load check
-    if SMODS.current_mod.config.spanish_descriptions then
-        G.E_MANAGER:add_event(Event({
-            trigger = 'after',
-            delay = 0.1,
-            func = function()
-                apply_cracklatro_language(true)
-                return true
-            end
-        }))
     end
 end

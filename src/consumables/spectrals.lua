@@ -13,6 +13,9 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_hierarchy',
     pos = { x = 0, y = 0 },
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Hierarchy',
         text = {
@@ -104,6 +107,9 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_order',
     pos = { x = 0, y = 0 },
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Order',
         text = {
@@ -160,6 +166,9 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_rot',
     pos = { x = 0, y = 0 },
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Rot',
         text = {
@@ -286,6 +295,9 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_catastrophic',
     pos = { x = 0, y = 0 },
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Catastrophic',
         text = {
@@ -351,6 +363,9 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_intensity',
     pos = { x = 0, y = 0 },
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Intensity',
         text = {
@@ -510,6 +525,9 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_refuerzo',
     pos = { x = 0, y = 0 },
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Reinforcement',
         text = {
@@ -567,6 +585,9 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_supernova',
     pos = { x = 0, y = 0 },
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Supernova',
         text = {

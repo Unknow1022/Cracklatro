@@ -23,18 +23,25 @@ SMODS.Back {
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
+                local is_combo = G.GAME and (G.GAME.cavernicola_sleeve_combo or is_sleeve_matching("cavernicola"))
                 if G.playing_cards then
                     local keep_ranks = { ['Ace'] = true, ['2'] = true, ['3'] = true, ['4'] = true, ['6'] = true, ['8'] = true }
+                    local silver_seal_key = (G.P_SEALS and G.P_SEALS['Crackedlatro_silver'] and 'Crackedlatro_silver') or 'silver'
                     for _, card in ipairs(G.playing_cards) do
                         local val = card.base and card.base.value
                         if not keep_ranks[val] then
                             card:set_ability(G.P_CENTERS.m_stone)
+                            if is_combo then
+                                card:set_seal(silver_seal_key, nil, true)
+                            end
                         end
                     end
                 end
 
-                G.GAME.round_resets.hands = math.max(1, G.GAME.round_resets.hands - 1)
-                ease_hands_played(-1)
+                if not is_combo then
+                    G.GAME.round_resets.hands = math.max(1, G.GAME.round_resets.hands - 1)
+                    ease_hands_played(-1)
+                end
 
                 return true
             end
@@ -67,11 +74,19 @@ SMODS.Back {
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
+                local is_combo = G.GAME and (G.GAME.strategist_sleeve_combo or is_sleeve_matching("strategist"))
                 if G.playing_cards then
                     for i = #G.playing_cards, 1, -1 do
                         local card = G.playing_cards[i]
                         local val = card.base and card.base.value
-                        local keep = (val == 'Ace' or val == 'King' or val == 'Queen' or val == 'Jack' or val == '10' or val == '9')
+                        local keep = false
+                        if is_combo then
+                            -- 20 cards: Ace, King, Queen, Jack, 10
+                            keep = (val == 'Ace' or val == 'King' or val == 'Queen' or val == 'Jack' or val == '10')
+                        else
+                            -- 24 cards: Ace, King, Queen, Jack, 10, 9
+                            keep = (val == 'Ace' or val == 'King' or val == 'Queen' or val == 'Jack' or val == '10' or val == '9')
+                        end
                         if not keep then
                             if card.area then
                                 card.area:remove_card(card)
@@ -92,6 +107,14 @@ SMODS.Back {
 
                 G.GAME.used_vouchers = G.GAME.used_vouchers or {}
                 G.GAME.used_vouchers['v_magic_trick'] = true
+                if is_combo then
+                    G.GAME.used_vouchers['v_tarot_merchant'] = true
+                    if G.GAME.shop then
+                        G.GAME.shop.joker_max = (G.GAME.shop.joker_max or 2) + 1
+                    end
+                    G.GAME.modifiers = G.GAME.modifiers or {}
+                    G.GAME.modifiers.money_per_hand = (G.GAME.modifiers.money_per_hand or 0) + 1
+                end
 
                 G.GAME.starting_params.ante_scaling = (G.GAME.starting_params.ante_scaling or 1) * 1.2
 
@@ -127,10 +150,15 @@ SMODS.Back {
         G.E_MANAGER:add_event(Event({
             func = function()
                 G.GAME.overseer_deck = true
-                G.GAME.dollars = 2
-
-                G.GAME.round_resets.hands = math.max(1, G.GAME.round_resets.hands - 1)
-                ease_hands_played(-1)
+                local is_combo = G.GAME and (G.GAME.overseer_sleeve_combo or is_sleeve_matching("overseer"))
+                if is_combo then
+                    G.GAME.overseer_no_markup = true
+                    G.GAME.dollars = 7
+                else
+                    G.GAME.dollars = 2
+                    G.GAME.round_resets.hands = math.max(1, G.GAME.round_resets.hands - 1)
+                    ease_hands_played(-1)
+                end
 
                 G.GAME.round_resets.discards = math.max(0, G.GAME.round_resets.discards - 1)
                 ease_discard(-1)
@@ -140,7 +168,8 @@ SMODS.Back {
         }))
     end,
     calculate = function(self, back, context)
-        if context.end_of_round and not context.individual and not context.repetition then
+        local is_combo = G.GAME and (G.GAME.overseer_sleeve_combo or is_sleeve_matching("overseer"))
+        if not is_combo and context.end_of_round and not context.individual and not context.repetition then
             if G.consumeables and #G.consumeables.cards < G.consumeables.config.card_limit then
                 G.E_MANAGER:add_event(Event({
                     func = function()
@@ -190,32 +219,75 @@ SMODS.Back {
     apply = function(self)
         G.E_MANAGER:add_event(Event({
             func = function()
-                if G.jokers and G.jokers.config then
-                    G.jokers.config.card_limit = math.max(1, G.jokers.config.card_limit - 1)
-                end
-                if G.GAME and G.GAME.starting_params and G.GAME.starting_params.joker_slots then
-                    G.GAME.starting_params.joker_slots = math.max(1, G.GAME.starting_params.joker_slots - 1)
-                end
-
-                G.GAME.round_resets.discards = math.max(0, G.GAME.round_resets.discards - 1)
-                ease_discard(-1)
-
-                play_sound('foil1')
-                for i = 1, 2 do
-                    local rarity_roll = pseudorandom('friendly_rarity')
-                    local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
-                    local new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck')
-                    if is_secret_card(new_joker) then
-                        if new_joker.area then new_joker.area:remove_card(new_joker) end
-                        new_joker:remove()
-                        new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_deck_fallback')
+                local is_combo = G.GAME and (G.GAME.friendly_sleeve_combo or is_sleeve_matching("friendly"))
+                if is_combo then
+                    -- Friendly Deck + Friendly Sleeve Fusion
+                    if G.jokers and G.jokers.config then
+                        G.jokers.config.card_limit = math.max(1, G.jokers.config.card_limit - 2)
                     end
-                    new_joker:set_eternal(true)
-                    if new_joker.ability then new_joker.ability.eternal = true end
-                    new_joker:set_edition({ negative = true }, true)
-                    new_joker:add_to_deck()
-                    G.jokers:emplace(new_joker)
-                    new_joker:juice_up(0.5, 0.5)
+                    if G.GAME and G.GAME.starting_params and G.GAME.starting_params.joker_slots then
+                        G.GAME.starting_params.joker_slots = math.max(1, G.GAME.starting_params.joker_slots - 2)
+                    end
+
+                    G.GAME.round_resets.discards = math.max(0, G.GAME.round_resets.discards - 1)
+                    ease_discard(-1)
+
+                    play_sound('foil1')
+                    local legendary_spawned = false
+                    for i = 1, 3 do
+                        local new_joker = nil
+                        -- Max 1 Legendary can spawn across the 3 generated Jokers
+                        if not legendary_spawned and pseudorandom('friendly_legendary_roll_' .. i) < 0.35 then
+                            new_joker = create_card('Joker', G.jokers, true, 4, nil, false, nil, 'friendly_legendary')
+                            if new_joker then
+                                legendary_spawned = true
+                            end
+                        end
+                        if not new_joker then
+                            local rarity_roll = pseudorandom('friendly_rarity_' .. i)
+                            local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
+                            new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck_combo')
+                        end
+                        if is_secret_card(new_joker) then
+                            if new_joker.area then new_joker.area:remove_card(new_joker) end
+                            new_joker:remove()
+                            new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_fallback')
+                        end
+                        new_joker:set_eternal(true)
+                        if new_joker.ability then new_joker.ability.eternal = true end
+                        new_joker:set_edition({ negative = true }, true)
+                        new_joker:add_to_deck()
+                        G.jokers:emplace(new_joker)
+                        new_joker:juice_up(0.5, 0.5)
+                    end
+                else
+                    if G.jokers and G.jokers.config then
+                        G.jokers.config.card_limit = math.max(1, G.jokers.config.card_limit - 1)
+                    end
+                    if G.GAME and G.GAME.starting_params and G.GAME.starting_params.joker_slots then
+                        G.GAME.starting_params.joker_slots = math.max(1, G.GAME.starting_params.joker_slots - 1)
+                    end
+
+                    G.GAME.round_resets.discards = math.max(0, G.GAME.round_resets.discards - 1)
+                    ease_discard(-1)
+
+                    play_sound('foil1')
+                    for i = 1, 2 do
+                        local rarity_roll = pseudorandom('friendly_rarity_' .. i)
+                        local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
+                        local new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck')
+                        if is_secret_card(new_joker) then
+                            if new_joker.area then new_joker.area:remove_card(new_joker) end
+                            new_joker:remove()
+                            new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_deck_fallback')
+                        end
+                        new_joker:set_eternal(true)
+                        if new_joker.ability then new_joker.ability.eternal = true end
+                        new_joker:set_edition({ negative = true }, true)
+                        new_joker:add_to_deck()
+                        G.jokers:emplace(new_joker)
+                        new_joker:juice_up(0.5, 0.5)
+                    end
                 end
                 return true
             end

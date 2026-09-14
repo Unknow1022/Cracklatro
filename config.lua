@@ -1,3 +1,5 @@
 return {
-    ["spanish_descriptions"] = false
+    ["new_runs"] = false,
+    ["new_challenges"] = true,
+    ["new_spectrals_and_jobs"] = true
 }

@@ -294,7 +294,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
@@ -347,7 +347,7 @@ SMODS.Consumable {
         }
     },
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
@@ -406,7 +406,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
@@ -459,7 +459,7 @@ SMODS.Consumable {
         }
     },
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 2
@@ -542,7 +542,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
@@ -605,7 +605,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         if G.hand and G.hand.highlighted and #G.hand.highlighted == 1 then
@@ -698,7 +698,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
@@ -758,7 +758,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1 and G.hand.highlighted[1]:is_face()
@@ -821,7 +821,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
@@ -880,7 +880,7 @@ SMODS.Consumable {
         return { vars = {} }
     end,
     in_pool = function(self, args)
-        return true
+        return is_cracklatro_spectrals_jobs_enabled()
     end,
     can_use = function(self, card)
         return G.hand and G.hand.highlighted and #G.hand.highlighted == 1
@@ -943,6 +943,9 @@ SMODS.Booster {
     kind = 'Job',
     group_key = 'k_job_pack',
     draw_hand = true,
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Job Application',
         group_name = 'Job Application',
@@ -975,6 +978,9 @@ SMODS.Booster {
     kind = 'Job',
     group_key = 'k_job_pack',
     draw_hand = true,
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Jumbo Job Application',
         group_name = 'Job Application',
@@ -1007,6 +1013,9 @@ SMODS.Booster {
     kind = 'Job',
     group_key = 'k_job_pack',
     draw_hand = true,
+    in_pool = function(self, args)
+        return is_cracklatro_spectrals_jobs_enabled()
+    end,
     loc_txt = {
         name = 'Mega Job Application',
         group_name = 'Job Application',

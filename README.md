@@ -4,14 +4,19 @@
 
 ![Balatro Version](https://img.shields.io/badge/Balatro-v1.0.1o-orange?style=for-the-badge&logo=balatro)
 ![Steamodded](https://img.shields.io/badge/Steamodded-v1.0.0%2B-blue?style=for-the-badge)
-![Cracklatro Version](https://img.shields.io/badge/Version-2.0%20La%20Display%20Update-9932CC?style=for-the-badge)
+![Cracklatro Version](https://img.shields.io/badge/Version-2.0%20The%20Sleeves%20Update-9932CC?style=for-the-badge)
+![CardSleeves](https://img.shields.io/badge/CardSleeves-Compatible-ff69b4?style=for-the-badge)
 ![JokerDisplay](https://img.shields.io/badge/JokerDisplay-Compatible-2ea44f?style=for-the-badge)
-![Language](https://img.shields.io/badge/Language-Espa%C3%B1ol%20%7C%20English-lightgrey?style=for-the-badge)
+![Language](https://img.shields.io/badge/Language-English%20%7C%20Espa%C3%B1ol-lightgrey?style=for-the-badge)
 
-**Una expansión masiva y completa para Balatro creada sobre el framework Steamodded (SMODS).**  
-Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas, una nueva categoría de consumibles (Cartas de Oficio), Paquetes de Refuerzo de Empleo, Ciegas Jefe dinámicas con iluminación CRT ambiental, Barajas temáticas, Sellos con efectos espectrales inéditos, Vales y Etiquetas.
+**A massive, feature-packed Balatro expansion built on the Steamodded (SMODS) framework.**  
+Introduces an exclusive Secret rarity, dozens of uniquely synergized Jokers, a new consumable category (Job Cards), Employment Booster Packs, dynamic Boss Blinds with CRT ambient lighting, custom Decks and Card Sleeves with Deck-Fusion mechanics, innovative Seals with spectral breaks, Vouchers, Tags, 10 high-difficulty synergy Challenges, and in-game configuration settings (New Runs seed divergence, Job & Spectral toggles).
 
-[Instalación](#%EF%B8%8F-instalación-y-requisitos) • [Novedades v2.0](#%EF%B8%8F-novedades-de-la-display-update-v20) • [Contenido](#-resumen-general-de-contenido) • [Jokers Secretos](#-rareza-secreta-11-jokers-secretos) • [Jokers Estándar](#-jokers-estándar-33-jokers) • [Cartas de Oficio](#-cartas-de-oficio-job-cards---10-y-paquetes-3) • [Espectrales y Sellos](#-consumibles-espectrales-8-sellos-y-mejoras) • [Ciegas Jefe](#%EF%B8%8F-ciegas-jefe-boss-blinds---12) • [Barajas](#-barajas-personalizadas-decks---4) • [FAQ](#-preguntas-frecuentes-faq)
+> 💬 **Mod Philosophy / Filosofía del Mod**:  
+> *"This mod is designed not to be unfair, but not to hand out free wins either; it is focused on long runs and fun Jokers to play. Reading is recommended, and if you don't like to read, well too bad XD!"*  
+> *(Este mod está hecho, no para ser injusto pero tampoco regalar partidas, está más concentrado en partidas largas y en Jokers divertidos de jugar, recomendable leer, y si no te gusta leer, pues que mal XD)*
+
+[Instalación](#%EF%B8%8F-instalación-y-requisitos) • [Novedades v2.0](#%EF%B8%8F-novedades-de-la-display-update-v20) • [Contenido](#-resumen-general-de-contenido) • [CardSleeves & Fusiones](#-fundas-cardsleeves---4-y-fusiones) • [Desafíos](#-desafíos-de-sinergia-challenges---10) • [Jokers Secretos](#-rareza-secreta-11-jokers-secretos) • [Jokers Estándar](#-jokers-estándar-33-jokers) • [Cartas de Oficio](#-cartas-de-oficio-job-cards---10-y-paquetes-3) • [Espectrales y Sellos](#-consumibles-espectrales-8-sellos-y-mejoras) • [Ciegas Jefe](#%EF%B8%8F-ciegas-jefe-boss-blinds---12) • [Barajas](#-barajas-personalizadas-decks---4) • [FAQ](#-preguntas-frecuentes-faq)
 
 </div>
 
@@ -31,9 +36,32 @@ Introduce una rareza secreta exclusiva, decenas de Jokers con sinergias únicas,
 | 🎴 **Mejoras y Sellos** | **7** | 4 Mejoras de carta exclusivas y 3 Sellos inéditos con animaciones y quiebre espectral. |
 | 👁️ **Ciegas Jefe Dinámicas** | **12** | 9 Ciegas Jefe temáticas + 3 Ciegas Showdown (Ante 8+) con paletas de color y shaders reactivos. |
 | 🎴 **Barajas Personalizadas** | **4** | Baraja Cavernícola, Baraja Estratega, Baraja Supervisora y Baraja Amistosa. |
+| 🛡️ **Fundas (CardSleeves)** | **4** | Fundas con efectos standalone y **Fusiones Únicas** al equipar Baraja + Funda correspondiente. |
+| 🏆 **Desafíos de Sinergia** | **10** | Desafíos de alta dificultad basados en sinergias complejas de Jokers y mecánicas del mod. |
+| ⚙️ **Configuraciones en Juego** | **3** | *New Runs* (semillas divergentes), *New Challenges* y *New Spectrals & Jobs* (filtro de pool). |
 | 🎫 **Vales de Tienda** | **2** | Catador (*Taster*) y Crítico (*Critic*) para filtrar rarezas en tienda. |
 | 🏷️ **Etiquetas de Salto** | **3** | Tag Discord, Tag de Brujería y Tag de Oferta. |
 | 📈 **Total Jokers** | **44** | Todos con sprites personalizados, soporte para localización y compatibilidad con **JokerDisplay**. |
+
+---
+
+## 🛡️ Novedades: Compatibilidad CardSleeves, Fusiones, Desafíos y Configuración (v2.0)
+
+* 🎴 **Compatibilidad Completa con CardSleeves (`larswijn/CardSleeves`)**:
+  * **4 Fundas Personalizadas**: Añade versiones Funda de cada baraja del mod (*Funda Cavernícola*, *Funda Estratega*, *Funda Supervisora* y *Funda Amistosa*).
+  * **Mecánica de Fusión de Barajas**: Al equipar una Baraja y su Funda correspondiente se activan efectos de fusión únicos:
+    * **Fusión Amistosa** (*Friendly Deck + Friendly Sleeve*): Genera **3 Jokers Negativos Eternos** con posibilidad de hasta **1 Joker Legendario**, con penalización de `-2` ranuras de Joker y `-1` descarte.
+    * **Fusión Prehistórica** (*Caveman Deck + Caveman Sleeve*): Aplica **Sello de Plata** a todas las cartas de piedra iniciales, las cartas de piedra otorgan **+3 Mult** y **+20 Fichas** al puntuar, y anula la penalización de -1 mano.
+    * **Fusión Estratégica** (*Strategist Deck + Strategist Sleeve*): Baraja condensada a **20 cartas** (del 10 al As), otorga vales **Truco de Magia** y **Mercader de Tarot**, **+1 ranura de tienda** y **+$1** por mano jugada.
+    * **Fusión Supervisora** (*Overseer Deck + Overseer Sleeve*): Genera **2 cartas Espectrales** por ronda, **triplica las etiquetas (x3)**, **elimina el sobrecoste** de Jokers e inicia con `+$5` y `+1` mano.
+
+* 🏆 **10 Desafíos de Sinergia Compleja (`New Challenges`)**:
+  * Desafíos basados en sinergias de alto nivel y reglas estrictas (*Ruleta Rusa de Negocios, Silencio Absoluto, Geometría Sagrada, Deuda Extrema, La Forja y la Mina, Duelo Numérico, El Lienzo Vivo, Coleccionista de Brillos, Urgencias Médicas, Sobresaturación Singular*).
+
+* ⚙️ **Configuraciones en Juego**:
+  * **New Runs**: Variación de semilla con salt exclusivo para divergir de la generación de Balatro vainilla.
+  * **New Challenges**: Alterna dinámicamente la presencia de los 10 desafíos de Cracklatro.
+  * **New Spectrals & Job Cards**: Habilita o deshabilita la aparición de cartas de oficio y espectrales en las runs sin alterar partidas guardadas.
 
 ---
 

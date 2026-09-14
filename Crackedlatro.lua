@@ -1,8 +1,18 @@
 --[[
     The Cracked Balatro (Cracklatro)
-    Version: 2.0 - La "Display" Update
+    Version: 2.0 - The "Display & Sleeves" Update
     Author: Unknow102
     Framework: Steamodded (SMODS)
+
+    "This mod is designed not to be unfair, but not to hand out free wins either;
+    it is focused on long runs and fun Jokers to play.
+    Reading is recommended, and if you don't like to read, well too bad XD!"
+
+    New Features:
+    - CardSleeves compatibility with custom sleeves & deck fusions
+    - 10 high-difficulty Synergy Challenges
+    - In-game Settings: New Runs seed variance, Job & Spectral toggles
+    - Full JokerDisplay Suite integration
 --]]
 
 local files = {
@@ -28,7 +38,11 @@ local files = {
     "src/tags/tags.lua",
 
     -- Mod Compatibility
-    "src/compat/jokerdisplay.lua"
+    "src/compat/jokerdisplay.lua",
+    "src/compat/cardsleeves.lua",
+
+    -- Challenges
+    "src/challenges/challenges.lua"
 }
 
 for _, file in ipairs(files) do

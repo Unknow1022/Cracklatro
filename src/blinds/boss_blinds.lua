@@ -377,10 +377,21 @@ SMODS.Blind {
         end
         if context.final_scoring_step and not G.GAME.cube_triggered then
             G.GAME.cube_triggered = true
-            local cur_chips = (hand_chips and hand_chips > 0 and hand_chips) or (context.chips and context.chips > 0 and context.chips) or 0
-            local cur_mult = (mult and mult > 0 and mult) or (context.mult and context.mult > 0 and context.mult) or 0
-            local mod_chips = (cur_chips > 0 and cur_chips % 2 == 0) and 0.5 or 1
-            local mod_mult = (cur_mult > 0 and cur_mult % 2 == 0) and 0.5 or 1
+            local c_val = to_big and to_big(hand_chips or context.chips or 0) or (hand_chips or context.chips or 0)
+            local m_val = to_big and to_big(mult or context.mult or 0) or (mult or context.mult or 0)
+            local is_even_chips = false
+            local is_even_mult = false
+
+            if to_big then
+                is_even_chips = (c_val > to_big(0)) and ((c_val % to_big(2)) == to_big(0))
+                is_even_mult = (m_val > to_big(0)) and ((m_val % to_big(2)) == to_big(0))
+            else
+                is_even_chips = (c_val > 0) and (c_val % 2 == 0)
+                is_even_mult = (m_val > 0) and (m_val % 2 == 0)
+            end
+
+            local mod_chips = is_even_chips and 0.5 or 1
+            local mod_mult = is_even_mult and 0.5 or 1
             if mod_chips < 1 or mod_mult < 1 then
                 return {
                     x_chips = mod_chips,

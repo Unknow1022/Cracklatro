@@ -597,10 +597,10 @@ SMODS.Joker {
                 for _, scard in ipairs(context.scoring_hand) do
                     local id = scard:get_id()
                     if id and id > 0 then
-                        if id % 2 == 0 then
-                            evens = evens + 1
-                        else
+                        if id == 14 or id % 2 ~= 0 then
                             odds = odds + 1
+                        else
+                            evens = evens + 1
                         end
                     end
                 end
@@ -952,7 +952,7 @@ SMODS.Joker {
             "{C:inactive}(Suit changes each round){}"
         }
     },
-    config = { extra = { mult_suit = 25, mult_wild = 50, suit = 'Hearts' } },
+    config = { extra = { mult_suit = 7, mult_wild = 15, suit = 'Hearts' } },
     rarity = 2,
     pos = { x = 5, y = 2 },
     cost = 6,
@@ -960,8 +960,8 @@ SMODS.Joker {
     loc_vars = function(self, info_queue, card)
         ensure_charco_suit(card)
         local suit = card.ability.extra.suit or 'Hearts'
-        local mult_suit = card.ability.extra.mult_suit or 25
-        local mult_wild = card.ability.extra.mult_wild or 50
+        local mult_suit = card.ability.extra.mult_suit or 7
+        local mult_wild = card.ability.extra.mult_wild or 15
         return { vars = { suit, mult_suit, mult_wild } }
     end,
     calculate = function(self, card, context)

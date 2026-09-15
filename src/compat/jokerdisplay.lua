@@ -432,7 +432,7 @@ jd_def["j_Crackedlatro_duel_of_value_joker"] = {
             for _, c in ipairs(scoring_hand) do
                 local id = c:get_id() or 0
                 if id > 0 then
-                    if id % 2 == 0 then evens = evens + 1 else odds = odds + 1 end
+                    if id == 14 or id % 2 ~= 0 then odds = odds + 1 else evens = evens + 1 end
                 end
             end
             if evens == 2 and odds == 2 then
@@ -592,9 +592,9 @@ jd_def["j_Crackedlatro_charco_pintura_joker"] = {
             for _, c in ipairs(scoring_hand) do
                 local triggers = JokerDisplay.calculate_card_triggers(c, scoring_hand)
                 if is_wild_card(c) then
-                    total_mult = total_mult + (card.ability.extra.mult_wild or 50) * triggers
+                    total_mult = total_mult + (card.ability.extra.mult_wild or 15) * triggers
                 elseif c:is_suit(suit) then
-                    total_mult = total_mult + (card.ability.extra.mult_suit or 25) * triggers
+                    total_mult = total_mult + (card.ability.extra.mult_suit or 7) * triggers
                 end
             end
         end

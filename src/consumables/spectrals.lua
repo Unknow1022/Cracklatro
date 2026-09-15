@@ -298,11 +298,13 @@ SMODS.Consumable {
 
         play_sound('tarot2')
         card:juice_up(0.4, 0.6)
-        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname = most_played, level = G.GAME.hands[most_played].level + 4})
+        local new_level = to_big and (to_big(G.GAME.hands[most_played].level) + to_big(4)) or (G.GAME.hands[most_played].level + 4)
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname = most_played, level = new_level})
         level_up_hand(card, most_played, false, 4)
 
         for hand_name, hand_data in pairs(G.GAME.hands) do
-            if hand_name ~= most_played and hand_data.level > 1 then
+            local is_gt_1 = to_big and (to_big(hand_data.level) > to_big(1)) or (hand_data.level > 1)
+            if hand_name ~= most_played and is_gt_1 then
                 level_up_hand(card, hand_name, true, -1)
             end
         end

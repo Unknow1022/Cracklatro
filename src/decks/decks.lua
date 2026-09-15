@@ -386,59 +386,55 @@ function inject_cracklatro_deck_localization()
         cavernicola = {
             name = is_es and "Baraja Cavernícola" or "Caveman Deck",
             text = is_es and {
-                "Inicia con solo {C:attention}A, 2, 3, 4, 6, 8{} de cada palo en tu baraja completa,",
-                "todas las demás cartas iniciales son {C:attention}Cartas de Piedra{},",
+                "Inicia solo con {C:attention}A, 2, 3, 4, 6, 8{} de cada palo,",
+                "Las demás cartas iniciales son {C:attention}Cartas de Piedra{},",
                 "{C:red}-1{} Mano"
             } or {
-                "Start with only {C:attention}A, 2, 3, 4, 6, 8{} of each suit in your full deck,",
-                "all other starting cards are {C:attention}Stone Cards{},",
+                "Start run with only {C:attention}A, 2, 3, 4, 6, 8{} of each suit,",
+                "All other starting cards become {C:attention}Stone Cards{},",
                 "{C:red}-1{} Hand"
             }
         },
         strategist = {
             name = is_es and "Baraja Estratega" or "Strategist Deck",
             text = is_es and {
-                "Inicia con una baraja de {C:attention}24 cartas{}",
-                "{C:inactive}(Ases, Reyes, Reinas, Jotas, 10s, 9s){}",
-                "Inicia con el vale {C:attention}Truco de Magia{},",
-                "Inicia con {C:money}$0{}, {C:red}-1{} mano, {C:red}-2{} descartes,",
-                "El objetivo de puntos de las Ciegas es {C:attention}X1.2{}"
+                "Inicia con baraja de {C:attention}24 cartas{} {C:inactive}(9 al As){},",
+                "Inicia con vale {C:attention}Truco de Magia{} y {C:money}$0{},",
+                "Objetivo de Ciegas es {C:attention}X1.2{},",
+                "{C:red}-1{} Mano, {C:red}-2{} Descartes"
             } or {
-                "Start with a {C:attention}24-card deck{}",
-                "{C:inactive}(Aces, Kings, Queens, Jacks, 10s, 9s){}",
-                "Start with {C:attention}Magic Trick{} voucher,",
-                "Start with {C:money}$0{}, {C:red}-1{} hand, {C:red}-2{} discards,",
-                "Blind score targets are {C:attention}X1.2{}"
+                "Start run with a {C:attention}24-card deck{} {C:inactive}(9 through Ace){},",
+                "Start with {C:attention}Magic Trick{} voucher and {C:money}$0{},",
+                "Blind score targets are {C:attention}X1.2{},",
+                "{C:red}-1{} Hand, {C:red}-2{} Discards"
             }
         },
         overseer = {
             name = is_es and "Baraja Supervisora" or "Overseer Deck",
             text = is_es and {
-                "Crea una carta {C:spectral}Espectral{} aleatoria",
-                "al final de la ronda {C:inactive}(excepto Podredumbre y Alma){},",
-                "Las {C:attention}Etiquetas se duplican{} siempre,",
-                "Los precios de Jokers son {C:red}X1.5{},",
-                "Inicia con {C:money}$2{}, {C:red}-1{} mano, {C:red}-1{} descarte"
+                "Crea carta {C:spectral}Espectral{} aleatoria al final de ronda",
+                "{C:inactive}(excepto Podredumbre y Alma){},",
+                "{C:attention}Las Etiquetas se duplican{},",
+                "Precios de Jokers son {C:red}X1.5{},",
+                "Inicia con {C:money}$2{}, {C:red}-1{} Mano, {C:red}-1{} Descarte"
             } or {
-                "Creates a random {C:spectral}Spectral card{}",
-                "at the end of round {C:inactive}(except Rot and Soul){},",
+                "Creates a random {C:spectral}Spectral card{} at end of round",
+                "{C:inactive}(except Rot and Soul){},",
                 "{C:attention}Tags are always doubled{},",
                 "Joker prices are {C:red}X1.5{},",
-                "Start with {C:money}$2{}, {C:red}-1{} hand, {C:red}-1{} discard"
+                "Start with {C:money}$2{}, {C:red}-1{} Hand, {C:red}-1{} Discard"
             }
         },
         friendly = {
             name = is_es and "Baraja Amistosa" or "Friendly Deck",
             text = is_es and {
-                "Inicia la partida con {C:attention}2 Jokers Negativos Eternos{} aleatorios,",
+                "Inicia con {C:attention}2{} Jokers {C:dark_edition}Negativos{} {C:attention}Eternos{} aleatorios,",
                 "{C:inactive}(Excepto Legendario o Secreto){},",
-                "{C:red}-1{} Espacio de Joker,",
-                "{C:red}-1{} Descarte"
+                "{C:red}-1{} Ranura de Joker, {C:red}-1{} Descarte"
             } or {
-                "Start run with {C:attention}2 random Negative Eternal Jokers{},",
+                "Start run with {C:attention}2{} random {C:dark_edition}Negative{} {C:attention}Eternal Jokers{},",
                 "{C:inactive}(Except Legendary or Secret){},",
-                "{C:red}-1{} Joker slot,",
-                "{C:red}-1{} Discard"
+                "{C:red}-1{} Joker Slot, {C:red}-1{} Discard"
             }
         }
     }

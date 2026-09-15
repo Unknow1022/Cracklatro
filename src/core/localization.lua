@@ -847,38 +847,36 @@ local SPANISH_DESCRIPTIONS = {
         cavernicola = {
             name = 'Baraja Cavernícola',
             text = {
-                "Inicia con solo {C:attention}A, 2, 3, 4, 6, 8{} de cada palo en tu baraja completa,",
-                "todas las demás cartas iniciales son {C:attention}Cartas de Piedra{},",
+                "Inicia solo con {C:attention}A, 2, 3, 4, 6, 8{} de cada palo,",
+                "Las demás cartas iniciales son {C:attention}Cartas de Piedra{},",
                 "{C:red}-1{} Mano"
             }
         },
         strategist = {
             name = 'Baraja Estratega',
             text = {
-                "Inicia con una baraja de {C:attention}24 cartas{}",
-                "{C:inactive}(Ases, Reyes, Reinas, Jotas, 10s, 9s){}",
-                "Inicia con el vale {C:attention}Truco de Magia{},",
-                "Inicia con {C:money}$0{}, {C:red}-1{} mano, {C:red}-2{} descartes,",
-                "El objetivo de puntos de las Ciegas es {C:attention}X1.2{}"
+                "Inicia con baraja de {C:attention}24 cartas{} {C:inactive}(9 al As){},",
+                "Inicia con vale {C:attention}Truco de Magia{} y {C:money}$0{},",
+                "Objetivo de Ciegas es {C:attention}X1.2{},",
+                "{C:red}-1{} Mano, {C:red}-2{} Descartes"
             }
         },
         overseer = {
             name = 'Baraja Supervisora',
             text = {
-                "Crea una carta {C:spectral}Espectral{} aleatoria",
-                "al final de la ronda {C:inactive}(excepto Podredumbre y Alma){},",
-                "Las {C:attention}Etiquetas se duplican{} siempre,",
-                "Los precios de Jokers son {C:red}X1.5{},",
-                "Inicia con {C:money}$2{}, {C:red}-1{} mano, {C:red}-1{} descarte"
+                "Crea carta {C:spectral}Espectral{} aleatoria al final de ronda",
+                "{C:inactive}(excepto Podredumbre y Alma){},",
+                "{C:attention}Las Etiquetas se duplican{},",
+                "Precios de Jokers son {C:red}X1.5{},",
+                "Inicia con {C:money}$2{}, {C:red}-1{} Mano, {C:red}-1{} Descarte"
             }
         },
         friendly = {
             name = 'Baraja Amistosa',
             text = {
-                "Inicia la partida con {C:attention}2 Jokers Negativos Eternos{} aleatorios,",
+                "Inicia con {C:attention}2{} Jokers {C:dark_edition}Negativos{} {C:attention}Eternos{} aleatorios,",
                 "{C:inactive}(Excepto Legendario o Secreto){},",
-                "{C:red}-1{} Espacio de Joker,",
-                "{C:red}-1{} Descarte"
+                "{C:red}-1{} Ranura de Joker, {C:red}-1{} Descarte"
             }
         }
     },
@@ -886,7 +884,7 @@ local SPANISH_DESCRIPTIONS = {
         friendly = {
             name = 'Funda Amistosa',
             text = {
-                "Inicia la partida con {C:attention}1 Joker Negativo Eterno{} aleatorio",
+                "Inicia con {C:attention}1{} Joker {C:dark_edition}Negativo{} {C:attention}Eterno{} aleatorio,",
                 "{C:inactive}(Excepto Legendario o Secreto){},",
                 "{C:red}-1{} Descarte"
             }
@@ -894,15 +892,16 @@ local SPANISH_DESCRIPTIONS = {
         friendly_alt = {
             name = 'Funda Amistosa (Fusión)',
             text = {
-                "{C:attention}Fusión Amistosa{}: Genera {C:attention}3 Jokers Negativos Eternos{},",
-                "con posibilidad de hasta {C:legendary}1 Joker Legendario{},",
-                "pierdes {C:red}-2{} Espacios de Joker y {C:red}-1{} Descarte"
+                "{C:attention}Fusión Amistosa{}:",
+                "Genera {C:attention}3{} Jokers {C:dark_edition}Negativos{} {C:attention}Eternos{},",
+                "{C:inactive}(Máx. {C:legendary}1 Joker Legendario{C:inactive}){},",
+                "{C:red}-2{} Ranuras de Joker, {C:red}-1{} Descarte"
             }
         },
         cavernicola = {
             name = 'Funda Cavernícola',
             text = {
-                "Todas las {C:attention}Figuras{} iniciales (J, Q, K)",
+                "Todas las {C:attention}Figuras{} iniciales {C:inactive}(J, Q, K){}",
                 "se convierten en {C:attention}Cartas de Piedra{},",
                 "{C:blue}+1{} Mano"
             }
@@ -910,40 +909,43 @@ local SPANISH_DESCRIPTIONS = {
         cavernicola_alt = {
             name = 'Funda Cavernícola (Fusión)',
             text = {
-                "{C:attention}Fusión Prehistórica{}: Todas las {C:attention}Cartas de Piedra{}",
-                "iniciales reciben un {C:chips}Sello de Plata{},",
-                "las Cartas de Piedra otorgan {C:mult}+3{} Mult y {C:chips}+20{} Fichas al anotar,",
+                "{C:attention}Fusión Prehistórica{}:",
+                "{C:attention}Cartas de Piedra{} iniciales reciben {C:chips}Sello de Plata{},",
+                "Otorgan {C:mult}+3{} Mult y {C:chips}+20{} Fichas al anotar,",
                 "{C:blue}+1{} Mano"
             }
         },
         strategist = {
             name = 'Funda Estratega',
             text = {
-                "Inicia con el vale {C:attention}Truco de Magia{},",
-                "Inicia con {C:money}$5{}, {C:red}-1{} Descarte"
+                "Inicia con vale {C:attention}Truco de Magia{},",
+                "Inicia con {C:money}$5{},",
+                "{C:red}-1{} Descarte"
             }
         },
         strategist_alt = {
             name = 'Funda Estratega (Fusión)',
             text = {
-                "{C:attention}Fusión Estratégica{}: Mazo inicial condensado a {C:attention}20 cartas{} (10 al As),",
-                "Inicia con los vales {C:attention}Truco de Magia{} y {C:attention}Mercader de Tarot{},",
-                "{C:attention}+1{} Espacio de carta en tienda, manos jugadas dan {C:money}+$1{}"
+                "{C:attention}Fusión Estratégica{}:",
+                "Mazo reducido a {C:attention}20 cartas{} {C:inactive}(10 al As){},",
+                "Inicia con vales {C:attention}Truco de Magia{} y {C:attention}Mercader de Tarot{},",
+                "{C:attention}+1{} Carta en tienda, manos jugadas otorgan {C:money}+$1{}"
             }
         },
         overseer = {
             name = 'Funda Supervisora',
             text = {
-                "Las {C:attention}Etiquetas se duplican{} siempre,",
-                "Vencer una Ciega Jefe crea una carta {C:spectral}Espectral{} aleatoria"
+                "{C:attention}Las Etiquetas se duplican{},",
+                "Derrotar Ciega Jefe crea carta {C:spectral}Espectral{} aleatoria"
             }
         },
         overseer_alt = {
             name = 'Funda Supervisora (Fusión)',
             text = {
-                "{C:attention}Fusión Supervisora{}: Crea {C:spectral}2 cartas Espectrales{} al final de ronda,",
-                "Las Etiquetas se {C:attention}triplican{} (X3),",
-                "Elimina el sobrecoste de Jokers, inicia con {C:money}+$5{} y {C:blue}+1{} Mano"
+                "{C:attention}Fusión Supervisora{}:",
+                "Crea {C:attention}2{} cartas {C:spectral}Espectrales{} aleatorias al final de ronda,",
+                "Etiquetas se {C:attention}triplican (X3){},",
+                "Sin sobrecoste de Jokers, inicia con {C:money}$7{} y {C:blue}+1{} Mano"
             }
         }
     },

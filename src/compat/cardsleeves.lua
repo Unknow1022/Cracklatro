@@ -141,11 +141,11 @@ local function inject_sleeve_localization()
         friendly = {
             name = is_es and "Funda Amistosa" or "Friendly Sleeve",
             text = is_es and {
-                "Inicia la partida con {C:attention}1 Joker Negativo Eterno{} aleatorio",
+                "Inicia con {C:attention}1{} Joker {C:dark_edition}Negativo{} {C:attention}Eterno{} aleatorio,",
                 "{C:inactive}(Excepto Legendario o Secreto){},",
                 "{C:red}-1{} Descarte"
             } or {
-                "Start run with {C:attention}1 random Negative Eternal Joker{},",
+                "Start run with {C:attention}1{} random {C:dark_edition}Negative{} {C:attention}Eternal Joker{},",
                 "{C:inactive}(Except Legendary or Secret){},",
                 "{C:red}-1{} Discard"
             }
@@ -153,13 +153,15 @@ local function inject_sleeve_localization()
         friendly_alt = {
             name = is_es and "Funda Amistosa (Fusión)" or "Friendly Sleeve (Fusion)",
             text = is_es and {
-                "{C:attention}Fusión Amistosa{}: Genera {C:attention}3 Jokers Negativos Eternos{},",
-                "con posibilidad de hasta {C:legendary}1 Joker Legendario{},",
-                "pierdes {C:red}-2{} Espacios de Joker y {C:red}-1{} Descarte"
+                "{C:attention}Fusión Amistosa{}:",
+                "Genera {C:attention}3{} Jokers {C:dark_edition}Negativos{} {C:attention}Eternos{},",
+                "{C:inactive}(Máx. {C:legendary}1 Joker Legendario{C:inactive}){},",
+                "{C:red}-2{} Ranuras de Joker, {C:red}-1{} Descarte"
             } or {
-                "{C:attention}Friendly Fusion{}: Spawns {C:attention}3 Negative Eternal Jokers{},",
-                "with a maximum of {C:legendary}1 Legendary Joker{},",
-                "lose {C:red}-2{} Joker slots and {C:red}-1{} Discard"
+                "{C:attention}Friendly Fusion{}:",
+                "Spawns {C:attention}3{} {C:dark_edition}Negative{} {C:attention}Eternal Jokers{},",
+                "{C:inactive}(Max {C:legendary}1 Legendary Joker{C:inactive}){},",
+                "{C:red}-2{} Joker Slots, {C:red}-1{} Discard"
             }
         },
 
@@ -167,11 +169,11 @@ local function inject_sleeve_localization()
         cavernicola = {
             name = is_es and "Funda Cavernícola" or "Caveman Sleeve",
             text = is_es and {
-                "Todas las {C:attention}Figuras{} iniciales (J, Q, K)",
+                "Todas las {C:attention}Figuras{} iniciales {C:inactive}(J, Q, K){}",
                 "se convierten en {C:attention}Cartas de Piedra{},",
                 "{C:blue}+1{} Mano"
             } or {
-                "All starting {C:attention}Face Cards{} (J, Q, K)",
+                "All starting {C:attention}Face Cards{} {C:inactive}(J, Q, K){}",
                 "become {C:attention}Stone Cards{},",
                 "{C:blue}+1{} Hand"
             }
@@ -179,14 +181,14 @@ local function inject_sleeve_localization()
         cavernicola_alt = {
             name = is_es and "Funda Cavernícola (Fusión)" or "Caveman Sleeve (Fusion)",
             text = is_es and {
-                "{C:attention}Fusión Prehistórica{}: Todas las {C:attention}Cartas de Piedra{}",
-                "iniciales reciben un {C:chips}Sello de Plata{},",
-                "las Cartas de Piedra otorgan {C:mult}+3{} Mult y {C:chips}+20{} Fichas al anotar,",
+                "{C:attention}Fusión Prehistórica{}:",
+                "{C:attention}Cartas de Piedra{} iniciales reciben {C:chips}Sello de Plata{},",
+                "Otorgan {C:mult}+3{} Mult y {C:chips}+20{} Fichas al anotar,",
                 "{C:blue}+1{} Mano"
             } or {
-                "{C:attention}Prehistoric Fusion{}: All starting {C:attention}Stone Cards{}",
-                "receive a {C:chips}Silver Seal{},",
-                "Stone Cards grant {C:mult}+3{} Mult and {C:chips}+20{} Chips when scored,",
+                "{C:attention}Prehistoric Fusion{}:",
+                "All starting {C:attention}Stone Cards{} get a {C:chips}Silver Seal{},",
+                "{C:attention}Stone Cards{} give {C:mult}+3{} Mult and {C:chips}+20{} Chips when scored,",
                 "{C:blue}+1{} Hand"
             }
         },
@@ -196,22 +198,26 @@ local function inject_sleeve_localization()
             name = is_es and "Funda Estratega" or "Strategist Sleeve",
             text = is_es and {
                 "Inicia con el vale {C:attention}Truco de Magia{},",
-                "Inicia con {C:money}$5{}, {C:red}-1{} Descarte"
+                "Inicia con {C:money}$5{},",
+                "{C:red}-1{} Descarte"
             } or {
                 "Start with {C:attention}Magic Trick{} voucher,",
-                "Start with {C:money}$5{}, {C:red}-1{} Discard"
+                "Start with {C:money}$5{},",
+                "{C:red}-1{} Discard"
             }
         },
         strategist_alt = {
             name = is_es and "Funda Estratega (Fusión)" or "Strategist Sleeve (Fusion)",
             text = is_es and {
-                "{C:attention}Fusión Estratégica{}: Mazo inicial condensado a {C:attention}20 cartas{} (10 al As),",
-                "Inicia con los vales {C:attention}Truco de Magia{} y {C:attention}Mercader de Tarot{},",
-                "{C:attention}+1{} Espacio de carta en tienda, manos jugadas dan {C:money}+$1{}"
+                "{C:attention}Fusión Estratégica{}:",
+                "Mazo reducido a {C:attention}20 cartas{} {C:inactive}(10 al As){},",
+                "Inicia con vales {C:attention}Truco de Magia{} y {C:attention}Mercader de Tarot{},",
+                "{C:attention}+1{} Carta en tienda, manos jugadas otorgan {C:money}+$1{}"
             } or {
-                "{C:attention}Grandmaster Fusion{}: Starting deck condensed to {C:attention}20 cards{} (10s through Aces),",
-                "Start with {C:attention}Magic Trick{} and {C:attention}Tarot Merchant{} vouchers,",
-                "{C:attention}+1{} Shop card slot, played hands grant {C:money}+$1{}"
+                "{C:attention}Grandmaster Fusion{}:",
+                "Deck reduced to {C:attention}20 cards{} {C:inactive}(10 through Ace){},",
+                "Start with {C:attention}Magic Trick{} and {C:attention}Tarot Merchant{},",
+                "{C:attention}+1{} Shop card slot, played hands give {C:money}+$1{}"
             }
         },
 
@@ -219,23 +225,25 @@ local function inject_sleeve_localization()
         overseer = {
             name = is_es and "Funda Supervisora" or "Overseer Sleeve",
             text = is_es and {
-                "Las {C:attention}Etiquetas se duplican{} siempre,",
-                "Vencer una Ciega Jefe crea una carta {C:spectral}Espectral{} aleatoria"
+                "{C:attention}Las Etiquetas se duplican{},",
+                "Derrotar Ciega Jefe crea carta {C:spectral}Espectral{} aleatoria"
             } or {
                 "{C:attention}Tags are always doubled{},",
-                "Defeating a Boss Blind creates a random {C:spectral}Spectral card{}"
+                "Defeating Boss Blind creates random {C:spectral}Spectral card{}"
             }
         },
         overseer_alt = {
             name = is_es and "Funda Supervisora (Fusión)" or "Overseer Sleeve (Fusion)",
             text = is_es and {
-                "{C:attention}Fusión Supervisora{}: Crea {C:spectral}2 cartas Espectrales{} al final de ronda,",
-                "Las Etiquetas se {C:attention}triplican{} (X3),",
-                "Elimina el sobrecoste de Jokers, inicia con {C:money}+$5{} y {C:blue}+1{} Mano"
+                "{C:attention}Fusión Supervisora{}:",
+                "Crea {C:attention}2{} cartas {C:spectral}Espectrales{} aleatorias al final de ronda,",
+                "Etiquetas se {C:attention}triplican (X3){},",
+                "Sin sobrecoste de Jokers, inicia con {C:money}$7{} y {C:blue}+1{} Mano"
             } or {
-                "{C:attention}Omniscient Fusion{}: Creates {C:spectral}2 random Spectral cards{} at end of round,",
-                "Tags are {C:attention}tripled{} (X3),",
-                "Removes the Joker price markup penalty, start with {C:money}+$5{} and {C:blue}+1{} Hand"
+                "{C:attention}Omniscient Fusion{}:",
+                "Creates {C:attention}2{} random {C:spectral}Spectral cards{} at end of round,",
+                "Tags are {C:attention}tripled (X3){},",
+                "No Joker price markup penalty, start with {C:money}$7{} and {C:blue}+1{} Hand"
             }
         }
     }

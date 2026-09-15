@@ -422,7 +422,6 @@ SMODS.Consumable {
     set = 'Spectral',
     atlas = 'c_spectrals',
     pos = { x = 1, y = 1 },
-    soul_pos = { x = 1, y = 0 },
     loc_txt = {
         name = 'La Muchachada',
         text = {

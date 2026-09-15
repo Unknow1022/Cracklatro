@@ -360,18 +360,20 @@ register_secret_joker {
     calculate = function(self, card, context)
         if context.joker_main and G.GAME and G.GAME.current_round and G.GAME.current_round.hands_played == 0 then
             local pow = (card.ability and card.ability.extra and card.ability.extra.power) or 2
-
-            if mult and mult > 1 then
+            if to_big or type(mult) == 'table' then
+                return {
+                    e_mult = pow,
+                    card = card
+                }
+            elseif mult and mult > 1 then
                 mult = math.floor(mult ^ pow)
+                update_hand_text({ sound = 'multhit2', modded = true }, { mult = mult })
+                return {
+                    message = '^' .. tostring(pow) .. ' Mult!',
+                    colour = G.C.DARK_EDITION,
+                    card = card
+                }
             end
-
-            update_hand_text({ sound = 'multhit2', modded = true }, { mult = mult })
-
-            return {
-                message = '^' .. tostring(pow) .. ' Mult!',
-                colour = G.C.DARK_EDITION,
-                card = card
-            }
         end
     end
 }

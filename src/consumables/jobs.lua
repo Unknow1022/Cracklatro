@@ -285,7 +285,7 @@ SMODS.Consumable {
         name = 'The Miner',
         text = {
             "Enhances {C:attention}1 selected card{}",
-            "into a {C:attention}Diamond Card{}"
+            "into a {C:attention}Shiny Card{}"
         }
     },
     loc_vars = function(self, info_queue, card)
@@ -318,7 +318,7 @@ SMODS.Consumable {
                 local center = get_diamond_enhancement_center()
                 target:set_ability(center)
                 target:juice_up(0.5, 0.5)
-                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Diamond Card!', colour = HEX('1b4d2e') })
+                card_eval_status_text(target, 'extra', nil, nil, nil, { message = 'Shiny Card!', colour = HEX('1b4d2e') })
                 if G.hand then G.hand:unhighlight_all() end
                 return true
             end

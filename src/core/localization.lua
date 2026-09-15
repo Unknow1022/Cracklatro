@@ -428,7 +428,7 @@ local SPANISH_DESCRIPTIONS = {
             name = 'El Minero',
             text = {
                 "Mejora {C:attention}1 carta seleccionada{}",
-                "en una {C:attention}Carta de Diamante{}"
+                "en una {C:attention}Carta Brillante{}"
             }
         },
         gardener_job = {
@@ -745,10 +745,11 @@ local SPANISH_DESCRIPTIONS = {
 
     Enhanced = {
         m_diamond = {
-            name = 'Carta de Diamante',
+            name = 'Carta Brillante',
             text = {
                 "Otorga {X:mult,C:white}X#1#{} Multi al {C:attention}reactivarse{},",
-                "otorga {C:money}$#2#{} al mantenerse en mano"
+                "otorga {C:money}$#2#{} una vez al mantenerse",
+                "en mano al final de la ronda"
             }
         },
         m_investment = {

@@ -160,19 +160,20 @@ SMODS.Seal {
     end
 }
 
--- Enhancement 1: Diamond Card
+-- Enhancement 1: Shiny Card (formerly Diamond Card)
 SMODS.Enhancement {
     key = 'diamond',
     atlas = 'enhancements',
     pos = { x = 3, y = 0 },
     discovered = true,
     unlocked = true,
-    config = { extra = { x_mult = 1.5, dollars = 3 }, h_dollars = 3 },
+    config = { extra = { x_mult = 1.5, dollars = 3 } },
     loc_txt = {
-        name = 'Diamond Card',
+        name = 'Shiny Card',
         text = {
             "Gives {X:mult,C:white}X#1#{} Mult when {C:attention}retriggered{},",
-            "gives {C:money}$#2#{} when held in hand"
+            "gives {C:money}$#2#{} once when",
+            "held in hand at end of round"
         }
     },
     loc_vars = function(self, info_queue, card)
@@ -181,19 +182,30 @@ SMODS.Enhancement {
         return { vars = { x_mult, dollars } }
     end,
     calculate = function(self, card, context)
-        if (context.main_scoring or context.individual) and context.cardarea == G.play then
-            if context.repetition or context.repetition_only or (card.retrigger_count and card.retrigger_count > 0) then
+        if card.ability and card.ability.h_dollars and card.ability.h_dollars > 0 then
+            card.ability.h_dollars = 0
+        end
+        local extra = (card and card.ability and card.ability.extra) or (self.config and self.config.extra) or { x_mult = 1.5, dollars = 3 }
+        local is_retrigger = (card.repetition_trigger and card.repetition_trigger ~= 0 and card.repetition_trigger ~= false)
+            or (card.retrigger_count and card.retrigger_count > 0)
+            or (context.retrigger_count and context.retrigger_count > 0)
+
+        if (context.main_scoring or context.cardarea == G.play) and not context.repetition and not context.repetition_only and not context.end_of_round then
+            if is_retrigger then
                 return {
-                    x_mult = card.ability.extra.x_mult
+                    x_mult = extra.x_mult,
+                    card = card
                 }
             end
         end
-        if context.end_of_round and context.cardarea == G.hand then
-            ease_dollars(card.ability.extra.dollars)
-            return {
-                message = '+$' .. card.ability.extra.dollars,
-                colour = G.C.MONEY
-            }
+
+        if (context.end_of_round or context.playing_card_end_of_round) and context.cardarea == G.hand then
+            if not context.repetition and not context.repetition_only and not is_retrigger then
+                return {
+                    dollars = extra.dollars,
+                    card = card
+                }
+            end
         end
     end
 }

@@ -203,7 +203,7 @@ Nuevo tipo de consumible temático que asigna profesiones exclusivas y transform
 
 | Carta de Oficio | Icono | Efecto Principal |
 | :--- | :---: | :--- |
-| **The Miner** | ⛏️ | Transforma 1 carta seleccionada en **Diamond Card (Carta de Diamante)**. |
+| **The Miner** | ⛏️ | Transforma 1 carta seleccionada en **Shiny Card (Carta Brillante)**. |
 | **The Gardener** | 🌿 | Asigna el oficio Jardinero: al descartarse, otorga **+2 Fichas base** permanentemente a todas las cartas de su mismo palo en la baraja. |
 | **The Banker** | 🏦 | Transforma 1 carta seleccionada en **Investment Card (Carta de Inversión)**. |
 | **The Surgeon** | 🩺 | Destruye la 1ª carta seleccionada y transfiere todas sus fichas de bonus, mejora, sello y edición a la 2ª carta seleccionada. |
@@ -246,7 +246,7 @@ Nuevo tipo de consumible temático que asigna profesiones exclusivas y transform
 ---
 
 ### 🃏 Mejoras de Carta Exclusivas
-* **Diamond Card (Carta de Diamante)**: Otorga **X1.5 Multi** al reactivarse; otorga **+$3** si se mantiene en mano al finalizar la ronda.
+* **Shiny Card (Carta Brillante)**: Otorga **X1.5 Multi** al reactivarse; otorga **+$3** una sola vez si se mantiene en mano al finalizar la ronda.
 * **Investment Card (Carta de Inversión)**: Genera un **10% de interés** sobre tu dinero actual (hasta un máximo de $10) al tenerla en mano al final de la ronda.
 * **Lead Card (Carta de Plomo)**: Otorga **+10 Fichas**. Se transmuta permanentemente en **Carta de Oro** si se puntúa en la mano que derrota la Ciega.
 * **Jeweled Card (Carta Engarzada)**: Otorga **X1.25 Multi** y **+$2** al puntuar si el palo de la carta es Diamantes o Corazones.

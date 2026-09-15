@@ -1622,7 +1622,6 @@ if G and G.UIDEF and G.UIDEF.use_and_sell_buttons then
                     }
                 })
             end
-        end
 
         return base_background
     end

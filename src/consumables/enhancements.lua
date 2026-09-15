@@ -266,19 +266,10 @@ SMODS.Enhancement {
         return { vars = { chips } }
     end,
     calculate = function(self, card, context)
-        if (context.main_scoring or context.individual) and context.cardarea == G.play then
-            if G.GAME and G.GAME.blind and (G.GAME.chips + (hand_chips or 0) * (mult or 1) >= G.GAME.blind.chips) then
-                G.E_MANAGER:add_event(Event({
-                    trigger = 'after',
-                    delay = 0.2,
-                    func = function()
-                        card:set_ability(G.P_CENTERS.m_gold)
-                        card:juice_up()
-                        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Transmuted to Gold!', colour = G.C.GOLD })
-                        return true
-                    end
-                }))
-            end
+        if (context.main_scoring or context.cardarea == G.play) and not context.repetition and not context.repetition_only and not context.end_of_round then
+            card.lead_scored_in_hand = true
+            G.GAME.round_lead_scored = G.GAME.round_lead_scored or {}
+            G.GAME.round_lead_scored[card] = true
             return {
                 chips = card.ability.extra.chips
             }

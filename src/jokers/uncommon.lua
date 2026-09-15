@@ -26,6 +26,10 @@ SMODS.Joker {
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local price = ex.current_price or 8
+        if info_queue then
+            info_queue[#info_queue + 1] = { key = 'bull_market', set = 'Other' }
+            info_queue[#info_queue + 1] = { key = 'bear_market', set = 'Other' }
+        end
         return { vars = { price, price * 2 } }
     end,
     check_for_unlock = function(self, args)
@@ -356,7 +360,8 @@ SMODS.Joker {
             "{C:attention}Three of a kind{}: {C:money}+$#3#{} and {X:mult,C:white}X#4#{} Mult.",
             "{C:attention}Triple 7 Jackpot{}: {C:money}+$#5#{}, {X:mult,C:white}X#6#{} Mult, and a {C:spectral}Spectral{} card.",
             "{C:green}Round Challenge{}: {C:attention}#7#{} {C:inactive}(#8#){}.",
-            "Use the {C:money}Bet{} button to win {C:money}X1.5{} your wager upon completion"
+            "Use the {C:money}Bet{} button to win {C:money}X1.5{} your wager upon completion",
+            "{C:inactive}(Last Spin: [ {C:attention}#9#{C:inactive} ])"
         }
     },
     unlock = {
@@ -374,7 +379,19 @@ SMODS.Joker {
         local ch = get_slot_challenge(card or self)
         local is_es = G.CRACKEDLATRO_SPANISH == true
         local bet_str = (ex and ex.bet_placed) and ((is_es and "Apostado $" or "Bet: $") .. (ex.bet_amount or 5)) or (is_es and "Sin apuesta" or "No bet")
-        return { vars = { ex.pair_cash, ex.pair_mult, ex.triple_cash, ex.triple_xmult, ex.jackpot_cash, ex.jackpot_xmult, ch.desc, bet_str } }
+        local spin_str = (is_es and "Sin giros" or "None")
+        if ex and ex.last_spin and #ex.last_spin == 3 then
+            local sym_map = {
+                Cherry = is_es and "Cereza" or "Cherry",
+                Lemon = is_es and "Limón" or "Lemon",
+                Bell = is_es and "Campana" or "Bell",
+                ['7'] = "7"
+            }
+            spin_str = (sym_map[ex.last_spin[1]] or ex.last_spin[1]) .. " | " ..
+                       (sym_map[ex.last_spin[2]] or ex.last_spin[2]) .. " | " ..
+                       (sym_map[ex.last_spin[3]] or ex.last_spin[3])
+        end
+        return { vars = { ex.pair_cash, ex.pair_mult, ex.triple_cash, ex.triple_xmult, ex.jackpot_cash, ex.jackpot_xmult, ch.desc, bet_str, spin_str } }
     end,
     check_for_unlock = function(self, args)
         if args.type == 'lucky_both' or (G.GAME and G.GAME.lucky_hit_both) then
@@ -407,9 +424,38 @@ SMODS.Joker {
             local r2 = pseudorandom_element(symbols, 'slot_r2')
             local r3 = pseudorandom_element(symbols, 'slot_r3')
             card.ability.extra.last_spin = { r1, r2, r3 }
+            card.ability.extra.spinning = true
+            card.ability.extra.spin_start_time = G.TIMERS.REAL
+
+            local is_es = G.CRACKEDLATRO_SPANISH == true
+            local sym_map = {
+                Cherry = is_es and "Cereza" or "Cherry",
+                Lemon = is_es and "Limón" or "Lemon",
+                Bell = is_es and "Campana" or "Bell",
+                ['7'] = "7"
+            }
+            local d1 = sym_map[r1] or r1
+            local d2 = sym_map[r2] or r2
+            local d3 = sym_map[r3] or r3
+            local roll_msg = '[ ' .. d1 .. ' | ' .. d2 .. ' | ' .. d3 .. ' ]'
+
+            card:juice_up(0.6, 0.6)
+            play_sound('tarot2', 1.2, 0.5)
+
+            if attention_text then
+                attention_text({
+                    text = roll_msg,
+                    scale = 0.8,
+                    hold = 1.4,
+                    major = card,
+                    backdrop_colour = G.C.GOLD,
+                    align = 'cm',
+                    silent = true
+                })
+            end
 
             return {
-                message = '[ ' .. r1 .. ' | ' .. r2 .. ' | ' .. r3 .. ' ]',
+                message = roll_msg,
                 colour = G.C.GOLD
             }
         end
@@ -418,6 +464,17 @@ SMODS.Joker {
             local r = card.ability.extra.last_spin
             local r1, r2, r3 = r[1], r[2], r[3]
             local ex = card.ability.extra
+            local is_es = G.CRACKEDLATRO_SPANISH == true
+            local sym_map = {
+                Cherry = is_es and "Cereza" or "Cherry",
+                Lemon = is_es and "Limón" or "Lemon",
+                Bell = is_es and "Campana" or "Bell",
+                ['7'] = "7"
+            }
+            local d1 = sym_map[r1] or r1
+            local d2 = sym_map[r2] or r2
+            local d3 = sym_map[r3] or r3
+            local r_prefix = '[ ' .. d1 .. ' ' .. d2 .. ' ' .. d3 .. ' ] '
 
             if r1 == '7' and r2 == '7' and r3 == '7' then
                 card.ability.extra.last_payout_text = "777 Jackpot! X" .. ex.jackpot_xmult .. " / +$" .. ex.jackpot_cash
@@ -435,27 +492,34 @@ SMODS.Joker {
                 return {
                     Xmult = ex.jackpot_xmult,
                     dollars = ex.jackpot_cash,
-                    message = '777 JACKPOT! +$' .. ex.jackpot_cash,
+                    message = r_prefix .. '777 JACKPOT! +$' .. ex.jackpot_cash,
                     colour = G.C.GOLD
                 }
             elseif r1 == r2 and r2 == r3 then
+                local win_name = is_es and "¡TRÍO!" or "TRIPLE!"
                 card.ability.extra.last_payout_text = "Triple Match! X" .. ex.triple_xmult .. " / +$" .. ex.triple_cash
                 return {
                     Xmult = ex.triple_xmult,
                     dollars = ex.triple_cash,
-                    message = 'TRIPLE MATCH! +$' .. ex.triple_cash,
+                    message = r_prefix .. win_name .. ' +$' .. ex.triple_cash,
                     colour = G.C.MONEY
                 }
             elseif r1 == r2 or r2 == r3 or r1 == r3 then
+                local win_name = is_es and "¡PAR!" or "PAIR!"
                 card.ability.extra.last_payout_text = "Pair Match! +" .. ex.pair_mult .. " Mult / +$" .. ex.pair_cash
                 return {
                     mult = ex.pair_mult,
                     dollars = ex.pair_cash,
-                    message = 'PAIR MATCH! +$' .. ex.pair_cash,
+                    message = r_prefix .. win_name .. ' +$' .. ex.pair_cash,
                     colour = G.C.MULT
                 }
             else
+                local miss_name = is_es and "FALLO" or "MISS"
                 card.ability.extra.last_payout_text = "Miss"
+                return {
+                    message = r_prefix .. miss_name,
+                    colour = G.C.UI.TEXT_INACTIVE
+                }
             end
         end
 

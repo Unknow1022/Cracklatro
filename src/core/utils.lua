@@ -1445,6 +1445,24 @@ if G and G.FUNCS and G.FUNCS.draw_from_play_to_discard then
             end
         end
 
+        -- Transmute Lead Card to Gold Card if scored in a round-winning hand
+        local is_round_won = G.GAME and G.GAME.blind and (G.GAME.chips >= G.GAME.blind.chips)
+        if G.play and G.play.cards then
+            for _, c in ipairs(G.play.cards) do
+                if c.lead_scored_in_hand or (G.GAME and G.GAME.round_lead_scored and G.GAME.round_lead_scored[c]) then
+                    c.lead_scored_in_hand = nil
+                    if is_round_won and not c.destroyed and not c.shattered then
+                        c:set_ability(G.P_CENTERS.m_gold)
+                        c:juice_up()
+                        card_eval_status_text(c, 'extra', nil, nil, nil, { message = 'Transmuted to Gold!', colour = G.C.GOLD })
+                    end
+                end
+            end
+        end
+        if G.GAME then
+            G.GAME.round_lead_scored = nil
+        end
+
         -- Clean up debuff flags and ghost cards
         if G.GAME then
             G.GAME.cracklatro_hand_debuffed = nil
@@ -1453,6 +1471,24 @@ if G and G.FUNCS and G.FUNCS.draw_from_play_to_discard then
         purge_cracklatro_ghost_cards()
 
         return draw_from_play_to_discard_ref(e)
+    end
+end
+
+-- Hook end_round as a fallback safety for Lead Card transmutation
+if end_round then
+    local end_round_lead_ref = end_round
+    function end_round()
+        local is_round_won = G.GAME and G.GAME.blind and (G.GAME.chips >= G.GAME.blind.chips)
+        if is_round_won and SMODS and SMODS.last_hand and SMODS.last_hand.scoring_hand then
+            for _, c in ipairs(SMODS.last_hand.scoring_hand) do
+                if c and not c.destroyed and not c.shattered and (c.config.center.key == 'lead' or c.config.center.key == 'm_lead' or SMODS.has_enhancement(c, 'lead')) then
+                    c:set_ability(G.P_CENTERS.m_gold)
+                    c:juice_up()
+                    card_eval_status_text(c, 'extra', nil, nil, nil, { message = 'Transmuted to Gold!', colour = G.C.GOLD })
+                end
+            end
+        end
+        return end_round_lead_ref()
     end
 end
 
@@ -1831,6 +1867,115 @@ if Game and Game.init_game_object then
         return ret
     end
 end
+
+-- =========================================================================
+-- SLOT MACHINE DYNAMIC REELS & CARD:DRAW HOOK
+-- =========================================================================
+
+if SMODS and SMODS.Atlas then
+    SMODS.Atlas {
+        key = "slot_reels",
+        path = "slot_reels.png",
+        px = 18,
+        py = 30
+    }
+end
+
+local SLOT_REEL_QUADS = nil
+local function get_slot_reel_quad(frame_idx)
+    local atlas = (SMODS and SMODS.Atlases and (SMODS.Atlases['slot_reels'] or SMODS.Atlases['cracklatro_slot_reels']))
+        or (G.ASSET_ATLAS and (G.ASSET_ATLAS['slot_reels'] or G.ASSET_ATLAS['cracklatro_slot_reels']))
+    if not atlas or not atlas.image then return nil, nil end
+    if not SLOT_REEL_QUADS then
+        SLOT_REEL_QUADS = {}
+        local img_w, img_h = atlas.image:getDimensions()
+        local fw = img_w / 8
+        local fh = img_h
+        for i = 0, 7 do
+            SLOT_REEL_QUADS[i] = love.graphics.newQuad(i * fw, 0, fw, fh, img_w, img_h)
+        end
+    end
+    return atlas.image, SLOT_REEL_QUADS[frame_idx]
+end
+
+local function sym_to_reel_frame(sym)
+    if sym == 'Cherry' or sym == 'Cereza' then return 0
+    elseif sym == 'Lemon' or sym == 'Limon' or sym == 'Limón' then return 1
+    elseif sym == 'Bell' or sym == 'Campana' then return 2
+    elseif sym == '7' then return 3
+    elseif sym == 'Joker' then return 4
+    end
+    return 0
+end
+
+function draw_slot_machine_reels(card)
+    if not card or not card.children or not card.children.center then return end
+    local atlas_img = get_slot_reel_quad(0)
+    if not atlas_img then return end
+
+    local ex = card.ability and card.ability.extra
+    local f1, f2, f3 = 4, 3, 0 -- initial default: Joker | 7 | Cherry
+    if ex and ex.last_spin and #ex.last_spin == 3 then
+        f1 = sym_to_reel_frame(ex.last_spin[1])
+        f2 = sym_to_reel_frame(ex.last_spin[2])
+        f3 = sym_to_reel_frame(ex.last_spin[3])
+    end
+
+    -- Dynamic spinning animation
+    if ex and ex.spinning and ex.spin_start_time then
+        local dt = G.TIMERS.REAL - ex.spin_start_time
+        if dt < 1.0 then
+            -- Blur cycling: frames 5, 6, 7
+            if dt < 0.35 then
+                f1 = 5 + (math.floor(G.TIMERS.REAL * 24) % 3)
+            end
+            if dt < 0.65 then
+                f2 = 5 + (math.floor((G.TIMERS.REAL + 0.08) * 24) % 3)
+            end
+            if dt < 0.95 then
+                f3 = 5 + (math.floor((G.TIMERS.REAL + 0.16) * 24) % 3)
+            end
+        else
+            ex.spinning = false
+        end
+    end
+
+    local center = card.children.center
+    prep_draw(center, 1)
+    love.graphics.scale(1 / (center.scale.x / center.VT.w), 1 / (center.scale.y / center.VT.h))
+
+    local alpha = 1
+    if card.dissolve and card.dissolve > 0 then
+        alpha = math.max(0, 1 - card.dissolve)
+    end
+    love.graphics.setColor(1, 1, 1, alpha)
+
+    local _, q1 = get_slot_reel_quad(f1)
+    local _, q2 = get_slot_reel_quad(f2)
+    local _, q3 = get_slot_reel_quad(f3)
+
+    local img_w, img_h = atlas_img:getDimensions()
+    local scale_x = 18 / (img_w / 8)
+    local scale_y = 30 / img_h
+
+    if q1 then love.graphics.draw(atlas_img, q1, 7, 39, 0, scale_x, scale_y) end
+    if q2 then love.graphics.draw(atlas_img, q2, 26, 39, 0, scale_x, scale_y) end
+    if q3 then love.graphics.draw(atlas_img, q3, 45, 39, 0, scale_x, scale_y) end
+
+    love.graphics.pop()
+end
+
+-- Hook Card:draw to overlay dynamic slot machine reels
+local card_draw_ref = Card.draw
+function Card:draw(layer)
+    card_draw_ref(self, layer)
+    if (layer == 'card' or layer == 'both') and self.sprite_facing == 'front' and not self.greyed and not self.debuff then
+        if card_has_key(self, 'slot_machine') then
+            draw_slot_machine_reels(self)
+        end
+    end
+end
+
 
 
 

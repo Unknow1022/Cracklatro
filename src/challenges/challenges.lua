@@ -23,7 +23,7 @@ local challenge_definitions = {
             }
         },
         jokers = {
-            { id = 'j_Crackedlatro_slot_machine_joker', eternal = true, pinned = true },
+            { id = 'j_Crackedlatro_slot_machine_joker', eternal = true },
             { id = 'j_Crackedlatro_shareholder_joker', eternal = true }
         },
         deck = {
@@ -63,7 +63,7 @@ local challenge_definitions = {
             }
         },
         jokers = {
-            { id = 'j_Crackedlatro_falta_de_lectura_joker', eternal = true, pinned = true }
+            { id = 'j_Crackedlatro_falta_de_lectura_joker', eternal = true }
         },
         deck = {
             type = 'Challenge Deck'
@@ -171,7 +171,7 @@ local challenge_definitions = {
             }
         },
         jokers = {
-            { id = 'j_Crackedlatro_infostealer_joker', eternal = true, pinned = true }
+            { id = 'j_Crackedlatro_infostealer_joker', eternal = true }
         },
         deck = {
             type = 'Challenge Deck'
@@ -271,7 +271,7 @@ local challenge_definitions = {
             }
         },
         jokers = {
-            { id = 'j_Crackedlatro_duel_of_value_joker', eternal = true, pinned = true }
+            { id = 'j_Crackedlatro_duel_of_value_joker', eternal = true }
         },
         deck = {
             type = 'Challenge Deck',
@@ -475,7 +475,7 @@ local challenge_definitions = {
             }
         },
         jokers = {
-            { id = 'j_Crackedlatro_sobresaturado_joker', eternal = true, pinned = true }
+            { id = 'j_Crackedlatro_sobresaturado_joker', eternal = true }
         },
         deck = {
             type = 'Challenge Deck'

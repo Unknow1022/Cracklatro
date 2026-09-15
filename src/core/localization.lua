@@ -167,7 +167,8 @@ local SPANISH_DESCRIPTIONS = {
                 "{C:attention}Trío{}: {C:money}+$#3#{} y {X:mult,C:white}X#4#{} Multi.",
                 "{C:attention}Jackpot 777{}: {C:money}+$#5#{}, {X:mult,C:white}X#6#{} Multi y una carta {C:spectral}Espectral{}.",
                 "{C:green}Reto de Ronda{}: {C:attention}#7#{} {C:inactive}(#8#){}.",
-                "Usa el botón {C:money}Apostar{} para ganar {C:money}X1.5{} tu apuesta al cumplir el reto"
+                "Usa el botón {C:money}Apostar{} para ganar {C:money}X1.5{} tu apuesta al cumplir el reto",
+                "{C:inactive}(Último giro: [ {C:attention}#9#{C:inactive} ])"
             }
         },
         duel_of_value_joker = {
@@ -1008,6 +1009,26 @@ local SPANISH_DESCRIPTIONS = {
                 "darle un oficio a una carta"
             }
         }
+    },
+    Other = {
+        bull_market = {
+            name = 'Mercado Alcista (Bull)',
+            text = {
+                "¡Gran optimismo financiero!",
+                "El precio de la acción sube",
+                "drásticamente a {C:money}$12-$18{}.",
+                "{C:inactive}(Se activa al vencer la Ciega en 1 mano){}"
+            }
+        },
+        bear_market = {
+            name = 'Mercado Bajista (Bear)',
+            text = {
+                "¡Recesión y desplome bursátil!",
+                "El precio de la acción cae",
+                "drásticamente a {C:money}$2-$5{}.",
+                "{C:inactive}(Se activa al gastar todas las manos de la ronda){}"
+            }
+        }
     }
 }
 
@@ -1218,6 +1239,52 @@ function apply_cracklatro_language(use_spanish)
                 reparse_localization_entry(b_entry)
             end
         end
+    end
+
+    -- Tooltips de Mercado (Bull Market & Bear Market) para Shareholder Joker
+    if G.localization and G.localization.descriptions then
+        G.localization.descriptions.Other = G.localization.descriptions.Other or {}
+        if use_spanish then
+            G.localization.descriptions.Other['bull_market'] = {
+                name = 'Mercado Alcista (Bull)',
+                text = {
+                    "¡Gran optimismo financiero!",
+                    "El precio de la acción sube",
+                    "drásticamente a {C:money}$12-$18{}.",
+                    "{C:inactive}(Se activa al vencer la Ciega en 1 mano){}"
+                }
+            }
+            G.localization.descriptions.Other['bear_market'] = {
+                name = 'Mercado Bajista (Bear)',
+                text = {
+                    "¡Recesión y desplome bursátil!",
+                    "El precio de la acción cae",
+                    "drásticamente a {C:money}$2-$5{}.",
+                    "{C:inactive}(Se activa al gastar todas las manos de la ronda){}"
+                }
+            }
+        else
+            G.localization.descriptions.Other['bull_market'] = {
+                name = 'Bull Market',
+                text = {
+                    "High market optimism!",
+                    "Next round's stock price rises",
+                    "sharply to {C:money}$12-$18{}.",
+                    "{C:inactive}(Triggered by beating Blind in 1 hand){}"
+                }
+            }
+            G.localization.descriptions.Other['bear_market'] = {
+                name = 'Bear Market',
+                text = {
+                    "Market downturn and crash!",
+                    "Next round's stock price falls",
+                    "sharply to {C:money}$2-$5{}.",
+                    "{C:inactive}(Triggered by using all hands in a round){}"
+                }
+            }
+        end
+        reparse_localization_entry(G.localization.descriptions.Other['bull_market'])
+        reparse_localization_entry(G.localization.descriptions.Other['bear_market'])
     end
 
     -- Sincronizar nombres de desafíos en G.localization.misc.challenge_names

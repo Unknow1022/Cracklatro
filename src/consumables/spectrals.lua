@@ -303,10 +303,9 @@ SMODS.Consumable {
         for hand_name, hand_data in pairs(G.GAME.hands) do
             if hand_name ~= most_played then
                 local current_lvl = hand_data.level
-                local is_gt_1 = to_big and (to_big(current_lvl) > to_big(1)) or (current_lvl > 1)
-                if is_gt_1 then
-                    local is_gt_2 = to_big and (to_big(current_lvl) > to_big(2)) or (current_lvl > 2)
-                    local deduction = is_gt_2 and -2 or -1
+                local num_lvl = (type(current_lvl) == 'table' and to_number and to_number(current_lvl)) or tonumber(current_lvl) or 1
+                if num_lvl > 1 then
+                    local deduction = (num_lvl > 2) and -2 or -1
                     level_up_hand(card, hand_name, true, deduction)
                 end
             end

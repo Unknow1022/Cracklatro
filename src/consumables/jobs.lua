@@ -867,9 +867,7 @@ SMODS.Booster {
     kind = 'Job',
     group_key = 'k_job_pack',
     draw_hand = true,
-    in_pool = function(self, args)
-        return is_cracklatro_spectrals_jobs_enabled()
-    end,
+    in_pool = function(self, args) return is_cracklatro_spectrals_jobs_enabled() end,
     loc_txt = {
         name = 'Job Application',
         group_name = 'Job Application',
@@ -884,27 +882,50 @@ SMODS.Booster {
         local extra = (card and card.ability and card.ability.extra) or (card and card.config and card.config.extra) or (self.config and self.config.extra) or 3
         return { vars = { choose, extra } }
     end,
-    create_card = function(self, card, i)
-        return create_job_card_for_pack('job_pack')
-    end,
-    ease_background_colour = function(self)
-        ease_job_pack_background()
-    end
+    create_card = function(self, card, i) return create_job_card_for_pack('job_pack') end,
+    ease_background_colour = function(self) ease_job_pack_background() end
 }
 
 SMODS.Booster {
     key = 'job_pack_2',
     atlas = 'c_packs',
     pos = { x = 1, y = 0 },
+    config = { extra = 3, choose = 1 },
+    cost = 4,
+    weight = 1.0,
+    kind = 'Job',
+    group_key = 'k_job_pack',
+    draw_hand = true,
+    in_pool = function(self, args) return is_cracklatro_spectrals_jobs_enabled() end,
+    loc_txt = {
+        name = 'Job Application',
+        group_name = 'Job Application',
+        text = {
+            "Choose {C:attention}#1#{} of up to",
+            "{C:attention}#2# Job cards{} to give",
+            "a job to a card"
+        }
+    },
+    loc_vars = function(self, info_queue, card)
+        local choose = (card and card.ability and card.ability.choose) or (card and card.config and card.config.choose) or (self.config and self.config.choose) or 1
+        local extra = (card and card.ability and card.ability.extra) or (card and card.config and card.config.extra) or (self.config and self.config.extra) or 3
+        return { vars = { choose, extra } }
+    end,
+    create_card = function(self, card, i) return create_job_card_for_pack('job_pack') end,
+    ease_background_colour = function(self) ease_job_pack_background() end
+}
+
+SMODS.Booster {
+    key = 'job_pack_3',
+    atlas = 'c_packs',
+    pos = { x = 2, y = 0 },
     config = { extra = 5, choose = 1 },
     cost = 6,
     weight = 0.5,
     kind = 'Job',
     group_key = 'k_job_pack',
     draw_hand = true,
-    in_pool = function(self, args)
-        return is_cracklatro_spectrals_jobs_enabled()
-    end,
+    in_pool = function(self, args) return is_cracklatro_spectrals_jobs_enabled() end,
     loc_txt = {
         name = 'Jumbo Job Application',
         group_name = 'Job Application',
@@ -919,27 +940,21 @@ SMODS.Booster {
         local extra = (card and card.ability and card.ability.extra) or (card and card.config and card.config.extra) or (self.config and self.config.extra) or 5
         return { vars = { choose, extra } }
     end,
-    create_card = function(self, card, i)
-        return create_job_card_for_pack('jumbo_job_pack')
-    end,
-    ease_background_colour = function(self)
-        ease_job_pack_background()
-    end
+    create_card = function(self, card, i) return create_job_card_for_pack('jumbo_job_pack') end,
+    ease_background_colour = function(self) ease_job_pack_background() end
 }
 
 SMODS.Booster {
-    key = 'job_pack_3',
+    key = 'job_pack_4',
     atlas = 'c_packs',
-    pos = { x = 2, y = 0 },
+    pos = { x = 3, y = 0 },
     config = { extra = 5, choose = 2 },
     cost = 8,
     weight = 0.25,
     kind = 'Job',
     group_key = 'k_job_pack',
     draw_hand = true,
-    in_pool = function(self, args)
-        return is_cracklatro_spectrals_jobs_enabled()
-    end,
+    in_pool = function(self, args) return is_cracklatro_spectrals_jobs_enabled() end,
     loc_txt = {
         name = 'Mega Job Application',
         group_name = 'Job Application',
@@ -954,10 +969,6 @@ SMODS.Booster {
         local extra = (card and card.ability and card.ability.extra) or (card and card.config and card.config.extra) or (self.config and self.config.extra) or 5
         return { vars = { choose, extra } }
     end,
-    create_card = function(self, card, i)
-        return create_job_card_for_pack('mega_job_pack')
-    end,
-    ease_background_colour = function(self)
-        ease_job_pack_background()
-    end
+    create_card = function(self, card, i) return create_job_card_for_pack('mega_job_pack') end,
+    ease_background_colour = function(self) ease_job_pack_background() end
 }

@@ -1285,23 +1285,32 @@ end
 
 local function build_cracklatro_config_tab()
     local cfg = get_cracklatro_config()
+    local is_es = false
+    if not (cfg and cfg.force_english) then
+        is_es = (G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or (G.CRACKEDLATRO_SPANISH == true)
+    end
+
+    local title_sub = is_es and "Configuración del Mod" or "Mod Configuration"
+    local quote_text = is_es and "Se recomienda leer... y si no te gusta leer, ¡pues qué mal XD!" or "Reading is recommended... and if you dislike reading, too bad XD"
+    local saved_text = is_es and "Configuración guardada en tiempo real" or "Settings saved in real-time"
+
     return {
         n = G.UIT.ROOT,
         config = {
             align = "cm",
-            padding = 0.15,
+            padding = 0.05,
             colour = G.C.CLEAR
         },
         nodes = {
             {
                 n = G.UIT.R,
-                config = { align = "cm", padding = 0.08 },
+                config = { align = "cm", padding = 0.02 },
                 nodes = {
                     {
                         n = G.UIT.T,
                         config = {
                             text = "The Cracked Balatro (Cracklatro)",
-                            scale = 0.50,
+                            scale = 0.42,
                             colour = G.C.GOLD,
                             shadow = true
                         }
@@ -1310,28 +1319,14 @@ local function build_cracklatro_config_tab()
             },
             {
                 n = G.UIT.R,
-                config = { align = "cm", padding = 0.04 },
+                config = { align = "cm", padding = 0.01 },
                 nodes = {
                     {
                         n = G.UIT.T,
                         config = {
-                            text = "Mod Configuration",
-                            scale = 0.34,
+                            text = title_sub,
+                            scale = 0.28,
                             colour = G.C.UI.TEXT_LIGHT
-                        }
-                    }
-                }
-            },
-            {
-                n = G.UIT.R,
-                config = { align = "cm", padding = 0.04 },
-                nodes = {
-                    {
-                        n = G.UIT.T,
-                        config = {
-                            text = "\"This mod is crafted not to be unfair, but not to give away free wins either,",
-                            scale = 0.25,
-                            colour = G.C.UI.TEXT_INACTIVE
                         }
                     }
                 }
@@ -1343,160 +1338,160 @@ local function build_cracklatro_config_tab()
                     {
                         n = G.UIT.T,
                         config = {
-                            text = "it focuses on high-synergy long runs and unique, fun Jokers to play with,",
-                            scale = 0.25,
-                            colour = G.C.UI.TEXT_INACTIVE
-                        }
-                    }
-                }
-            },
-            {
-                n = G.UIT.R,
-                config = { align = "cm", padding = 0.05 },
-                nodes = {
-                    {
-                        n = G.UIT.T,
-                        config = {
-                            text = "reading is recommended... and if you dislike reading, too bad XD\"",
-                            scale = 0.25,
+                            text = "\"" .. quote_text .. "\"",
+                            scale = 0.22,
                             colour = G.C.GOLD
                         }
                     }
                 }
             },
-            -- Toggle 1: New Runs
             {
                 n = G.UIT.R,
-                config = { align = "cm", padding = 0.06 },
+                config = { align = "cm", padding = 0.02 },
                 nodes = {
-                    create_toggle({
-                        label = "New Runs",
-                        ref_table = cfg,
-                        ref_value = "new_runs",
-                        callback = function(val)
-                            save_cracklatro_config()
-                        end,
-                        info = {
-                            "Optional. When enabled, seeds generate different",
-                            "outcome variations between Cracklatro and vanilla Balatro."
+                    -- Columna Izquierda (3 opciones)
+                    {
+                        n = G.UIT.C,
+                        config = { align = "tm", padding = 0.05 },
+                        nodes = {
+                            create_toggle({
+                                label = is_es and "Nuevas Runs" or "New Runs",
+                                w = 2.4,
+                                scale = 0.75,
+                                label_scale = 0.30,
+                                ref_table = cfg,
+                                ref_value = "new_runs",
+                                callback = function(val)
+                                    save_cracklatro_config()
+                                end,
+                                info = is_es and {
+                                    "Opcional. Semillas generan variaciones",
+                                    "divergentes de Balatro vainilla."
+                                } or {
+                                    "Optional. Seeds generate different",
+                                    "variations from vanilla Balatro."
+                                }
+                            }),
+                            create_toggle({
+                                label = is_es and "Nuevos Desafíos" or "New Challenges",
+                                w = 2.4,
+                                scale = 0.75,
+                                label_scale = 0.30,
+                                ref_table = cfg,
+                                ref_value = "new_challenges",
+                                callback = function(val)
+                                    save_cracklatro_config()
+                                    if cracklatro_sync_challenges then
+                                        cracklatro_sync_challenges(cfg.new_challenges)
+                                    end
+                                end,
+                                info = is_es and {
+                                    "Opcional. Añade 10 desafíos únicos",
+                                    "centrados en sinergias del mod."
+                                } or {
+                                    "Optional. 10 custom challenges",
+                                    "centered on mod synergies."
+                                }
+                            }),
+                            create_toggle({
+                                label = is_es and "Espectrales y Jobs" or "Spectrals & Jobs",
+                                w = 2.4,
+                                scale = 0.75,
+                                label_scale = 0.30,
+                                ref_table = cfg,
+                                ref_value = "new_spectrals_and_jobs",
+                                callback = function(val)
+                                    save_cracklatro_config()
+                                end,
+                                info = is_es and {
+                                    "Habilita Job Cards y Espectrales.",
+                                    "No afecta partidas en curso."
+                                } or {
+                                    "Enables Job Cards and Spectrals.",
+                                    "Does not affect ongoing runs."
+                                }
+                            })
                         }
-                    })
+                    },
+                    -- Columna Derecha (3 opciones)
+                    {
+                        n = G.UIT.C,
+                        config = { align = "tm", padding = 0.05 },
+                        nodes = {
+                            create_toggle({
+                                label = is_es and "Boss Blinds Custom" or "Custom Boss Blinds",
+                                w = 2.4,
+                                scale = 0.75,
+                                label_scale = 0.30,
+                                ref_table = cfg,
+                                ref_value = "new_boss_blinds",
+                                callback = function(val)
+                                    save_cracklatro_config()
+                                end,
+                                info = is_es and {
+                                    "Habilita las 11 Boss Blinds custom",
+                                    "(The Pole, The Rod, The Door, etc)."
+                                } or {
+                                    "Enables Cracklatro's 11 Boss Blinds",
+                                    "(The Pole, The Rod, The Door, etc)."
+                                }
+                            }),
+                            create_toggle({
+                                label = is_es and "Animaciones Rápidas" or "Fast Animations",
+                                w = 2.4,
+                                scale = 0.75,
+                                label_scale = 0.30,
+                                ref_table = cfg,
+                                ref_value = "fast_animations",
+                                callback = function(val)
+                                    save_cracklatro_config()
+                                end,
+                                info = is_es and {
+                                    "Reduce retrasos en mecánicas custom",
+                                    "(giros de Slot, transformaciones)."
+                                } or {
+                                    "Reduces delays on custom mechanics",
+                                    "(Slot spins, transforms) for speed."
+                                }
+                            }),
+                            create_toggle({
+                                label = is_es and "Forzar Inglés" or "Force English",
+                                w = 2.4,
+                                scale = 0.75,
+                                label_scale = 0.30,
+                                ref_table = cfg,
+                                ref_value = "force_english",
+                                callback = function(val)
+                                    save_cracklatro_config()
+                                    if apply_cracklatro_language then
+                                        local is_es_new = false
+                                        if not val then
+                                            is_es_new = (G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or (G.CRACKEDLATRO_SPANISH == true)
+                                        end
+                                        apply_cracklatro_language(is_es_new)
+                                    end
+                                end,
+                                info = is_es and {
+                                    "Fuerza cartas y textos a inglés",
+                                    "sin importar el idioma del juego."
+                                } or {
+                                    "Forces all cards and descriptions",
+                                    "to English regardless of language."
+                                }
+                            })
+                        }
+                    }
                 }
             },
-            -- Toggle 2: New Challenges
             {
                 n = G.UIT.R,
-                config = { align = "cm", padding = 0.06 },
-                nodes = {
-                    create_toggle({
-                        label = "New Challenges",
-                        ref_table = cfg,
-                        ref_value = "new_challenges",
-                        callback = function(val)
-                            save_cracklatro_config()
-                            if cracklatro_sync_challenges then
-                                cracklatro_sync_challenges(cfg.new_challenges)
-                            end
-                        end,
-                        info = {
-                            "Optional. Adds 10 high-difficulty custom challenges",
-                            "centered around unique Cracklatro synergies."
-                        }
-                    })
-                }
-            },
-            -- Toggle 3: New Spectrals & Job Cards
-            {
-                n = G.UIT.R,
-                config = { align = "cm", padding = 0.06 },
-                nodes = {
-                    create_toggle({
-                        label = "New Spectrals & Job Cards",
-                        ref_table = cfg,
-                        ref_value = "new_spectrals_and_jobs",
-                        callback = function(val)
-                            save_cracklatro_config()
-                        end,
-                        info = {
-                            "Enables mod Job Cards and custom Spectral Cards.",
-                            "Does not affect runs already in progress."
-                        }
-                    })
-                }
-            },
-            -- Toggle 4: Custom Boss Blinds
-            {
-                n = G.UIT.R,
-                config = { align = "cm", padding = 0.06 },
-                nodes = {
-                    create_toggle({
-                        label = "Custom Boss Blinds",
-                        ref_table = cfg,
-                        ref_value = "new_boss_blinds",
-                        callback = function(val)
-                            save_cracklatro_config()
-                        end,
-                        info = {
-                            "Enables Cracklatro's 11 custom Boss Blinds (The Pole, The Rod,",
-                            "The Magician, The Door, etc.) in the blind pool."
-                        }
-                    })
-                }
-            },
-            -- Toggle 5: Fast Animations
-            {
-                n = G.UIT.R,
-                config = { align = "cm", padding = 0.06 },
-                nodes = {
-                    create_toggle({
-                        label = "Fast Animations",
-                        ref_table = cfg,
-                        ref_value = "fast_animations",
-                        callback = function(val)
-                            save_cracklatro_config()
-                        end,
-                        info = {
-                            "Reduces extra delays on custom mechanics (Slot Machine spins,",
-                            "transform animations) for faster pacing."
-                        }
-                    })
-                }
-            },
-            -- Toggle 6: Force English Language
-            {
-                n = G.UIT.R,
-                config = { align = "cm", padding = 0.06 },
-                nodes = {
-                    create_toggle({
-                        label = "Force English Language",
-                        ref_table = cfg,
-                        ref_value = "force_english",
-                        callback = function(val)
-                            save_cracklatro_config()
-                            if apply_cracklatro_language then
-                                local is_es = false
-                                if not val then
-                                    is_es = (G.SETTINGS and (G.SETTINGS.language == 'es' or G.SETTINGS.language == 'es_419' or G.SETTINGS.language == 'es_ES')) or (G.CRACKEDLATRO_SPANISH == true)
-                                end
-                                apply_cracklatro_language(is_es)
-                            end
-                        end,
-                        info = {
-                            "Forces all Cracklatro cards, decks, and descriptions to",
-                            "display in English regardless of Balatro's language setting."
-                        }
-                    })
-                }
-            },
-            {
-                n = G.UIT.R,
-                config = { align = "cm", padding = 0.06 },
+                config = { align = "cm", padding = 0.02 },
                 nodes = {
                     {
                         n = G.UIT.T,
                         config = {
-                            text = "Settings saved in real-time",
-                            scale = 0.26,
+                            text = saved_text,
+                            scale = 0.22,
                             colour = G.C.GREEN
                         }
                     }

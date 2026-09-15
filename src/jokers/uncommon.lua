@@ -29,7 +29,8 @@ SMODS.Joker {
         return { vars = { price, price * 2 } }
     end,
     check_for_unlock = function(self, args)
-        if G.GAME and G.GAME.dollars and G.GAME.dollars >= 100 then
+        local cur_dollars = (to_number and to_number(G.GAME and G.GAME.dollars)) or tonumber(G.GAME and G.GAME.dollars) or 0
+        if cur_dollars >= 100 then
             return true
         end
     end,

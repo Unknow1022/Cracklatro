@@ -1,5 +1,15 @@
 -- Core Utilities & Engine Hooks for Cracklatro
 
+if not to_number then
+    function to_number(x)
+        if type(x) == 'table' then
+            if x.to_number then return x:to_number() end
+            return tonumber(x[1]) or 0
+        end
+        return tonumber(x) or 0
+    end
+end
+
 function get_card_key(card)
     if not card then return nil end
     return (card.config and card.config.center and card.config.center.key)
@@ -394,7 +404,9 @@ function Game:update(dt)
             G.GAME.entered_shop_dollars = G.GAME.dollars or 0
         end
     elseif G.STATE ~= G.STATES.SHOP and G.GAME and G.GAME.entered_shop_dollars then
-        if G.GAME.entered_shop_dollars >= 50 and (G.GAME.dollars or 0) <= 10 then
+        local entered = (to_number and to_number(G.GAME.entered_shop_dollars)) or tonumber(G.GAME.entered_shop_dollars) or 0
+        local current = (to_number and to_number(G.GAME.dollars)) or tonumber(G.GAME.dollars) or 0
+        if entered >= 50 and current <= 10 then
             check_for_unlock({ type = 'leave_shop' })
         end
         G.GAME.entered_shop_dollars = nil
@@ -1632,10 +1644,11 @@ if G and G.FUNCS then
     G.FUNCS.can_slot_machine_bet = function(e)
         local card = e.config.ref_table
         if card and card.ability and card.ability.extra then
+            local cur_d = (to_number and to_number(G.GAME and G.GAME.dollars)) or tonumber(G.GAME and G.GAME.dollars) or 0
             if card.ability.extra.bet_placed then
                 e.config.colour = G.C.UI.BACKGROUND_INACTIVE
                 e.config.button = nil
-            elseif (G.GAME.dollars or 0) >= 5 and G.STATE == G.STATES.SELECTING_HAND then
+            elseif cur_d >= 5 and G.STATE == G.STATES.SELECTING_HAND then
                 e.config.colour = G.C.GOLD
                 e.config.button = 'slot_machine_bet'
             else
@@ -1647,7 +1660,8 @@ if G and G.FUNCS then
 
     G.FUNCS.slot_machine_bet = function(e)
         local card = e.config.ref_table
-        if card and card.ability and card.ability.extra and not card.ability.extra.bet_placed and (G.GAME.dollars or 0) >= 5 then
+        local cur_d = (to_number and to_number(G.GAME and G.GAME.dollars)) or tonumber(G.GAME and G.GAME.dollars) or 0
+        if card and card.ability and card.ability.extra and not card.ability.extra.bet_placed and cur_d >= 5 then
             ease_dollars(-5)
             card.ability.extra.bet_placed = true
             card.ability.extra.bet_amount = 5

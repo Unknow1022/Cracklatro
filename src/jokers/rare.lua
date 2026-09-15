@@ -223,7 +223,9 @@ SMODS.Joker {
     end,
     check_for_unlock = function(self, args)
         if args.type == 'leave_shop' or args.type == 'ending_shop' then
-            if G.GAME and G.GAME.entered_shop_dollars and G.GAME.entered_shop_dollars >= 50 and (G.GAME.dollars or 0) <= 10 then
+            local entered = (to_number and to_number(G.GAME and G.GAME.entered_shop_dollars)) or tonumber(G.GAME and G.GAME.entered_shop_dollars) or 0
+            local current = (to_number and to_number(G.GAME and G.GAME.dollars)) or tonumber(G.GAME and G.GAME.dollars) or 0
+            if G.GAME and G.GAME.entered_shop_dollars and entered >= 50 and current <= 10 then
                 return true
             end
         end
@@ -854,7 +856,7 @@ SMODS.Joker {
             card.ability.extra = card.ability.extra or {}
             local cost = card.ability.extra.cost or 10
             local change = card.ability.extra.xmult_change or 0.5
-            local current_dollars = (G.GAME and G.GAME.dollars) or 0
+            local current_dollars = (to_number and to_number(G.GAME and G.GAME.dollars)) or tonumber(G.GAME and G.GAME.dollars) or 0
 
             if current_dollars >= cost then
                 ease_dollars(-cost)

@@ -1511,12 +1511,14 @@ if G and G.UIDEF and G.UIDEF.use_and_sell_buttons then
     local use_and_sell_buttons_ref = G.UIDEF.use_and_sell_buttons
     G.UIDEF.use_and_sell_buttons = function(card)
         local base_background = use_and_sell_buttons_ref(card)
+        if not card or card.area ~= G.jokers or G.STATE == G.STATES.TUTORIAL then
+            return base_background
+        end
         if not base_background or not base_background.nodes or not base_background.nodes[1] or not base_background.nodes[1].nodes then
             return base_background
         end
 
-        if card.area == G.jokers and G.STATE ~= G.STATES.TUTORIAL then
-            local is_es = G.CRACKEDLATRO_SPANISH == true
+        local is_es = G.CRACKEDLATRO_SPANISH == true
             -- Slot Machine "Bet" button
             if card_has_key(card, 'slot_machine') then
                 local bet_text = is_es and "Apostar" or "Bet"
@@ -1739,6 +1741,44 @@ function is_cracklatro_spectrals_jobs_enabled()
     return true
 end
 
+function is_cracklatro_boss_blinds_enabled()
+    if G and G.GAME and G.GAME.cracklatro_boss_blinds ~= nil then
+        return G.GAME.cracklatro_boss_blinds
+    end
+    local cfg = (get_cracklatro_config and get_cracklatro_config())
+        or (SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'] and SMODS.Mods['Crackedlatro'].config)
+        or (SMODS and SMODS.current_mod and SMODS.current_mod.config)
+        or {}
+    if cfg.new_boss_blinds ~= nil then
+        return cfg.new_boss_blinds
+    end
+    return true
+end
+
+function is_cracklatro_fast_animations_enabled()
+    local cfg = (get_cracklatro_config and get_cracklatro_config())
+        or (SMODS and SMODS.Mods and SMODS.Mods['Crackedlatro'] and SMODS.Mods['Crackedlatro'].config)
+        or (SMODS and SMODS.current_mod and SMODS.current_mod.config)
+        or {}
+    return cfg.fast_animations == true
+end
+
+-- Hook SMODS.Blind.in_pool to disable Cracklatro Boss Blinds when toggled off
+if SMODS and SMODS.Blind then
+    local orig_blind_in_pool = SMODS.Blind.in_pool
+    function SMODS.Blind:in_pool(args)
+        if (self.mod and self.mod.id == 'Crackedlatro') or (self.key and G.CRACKEDLATRO_BLIND_THEMES and G.CRACKEDLATRO_BLIND_THEMES[self.key]) then
+            if not is_cracklatro_boss_blinds_enabled() then
+                return false
+            end
+        end
+        if orig_blind_in_pool then
+            return orig_blind_in_pool(self, args)
+        end
+        return true
+    end
+end
+
 -- Hook Game:init_game_object for "New Runs" seed variation and "New Spectrals Y Job Cards" run-lock
 if Game and Game.init_game_object then
     local orig_game_init_game_object = Game.init_game_object
@@ -1752,6 +1792,11 @@ if Game and Game.init_game_object then
         -- Lock in spectrals & jobs setting for this run (does not affect runs in progress)
         if self.GAME and self.GAME.cracklatro_spectrals_jobs == nil then
             self.GAME.cracklatro_spectrals_jobs = (cfg.new_spectrals_and_jobs ~= false)
+        end
+
+        -- Lock in custom boss blinds setting for this run
+        if self.GAME and self.GAME.cracklatro_boss_blinds == nil then
+            self.GAME.cracklatro_boss_blinds = (cfg.new_boss_blinds ~= false)
         end
 
         -- New Runs: when active, seeds generate different outcomes/variations between mod and vanilla Balatro
@@ -1773,6 +1818,7 @@ if Game and Game.init_game_object then
         return ret
     end
 end
+
 
 
 

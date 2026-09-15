@@ -224,7 +224,13 @@ local function get_most_played_hands()
             end
         end
     end
-    table.sort(counts, function(a, b) return a > b end)
+    table.sort(counts, function(a, b)
+        if to_big then
+            return to_big(a) > to_big(b)
+        else
+            return (a or 0) > (b or 0)
+        end
+    end)
 
     local most_played = nil
     local second_played = nil
@@ -279,17 +285,9 @@ SMODS.Consumable {
         name = 'Catastrophic',
         text = {
             "{C:attention}+4 levels{} to your most played hand,",
-            "creates {C:attention}3 Negative Planets{} of your",
-            "most played hand,",
-            "{C:red}-1 level{} to all other hands"
+            "{C:red}-2 levels{} to all other hands"
         }
     },
-    loc_vars = function(self, info_queue, card)
-        if info_queue then
-            info_queue[#info_queue + 1] = G.P_CENTERS.e_negative
-        end
-        return { vars = {} }
-    end,
     can_use = function(self, card)
         return true
     end,
@@ -303,29 +301,18 @@ SMODS.Consumable {
         level_up_hand(card, most_played, false, 4)
 
         for hand_name, hand_data in pairs(G.GAME.hands) do
-            local is_gt_1 = to_big and (to_big(hand_data.level) > to_big(1)) or (hand_data.level > 1)
-            if hand_name ~= most_played and is_gt_1 then
-                level_up_hand(card, hand_name, true, -1)
+            if hand_name ~= most_played then
+                local current_lvl = hand_data.level
+                local is_gt_1 = to_big and (to_big(current_lvl) > to_big(1)) or (current_lvl > 1)
+                if is_gt_1 then
+                    local is_gt_2 = to_big and (to_big(current_lvl) > to_big(2)) or (current_lvl > 2)
+                    local deduction = is_gt_2 and -2 or -1
+                    level_up_hand(card, hand_name, true, deduction)
+                end
             end
         end
 
-        local planet_key = hand_to_planet[most_played] or 'c_pluto'
-        G.E_MANAGER:add_event(Event({
-            trigger = 'after',
-            delay = 0.4,
-            func = function()
-                play_sound('tarot1')
-                for i = 1, 3 do
-                    local p_card = create_card('Planet', G.consumeables, nil, nil, nil, nil, planet_key, 'catastrophic')
-                    p_card:set_edition({negative = true}, true)
-                    p_card:add_to_deck()
-                    G.consumeables:emplace(p_card)
-                    p_card:juice_up(0.3, 0.3)
-                end
-                card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Catastrophic!', colour = G.C.DARK_EDITION })
-                return true
-            end
-        }))
+        card_eval_status_text(card, 'extra', nil, nil, nil, { message = 'Catastrophic!', colour = G.C.DARK_EDITION })
     end
 }
 

@@ -348,9 +348,16 @@ local function get_slot_challenge(card)
     return SLOT_CHALLENGES[idx]
 end
 
+SMODS.Atlas {
+    key = "cracklatro_slot_machine",
+    path = "slot_machine.png",
+    px = 71,
+    py = 95
+}
+
 SMODS.Joker {
     key = 'slot_machine_joker',
-    atlas = 'cracklatro_jokers',
+    atlas = 'cracklatro_slot_machine',
     unlocked = false,
     loc_txt = {
         name = 'Slot Machine',
@@ -369,11 +376,16 @@ SMODS.Joker {
         "{C:money}$20{} from a single",
         "{C:attention}Lucky Card{}"
     },
-    config = { extra = { pair_cash = 3, pair_mult = 15, triple_cash = 12, triple_xmult = 2.5, jackpot_cash = 35, jackpot_xmult = 4.0, challenge_idx = 1, bet_placed = false, bet_amount = 0, challenge_completed = false, last_payout_text = "" } },
+    config = { extra = { pair_cash = 3, pair_mult = 15, triple_cash = 12, triple_xmult = 2.5, jackpot_cash = 35, jackpot_xmult = 4.0, challenge_idx = 1, bet_placed = false, bet_amount = 0, challenge_completed = false, last_payout_text = "", combo_idx = 0 } },
     rarity = 2,
-    pos = { x = 5, y = 1 },
+    pos = { x = 0, y = 0 },
     cost = 6,
     blueprint_compat = true,
+    set_sprites = function(self, card, _front)
+        if card and card.ability and card.ability.extra and card.ability.extra.combo_idx and card.children and card.children.center then
+            card.children.center:set_sprite_pos({ x = card.ability.extra.combo_idx, y = 0 })
+        end
+    end,
     loc_vars = function(self, info_queue, card)
         local ex = (card and card.ability and card.ability.extra) or self.config.extra
         local ch = get_slot_challenge(card or self)
@@ -424,40 +436,9 @@ SMODS.Joker {
             local r2 = pseudorandom_element(symbols, 'slot_r2')
             local r3 = pseudorandom_element(symbols, 'slot_r3')
             card.ability.extra.last_spin = { r1, r2, r3 }
-            card.ability.extra.spinning = true
-            card.ability.extra.spin_start_time = G.TIMERS.REAL
-
-            local is_es = G.CRACKEDLATRO_SPANISH == true
-            local sym_map = {
-                Cherry = is_es and "Cereza" or "Cherry",
-                Lemon = is_es and "Limón" or "Lemon",
-                Bell = is_es and "Campana" or "Bell",
-                ['7'] = "7"
-            }
-            local d1 = sym_map[r1] or r1
-            local d2 = sym_map[r2] or r2
-            local d3 = sym_map[r3] or r3
-            local roll_msg = '[ ' .. d1 .. ' | ' .. d2 .. ' | ' .. d3 .. ' ]'
 
             card:juice_up(0.6, 0.6)
             play_sound('tarot2', 1.2, 0.5)
-
-            if attention_text then
-                attention_text({
-                    text = roll_msg,
-                    scale = 0.8,
-                    hold = 1.4,
-                    major = card,
-                    backdrop_colour = G.C.GOLD,
-                    align = 'cm',
-                    silent = true
-                })
-            end
-
-            return {
-                message = roll_msg,
-                colour = G.C.GOLD
-            }
         end
 
         if context.joker_main and card.ability.extra.last_spin then
@@ -465,18 +446,12 @@ SMODS.Joker {
             local r1, r2, r3 = r[1], r[2], r[3]
             local ex = card.ability.extra
             local is_es = G.CRACKEDLATRO_SPANISH == true
-            local sym_map = {
-                Cherry = is_es and "Cereza" or "Cherry",
-                Lemon = is_es and "Limón" or "Lemon",
-                Bell = is_es and "Campana" or "Bell",
-                ['7'] = "7"
-            }
-            local d1 = sym_map[r1] or r1
-            local d2 = sym_map[r2] or r2
-            local d3 = sym_map[r3] or r3
-            local r_prefix = '[ ' .. d1 .. ' ' .. d2 .. ' ' .. d3 .. ' ] '
+
+            local combo_idx = 9
+            local ret = {}
 
             if r1 == '7' and r2 == '7' and r3 == '7' then
+                combo_idx = 1
                 card.ability.extra.last_payout_text = "777 Jackpot! X" .. ex.jackpot_xmult .. " / +$" .. ex.jackpot_cash
                 if not context.blueprint then
                     G.E_MANAGER:add_event(Event({
@@ -489,38 +464,64 @@ SMODS.Joker {
                         end
                     }))
                 end
-                return {
+                ret = {
                     Xmult = ex.jackpot_xmult,
                     dollars = ex.jackpot_cash,
-                    message = r_prefix .. '777 JACKPOT! +$' .. ex.jackpot_cash,
+                    message = '[ 7 7 7 ] 777 JACKPOT! +$' .. ex.jackpot_cash,
                     colour = G.C.GOLD
                 }
             elseif r1 == r2 and r2 == r3 then
-                local win_name = is_es and "¡TRÍO!" or "TRIPLE!"
+                if r1 == 'Cherry' then combo_idx = 2
+                elseif r1 == 'Lemon' then combo_idx = 3
+                elseif r1 == 'Bell' then combo_idx = 4
+                end
+                local sym_name = is_es and (r1 == 'Cherry' and 'CEREZA' or r1 == 'Lemon' and 'LIMÓN' or 'CAMPANA') or r1:upper()
+                local win_msg = is_es and ('¡TRÍO ' .. sym_name .. '!') or ('TRIPLE ' .. sym_name .. '!')
                 card.ability.extra.last_payout_text = "Triple Match! X" .. ex.triple_xmult .. " / +$" .. ex.triple_cash
-                return {
+                ret = {
                     Xmult = ex.triple_xmult,
                     dollars = ex.triple_cash,
-                    message = r_prefix .. win_name .. ' +$' .. ex.triple_cash,
+                    message = win_msg .. ' +$' .. ex.triple_cash,
                     colour = G.C.MONEY
                 }
             elseif r1 == r2 or r2 == r3 or r1 == r3 then
-                local win_name = is_es and "¡PAR!" or "PAIR!"
+                local pair_sym = (r1 == r2 and r1) or (r2 == r3 and r2) or r1
+                if pair_sym == '7' then combo_idx = 5
+                elseif pair_sym == 'Cherry' then combo_idx = 6
+                elseif pair_sym == 'Lemon' then combo_idx = 7
+                elseif pair_sym == 'Bell' then combo_idx = 8
+                end
+                local sym_name = is_es and (pair_sym == 'Cherry' and 'CEREZA' or pair_sym == 'Lemon' and 'LIMÓN' or pair_sym == 'Bell' and 'CAMPANA' or '7') or pair_sym:upper()
+                local win_msg = is_es and ('¡PAR ' .. sym_name .. '!') or ('PAIR ' .. sym_name .. '!')
                 card.ability.extra.last_payout_text = "Pair Match! +" .. ex.pair_mult .. " Mult / +$" .. ex.pair_cash
-                return {
+                ret = {
                     mult = ex.pair_mult,
                     dollars = ex.pair_cash,
-                    message = r_prefix .. win_name .. ' +$' .. ex.pair_cash,
+                    message = win_msg .. ' +$' .. ex.pair_cash,
                     colour = G.C.MULT
                 }
             else
-                local miss_name = is_es and "FALLO" or "MISS"
+                combo_idx = 9
                 card.ability.extra.last_payout_text = "Miss"
-                return {
-                    message = r_prefix .. miss_name,
+                local sym_map = { Cherry = is_es and "Cereza" or "Cherry", Lemon = is_es and "Limón" or "Lemon", Bell = is_es and "Campana" or "Bell", ['7'] = "7" }
+                local d1 = sym_map[r1] or r1
+                local d2 = sym_map[r2] or r2
+                local d3 = sym_map[r3] or r3
+                ret = {
+                    message = '[ ' .. d1 .. ' ' .. d2 .. ' ' .. d3 .. ' ] ' .. (is_es and 'FALLO' or 'MISS'),
                     colour = G.C.UI.TEXT_INACTIVE
                 }
             end
+
+            -- Actualizar textura del Joker al roll obtenido (100% nativo)
+            card.ability.extra.combo_idx = combo_idx
+            if card.children and card.children.center then
+                card.children.center:set_sprite_pos({ x = combo_idx, y = 0 })
+            end
+            card:juice_up(0.7, 0.5)
+            play_sound('coin1', 1.0, 0.6)
+
+            return ret
         end
 
         -- Check Challenge completion for the active bet

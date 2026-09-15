@@ -53,6 +53,22 @@ function is_secret_card(card)
     return false
 end
 
+function is_invalid_eternal_joker(card)
+    if not card then return true end
+    if is_secret_card(card) then return true end
+    local key = get_card_key(card) or ''
+    key = string.lower(tostring(key))
+    local invalid_keys = {
+        'gros_michel', 'cavendish', 'ice_cream', 'popcorn', 'turtle_bean',
+        'ramen', 'seltzer', 'diet_cola', 'egg', 'invisible', 'luchador',
+        'mr_bones', 'blueberry', 'parca', 'ceremonial'
+    }
+    for _, ik in ipairs(invalid_keys) do
+        if string.find(key, ik, 1, true) then return true end
+    end
+    return false
+end
+
 function is_sleeve_matching(target_key)
     if not target_key then return false end
     if G and G.GAME then

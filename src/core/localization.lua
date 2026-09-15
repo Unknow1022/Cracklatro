@@ -679,7 +679,7 @@ local SPANISH_DESCRIPTIONS = {
             name = 'Baraja Amistosa',
             text = {
                 "Comienza con {C:attention}2 Jokers Negativos Eternos{} aleatorios,",
-                "{C:inactive}(Excepto Legendarios o Secretos){},",
+                "{C:inactive}(Cualq. rareza, no Secretos ni comodines de venta){},",
                 "{C:red}-1{} espacio de Joker,",
                 "{C:red}-1{} Descarte"
             }

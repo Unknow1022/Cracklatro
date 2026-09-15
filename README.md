@@ -4,7 +4,7 @@
 
 ![Balatro Version](https://img.shields.io/badge/Balatro-v1.0.1o-orange?style=for-the-badge&logo=balatro)
 ![Steamodded](https://img.shields.io/badge/Steamodded-v1.0.0%2B-blue?style=for-the-badge)
-![Cracklatro Version](https://img.shields.io/badge/Version-2.0%20The%20Sleeves%20Update-9932CC?style=for-the-badge)
+![Cracklatro Version](https://img.shields.io/badge/Version-3.4%20The%20Re--Draw%20Update-9932CC?style=for-the-badge)
 ![CardSleeves](https://img.shields.io/badge/CardSleeves-Compatible-ff69b4?style=for-the-badge)
 ![JokerDisplay](https://img.shields.io/badge/JokerDisplay-Compatible-2ea44f?style=for-the-badge)
 ![Language](https://img.shields.io/badge/Language-English%20%7C%20Espa%C3%B1ol-lightgrey?style=for-the-badge)
@@ -16,7 +16,7 @@ Introduces an exclusive Secret rarity, dozens of uniquely synergized Jokers, a n
 > *"This mod is designed not to be unfair, but not to hand out free wins either; it is focused on long runs and fun Jokers to play. Reading is recommended, and if you don't like to read, well too bad XD!"*  
 > *(Este mod está hecho, no para ser injusto pero tampoco regalar partidas, está más concentrado en partidas largas y en Jokers divertidos de jugar, recomendable leer, y si no te gusta leer, pues que mal XD)*
 
-[Instalación](#%EF%B8%8F-instalación-y-requisitos) • [Novedades v2.0](#%EF%B8%8F-novedades-de-la-display-update-v20) • [Contenido](#-resumen-general-de-contenido) • [CardSleeves & Fusiones](#-fundas-cardsleeves---4-y-fusiones) • [Desafíos](#-desafíos-de-sinergia-challenges---10) • [Jokers Secretos](#-rareza-secreta-11-jokers-secretos) • [Jokers Estándar](#-jokers-estándar-33-jokers) • [Cartas de Oficio](#-cartas-de-oficio-job-cards---10-y-paquetes-3) • [Espectrales y Sellos](#-consumibles-espectrales-8-sellos-y-mejoras) • [Ciegas Jefe](#%EF%B8%8F-ciegas-jefe-boss-blinds---12) • [Barajas](#-barajas-personalizadas-decks---4) • [FAQ](#-preguntas-frecuentes-faq)
+[Instalación](#%EF%B8%8F-instalación-y-requisitos) • [Novedades v3.4](#-novedades-de-la-re-draw-update-v34) • [Contenido](#-resumen-general-de-contenido) • [CardSleeves & Fusiones](#-fundas-cardsleeves---4-y-fusiones) • [Desafíos](#-desafíos-de-sinergia-challenges---10) • [Jokers Secretos](#-rareza-secreta-11-jokers-secretos) • [Jokers Estándar](#-jokers-estándar-33-jokers) • [Cartas de Oficio](#-cartas-de-oficio-job-cards---10-y-paquetes-3) • [Espectrales y Sellos](#-consumibles-espectrales-8-sellos-y-mejoras) • [Ciegas Jefe](#%EF%B8%8F-ciegas-jefe-boss-blinds---12) • [Barajas](#-barajas-personalizadas-decks---4) • [FAQ](#-preguntas-frecuentes-faq)
 
 </div>
 
@@ -45,12 +45,20 @@ Introduces an exclusive Secret rarity, dozens of uniquely synergized Jokers, a n
 
 ---
 
+## 🎨 Novedades de la "Re-Draw Update" (v3.4)
+
+* 🃏 **Ajuste de Raridades en Baraja y Funda Amistosa**:
+  * Los Jokers **Negativos y Eternos** materializados por la **Baraja Amistosa** y la **Funda Amistosa** (tanto en versión base como en Fusión) ahora pueden ser de **cualquier rareza** (Comunes, Poco Comunes, Raros y en Fusión hasta Legendarios).
+  * **Protección Anti-Bloqueo de Comodines**: Se ha implementado un filtro inteligente para que la Baraja y Funda Amistosa **no puedan generar en formato Eterno comodines que deban venderse o destruirse para funcionar** (como *Gros Michel*, *Cavendish*, *Helado*, *Palomitas*, *Huevo*, *Joker Invisible*, *Luchador*, *Joker Arándano*, etc.), garantizando que los Jokers otorgados sean siempre útiles en combate.
+
+---
+
 ## 🛡️ Novedades: Compatibilidad CardSleeves, Fusiones, Desafíos y Configuración (v2.0)
 
 * 🎴 **Compatibilidad Completa con CardSleeves (`larswijn/CardSleeves`)**:
   * **4 Fundas Personalizadas**: Añade versiones Funda de cada baraja del mod (*Funda Cavernícola*, *Funda Estratega*, *Funda Supervisora* y *Funda Amistosa*).
   * **Mecánica de Fusión de Barajas**: Al equipar una Baraja y su Funda correspondiente se activan efectos de fusión únicos:
-    * **Fusión Amistosa** (*Friendly Deck + Friendly Sleeve*): Genera **3 Jokers Negativos Eternos** con posibilidad de hasta **1 Joker Legendario**, con penalización de `-2` ranuras de Joker y `-1` descarte.
+    * **Fusión Amistosa** (*Friendly Deck + Friendly Sleeve*): Genera **3 Jokers Negativos Eternos** de cualquier rareza (con posibilidad de hasta **1 Joker Legendario**, excluyendo comodines de consumo/venta), con penalización de `-2` ranuras de Joker y `-1` descarte.
     * **Fusión Prehistórica** (*Caveman Deck + Caveman Sleeve*): Aplica **Sello de Plata** a todas las cartas de piedra iniciales, las cartas de piedra otorgan **+3 Mult** y **+20 Fichas** al puntuar, y anula la penalización de -1 mano.
     * **Fusión Estratégica** (*Strategist Deck + Strategist Sleeve*): Baraja condensada a **20 cartas** (del 10 al As), otorga vales **Truco de Magia** y **Mercader de Tarot**, **+1 ranura de tienda** y **+$1** por mano jugada.
     * **Fusión Supervisora** (*Overseer Deck + Overseer Sleeve*): Genera **2 cartas Espectrales** por ronda, **triplica las etiquetas (x3)**, **elimina el sobrecoste** de Jokers e inicia con `+$5` y `+1` mano.
@@ -104,7 +112,7 @@ Introduces an exclusive Secret rarity, dozens of uniquely synergized Jokers, a n
 * 🏷️ **Nuevas Etiquetas & Barajas**:
   * **Etiqueta de Brujería (*Witchcraft Tag*)**: Otorga un Mega Paquete Espectral gratuito.
   * **Etiqueta de Oferta (*Sale Tag*)**: 50% de descuento en artículos y rerolls de la siguiente tienda.
-  * **Baraja Amistosa (*Friendly Deck*)**: Comienza con 2 Jokers Negativos y Eternos al azar, a cambio de -1 ranura de Joker y -1 descarte.
+  * **Baraja Amistosa (*Friendly Deck*)**: Comienza con 2 Jokers Negativos y Eternos de cualquier rareza al azar (excluyendo comodines de consumo/venta), a cambio de -1 ranura de Joker y -1 descarte.
 * 🌐 **Compatibilidad Completa con JokerDisplay**: Visualización en tiempo real de estadísticas, contadores de letras, heat, precios de acciones y multiplicadores en la interfaz.
 
 ---
@@ -280,7 +288,7 @@ Todas las Ciegas Jefe cuentan con iluminación reactiva que altera el tapete, CR
 * **Caveman Deck (Baraja Cavernícola)**: Empiezas únicamente con A, 2, 3, 4, 6 y 8 de cada palo en tu baraja; todas las demás cartas iniciales son Cartas de Piedra. Empiezas con **-1 Mano**.
 * **Strategist Deck (Baraja Estratega)**: Empiezas con una baraja compacta de 24 cartas (Ases, Reyes, Reinas, Jotas, 10s y 9s). Inicias con el vale *Magic Trick*, $0, **-1 mano**, **-2 descartes** y las ciegas escalan X1.2.
 * **Overseer Deck (Baraja Supervisora)**: Crea una carta Espectral aleatoria al final de cada ronda (excepto Rot y Soul). Las etiquetas siempre se duplican. Los precios de los Jokers son X1.5. Empiezas con $2, -1 mano y -1 descarte.
-* **Friendly Deck (Baraja Amistosa)**: Genera **2 Jokers aleatorios con edición Negativa y condición de Eternos** al comenzar la partida (no puede generar Legendarios ni Secretos). Inicias con **-1 Espacio de Joker** y **-1 Descarte**.
+* **Friendly Deck (Baraja Amistosa)**: Genera **2 Jokers aleatorios de cualquier rareza** con edición Negativa y condición de Eternos al comenzar la partida (no puede generar Secretos ni comodines que requieran venderse o destruirse). Inicias con **-1 Espacio de Joker** y **-1 Descarte**.
 
 ---
 

@@ -316,21 +316,31 @@ SMODS.Back {
                     local legendary_spawned = false
                     for i = 1, 3 do
                         local new_joker = nil
-                        -- Max 1 Legendary can spawn across the 3 generated Jokers
-                        if not legendary_spawned and pseudorandom('friendly_legendary_roll_' .. i) < 0.35 then
-                            new_joker = create_card('Joker', G.jokers, true, 4, nil, false, nil, 'friendly_legendary')
-                            if new_joker then
-                                legendary_spawned = true
+                        local attempts = 0
+                        repeat
+                            attempts = attempts + 1
+                            if not legendary_spawned and not new_joker and pseudorandom('friendly_legendary_roll_' .. i .. '_' .. attempts) < 0.35 then
+                                new_joker = create_card('Joker', G.jokers, true, 4, nil, false, nil, 'friendly_legendary')
+                                if new_joker and not is_invalid_eternal_joker(new_joker) then
+                                    legendary_spawned = true
+                                elseif new_joker then
+                                    if new_joker.area then new_joker.area:remove_card(new_joker) end
+                                    new_joker:remove()
+                                    new_joker = nil
+                                end
                             end
-                        end
+                            if not new_joker then
+                                local rarity_roll = pseudorandom('friendly_rarity_' .. i .. '_' .. attempts)
+                                local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
+                                new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck_combo')
+                            end
+                            if new_joker and is_invalid_eternal_joker(new_joker) then
+                                if new_joker.area then new_joker.area:remove_card(new_joker) end
+                                new_joker:remove()
+                                new_joker = nil
+                            end
+                        until new_joker or attempts >= 20
                         if not new_joker then
-                            local rarity_roll = pseudorandom('friendly_rarity_' .. i)
-                            local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
-                            new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck_combo')
-                        end
-                        if is_secret_card(new_joker) then
-                            if new_joker.area then new_joker.area:remove_card(new_joker) end
-                            new_joker:remove()
                             new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_fallback')
                         end
                         new_joker:set_eternal(true)
@@ -353,12 +363,20 @@ SMODS.Back {
 
                     play_sound('foil1')
                     for i = 1, 2 do
-                        local rarity_roll = pseudorandom('friendly_rarity_' .. i)
-                        local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
-                        local new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck')
-                        if is_secret_card(new_joker) then
-                            if new_joker.area then new_joker.area:remove_card(new_joker) end
-                            new_joker:remove()
+                        local new_joker = nil
+                        local attempts = 0
+                        repeat
+                            attempts = attempts + 1
+                            local rarity_roll = pseudorandom('friendly_rarity_' .. i .. '_' .. attempts)
+                            local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
+                            new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_deck')
+                            if new_joker and is_invalid_eternal_joker(new_joker) then
+                                if new_joker.area then new_joker.area:remove_card(new_joker) end
+                                new_joker:remove()
+                                new_joker = nil
+                            end
+                        until new_joker or attempts >= 20
+                        if not new_joker then
                             new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_deck_fallback')
                         end
                         new_joker:set_eternal(true)
@@ -429,11 +447,11 @@ function inject_cracklatro_deck_localization()
             name = is_es and "Baraja Amistosa" or "Friendly Deck",
             text = is_es and {
                 "Inicia con {C:attention}2{} Jokers {C:dark_edition}Negativos{} {C:attention}Eternos{} aleatorios,",
-                "{C:inactive}(Excepto Legendario o Secreto){},",
+                "{C:inactive}(Cualq. rareza, no Secretos ni comodines de venta){},",
                 "{C:red}-1{} Ranura de Joker, {C:red}-1{} Descarte"
             } or {
                 "Start run with {C:attention}2{} random {C:dark_edition}Negative{} {C:attention}Eternal Jokers{},",
-                "{C:inactive}(Except Legendary or Secret){},",
+                "{C:inactive}(Any rarity, no Secret or sell/destroy Jokers){},",
                 "{C:red}-1{} Joker Slot, {C:red}-1{} Discard"
             }
         }

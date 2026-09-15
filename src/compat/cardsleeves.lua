@@ -142,11 +142,11 @@ local function inject_sleeve_localization()
             name = is_es and "Funda Amistosa" or "Friendly Sleeve",
             text = is_es and {
                 "Inicia con {C:attention}1{} Joker {C:dark_edition}Negativo{} {C:attention}Eterno{} aleatorio,",
-                "{C:inactive}(Excepto Legendario o Secreto){},",
+                "{C:inactive}(Cualq. rareza, no Secretos ni comodines de venta){},",
                 "{C:red}-1{} Descarte"
             } or {
                 "Start run with {C:attention}1{} random {C:dark_edition}Negative{} {C:attention}Eternal Joker{},",
-                "{C:inactive}(Except Legendary or Secret){},",
+                "{C:inactive}(Any rarity, no Secret or sell/destroy Jokers){},",
                 "{C:red}-1{} Discard"
             }
         },
@@ -155,12 +155,12 @@ local function inject_sleeve_localization()
             text = is_es and {
                 "{C:attention}Fusión Amistosa{}:",
                 "Genera {C:attention}3{} Jokers {C:dark_edition}Negativos{} {C:attention}Eternos{},",
-                "{C:inactive}(Máx. {C:legendary}1 Joker Legendario{C:inactive}){},",
+                "{C:inactive}(Cualq. rareza, máx. 1 Legendario, sin comodines de venta){},",
                 "{C:red}-2{} Ranuras de Joker, {C:red}-1{} Descarte"
             } or {
                 "{C:attention}Friendly Fusion{}:",
                 "Spawns {C:attention}3{} {C:dark_edition}Negative{} {C:attention}Eternal Jokers{},",
-                "{C:inactive}(Max {C:legendary}1 Legendary Joker{C:inactive}){},",
+                "{C:inactive}(Any rarity, max 1 Legendary, no sell/destroy Jokers){},",
                 "{C:red}-2{} Joker Slots, {C:red}-1{} Discard"
             }
         },
@@ -362,12 +362,20 @@ function register_cracklatro_sleeves()
                     delay = 0.3,
                     func = function()
                         play_sound('foil1')
-                        local rarity_roll = pseudorandom('friendly_sleeve_rarity')
-                        local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
-                        local new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_sleeve')
-                        if is_secret_card(new_joker) then
-                            if new_joker.area then new_joker.area:remove_card(new_joker) end
-                            new_joker:remove()
+                        local new_joker = nil
+                        local attempts = 0
+                        repeat
+                            attempts = attempts + 1
+                            local rarity_roll = pseudorandom('friendly_sleeve_rarity_' .. attempts)
+                            local rarity = (rarity_roll > 0.95 and 3) or (rarity_roll > 0.70 and 2) or 1
+                            new_joker = create_card('Joker', G.jokers, false, rarity, nil, false, nil, 'friendly_sleeve')
+                            if new_joker and is_invalid_eternal_joker(new_joker) then
+                                if new_joker.area then new_joker.area:remove_card(new_joker) end
+                                new_joker:remove()
+                                new_joker = nil
+                            end
+                        until new_joker or attempts >= 20
+                        if not new_joker then
                             new_joker = create_card('Joker', G.jokers, false, 1, nil, false, nil, 'friendly_sleeve_fallback')
                         end
                         new_joker:set_eternal(true)
